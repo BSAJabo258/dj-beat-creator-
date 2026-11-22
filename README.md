@@ -6,7 +6,10 @@ Your audio never leaves your device.
 
 ## Run it
 
-Open `index.html` through any static web server:
+**One file:** `dist/DJ_Beat_Creator.html` is the whole app in a single file. Download it and open it in Chrome, Edge or Safari, no server needed. Rebuild it after changes with `python3 tools/build-single.py`.
+
+**From the repo:** 
+serve the folder with any static web server:
 
 ```sh
 python3 -m http.server 8000
@@ -17,12 +20,35 @@ Pushing to `main` runs the checks in `.github/workflows/site.yml` and publishes 
 
 ## The machine
 
-The app is laid out as one instrument, the BC-16:
+The app is laid out as one instrument, the BC-16. Only the screen changes. Every other control is fixed on the body and keeps working in every mode.
 
-- **Screen.** Shows one mode at a time. The mode buttons under it switch between them.
-- **Pads, pad banks A–H, the sequence keys P1–P8, the transport and the Q-link knobs.** These are physical controls on the body. They stay put and keep working whatever is on the screen, so you can play and record pads while you're in Chop, DJ or Brain.
-- **Q-link knobs.** Tempo, swing, filter and sidechain pump. Drag up or down, scroll, use the arrow keys, or double-click to reset.
-- **Loading another song** swaps everything over to it. Each song keeps its own pads, patterns and song order, and switching back brings them back.
+| Section | Controls |
+|---|---|
+| Top | Display (song, BPM, key, Camelot code), **MASTER** volume, **TAKE REC** |
+| Screen | The current mode. Its header shows sequence, bank, timing correct and REC/TAKE status. The **soft keys** along the bottom change with each mode. |
+| Mode | MAIN, CHOP, STEMS, GROUPS, BROWSE, PROGRAM, STEP SEQ, BRAIN, LIVE, KEYS, DJ, ARRANGE, SONG |
+| Data | A **jog wheel** with **−** and **+**. They change whatever value you touched last on the screen (tempo by default). |
+| Transport | **REC**, **OVERDUB**, **STOP**, **PLAY**, **PLAY START**, **TAP TEMPO** |
+| Sequence | P1–P8 (switch at the end of the loop while playing) |
+| Q-link | Knobs for TEMPO, SWING, FILTER and PUMP. Drag, scroll, use the arrow keys, or double-click to reset. |
+| Pad bank | A–H |
+| Pads | 4×4 rubber pads with colour backlight |
+| Pad function | **16 LEVELS**, **CHORD**, **UNDO**, **NOTE REPEAT** with rate, **SHIFT**, **ERASE**, **COPY**, **TC**, **FULL LEVEL**, **PAD MUTE** |
+
+- **ERASE**: press a pad to erase its hits from the current sequence.
+- **PAD MUTE**: press pads to mute or unmute them in playback and exports. **SHIFT + PAD MUTE** unmutes all.
+- **COPY**: copies the current sequence to the next empty one.
+- **TC**: steps through the timing-correct (quantize) values.
+- **SHIFT**: latches note repeat. Holding the Shift key does the same.
+
+### Recording works on every page
+
+- **REC / OVERDUB** records into the current sequence from any mode. That covers the pads, plus anything you play on the **Live** pads and keys, the **Keys** piano, **Chop** slices and **Groups**. A sound that isn't on a pad yet gets one automatically, starting in bank H, named "REC …".
+- **TAKE REC** records the audio of whatever you play, on any page. Takes can be saved as WAV or MP3, or sent to the slice bin and chopped again.
+
+### Songs
+
+Loading another song swaps everything over to it. Each song keeps its own pads, patterns and song order, and switching back brings them back.
 
 ## Modes
 
@@ -109,4 +135,6 @@ js/engine.js      analysis, chopping, Live, Keys, Parts, Groups, Arrange
 js/studio.js      pads, sequencer, DJ engine, Beat Brain, presets, automation, connections
 js/app.js         modes, physical controls, Q-link knobs, drag-and-drop loading
 js/demo-audio.js  the demo beat
+tools/            build-single.py bundles everything into dist/DJ_Beat_Creator.html
+dist/             the single-file app
 ```

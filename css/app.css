@@ -233,3 +233,67 @@ kbd{background:#0a0d10!important;color:var(--scrtx)!important;border-color:#3340
   #screenWrap{height:42vh;min-height:300px}
   #padsSlot{order:1}#fnGrp{order:2}#bankGrp{order:3}#knobGrp{order:4}
 }
+
+/* ================= MPC hardware, complete ================= */
+/* screen header readouts */
+#scrInfo{flex:none;font:600 10.5px var(--mono);color:var(--teal);white-space:nowrap}
+#scrRec,#scrTake{flex:none;font:700 10.5px var(--mono);color:#fff;background:var(--led-red);padding:2px 7px;border-radius:3px;animation:blink 1s steps(2) infinite}
+#scrTake{background:#b3261e}
+/* soft keys along the bottom of the screen */
+#scrFoot{display:flex;gap:1px;background:#05070a;border-top:1px solid var(--scrline);overflow-x:auto;scrollbar-width:none}
+#scrFoot::-webkit-scrollbar{display:none}
+#scrFoot .sk{flex:1 0 auto;min-width:84px;height:34px;border:0;border-radius:0;background:linear-gradient(180deg,#1d242b,#151a20);color:var(--scrtx);font:700 10px var(--mono);letter-spacing:.06em;padding:0 10px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+#scrFoot .sk:hover:not(:disabled){background:linear-gradient(180deg,#26303a,#1b222a)}
+#scrFoot .sk:active:not(:disabled){background:#2c3844}
+#scrFoot .sk.on{background:var(--amber);color:#1b1200}
+#scrFoot .sk:disabled{opacity:.35;cursor:default}
+/* left column: modes + data wheel */
+.hwrow2{align-items:stretch}
+.hwrow2 #modesGrp{flex:1}
+#dataGrp{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 14px 8px}
+#dataBox{display:flex;align-items:center;gap:10px}
+#device .hwb.sq{min-width:0;width:40px;height:40px;padding:0;justify-content:center;align-items:center;font:700 18px var(--mono)}
+#device .hwb.sq .led{display:none}
+#jog{position:relative;width:82px;height:82px;border-radius:50%;cursor:grab;touch-action:none;outline:none;
+  background:repeating-conic-gradient(#101113 0 3deg,#26282c 3deg 6deg);box-shadow:0 0 0 3px #0b0c0d,0 0 0 4px rgba(255,255,255,.07),0 8px 16px rgba(0,0,0,.6)}
+#jogCap{position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#3b3d42,#151618 70%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -6px 10px rgba(0,0,0,.5)}
+#jogCap i{position:absolute;left:50%;top:9px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#0c0d0f,#25272b);box-shadow:inset 0 2px 3px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.1)}
+#jog.turn,#jog:active{cursor:grabbing}
+#jog:focus-visible{box-shadow:0 0 0 3px var(--amber),0 8px 16px rgba(0,0,0,.6)}
+#dataT{font:600 9.5px var(--mono);color:var(--teal);background:#050606;border-radius:3px;padding:1px 7px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* transport: six keys, REC and PLAY bigger */
+#transport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+#device #transport .hwb{min-width:0;width:100%;height:46px}
+#hwOvd{color:#ffb3a8}
+#hwOvd.on .led{background:var(--led-red);box-shadow:0 0 8px var(--led-red)}
+/* pad function keys: two rows */
+#padFn2{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:7px}
+#padFn2 .hwb{min-width:0;width:100%;height:36px;font-size:8.5px;padding:0 6px 5px}
+#hwErase.on .led,#hwMute.on .led{background:var(--led-red);box-shadow:0 0 8px var(--led-red)}
+#hwMute.has:not(.on) .led{background:#7a2a10}
+#fnGrp{padding-top:16px}
+/* muted pads */
+#padsSlot .pp.mut{filter:saturate(.15) brightness(.55)}
+#padsSlot .pp.mut::before{content:'MUTE';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font:700 10px var(--mono);letter-spacing:.12em;color:#ff8b8b;z-index:2}
+/* master knob in the header */
+#masterGrp{padding:12px 10px 6px;display:flex;align-items:center}
+.knob.sm{flex-direction:row;gap:8px}
+.knob.sm .kcap{width:34px;height:34px}
+.knob.sm .kcap::before{inset:5px}
+.knob.sm .kcap i{top:3px;height:11px;transform-origin:50% 14px}
+#hwRecSlot .hwb{height:38px}
+
+/* phones and tablets: one column, every hardware group in the order you use it */
+@media (max-width:1099px){
+  #device{grid-template-areas:none;grid-template-columns:minmax(0,1fr)}
+  #device > *{grid-area:auto}
+  #ctlL,#ctlR,.hwrow,.hwrow2{display:contents}
+  #hwTop{order:0}#screenWrap{order:1}#trGrp{order:2}#padsSlot{order:3}#fnGrp{order:4}#bankGrp{order:5}#seqGrp{order:6}#knobGrp{order:7}#modesGrp{order:8}#dataGrp{order:9}
+  #transport{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #masterGrp{display:none}
+}
+@media (max-width:640px){
+  #padFn2{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #padFn{gap:6px}
+  #scrFoot .sk{min-width:72px}
+}

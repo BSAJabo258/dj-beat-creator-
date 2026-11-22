@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DJ Beat Creator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23252629%22/%3E%3Crect x=%223%22 y=%223%22 width=%224%22 height=%224%22 rx=%221%22 fill=%22%23ffae1a%22/%3E%3Crect x=%229%22 y=%223%22 width=%224%22 height=%224%22 rx=%221%22 fill=%22%235ee0c8%22/%3E%3Crect x=%223%22 y=%229%22 width=%224%22 height=%224%22 rx=%221%22 fill=%22%23e2252f%22/%3E%3Crect x=%229%22 y=%229%22 width=%224%22 height=%224%22 rx=%221%22 fill=%22%23888%22/%3E%3C/svg%3E">
 <meta name="description" content="A sampler, sequencer and DJ deck that runs in the browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Martian+Mono:wdth,wght@75..112,400..700&display=swap">
@@ -12,11 +13,12 @@
  <header id="hwTop">
   <div class="logo"><b>DJ BEAT CREATOR</b><span>BC-16 · sampler · sequencer · DJ</span></div>
   <div id="oled"><b id="projName">NO SONG</b><span id="projMeta">insert a song</span></div>
-  <div id="hwRecSlot" class="hwgrp"><span class="hwl">TAKE</span></div>
+  <div class="hwgrp" id="masterGrp"><span class="hwl">MASTER</span><input type="range" id="hwMasterIn" min="0" max="120" value="100" hidden><div class="knob sm" data-label="MASTER" data-for="hwMasterIn" data-min="0" data-max="120" data-step="1" data-def="100"><div class="kcap"><i></i></div><span class="kv"></span></div></div>
+  <div id="hwRecSlot" class="hwgrp"><span class="hwl">TAKE REC</span></div>
   <button id="menuBtn" class="hwb" aria-label="Modes"><i class="led"></i>MODE</button>
  </header>
  <section id="screenWrap"><div id="bezel"><div id="screen">
-  <div id="scrHead"><span id="scrMode">MAIN</span><span id="st">Load a song to start.</span><span id="scrPos"></span></div>
+  <div id="scrHead"><span id="scrMode">MAIN</span><span id="st">Load a song to start.</span><span id="scrInfo"></span><span id="scrRec" hidden>● REC</span><span id="scrTake" hidden>● TAKE</span><span id="scrPos"></span></div>
   <main id="scrBody"><section class="page" id="pgStart" data-page="start">
 <header class="phead"><h1>Main</h1><p>Load a song. The tempo, key and every hit are found for you and the pads light up.</p></header>
 <div class="drop" id="drop"><h2>Drop a song on the machine</h2><p>WAV, MP3, M4A, FLAC or OGG. Loading another song swaps everything over to it; each song keeps its own pads and patterns.</p>
@@ -226,11 +228,13 @@
 <div class="card"><h2>Project</h2><div class="row"><button class="p" id="gsave">⬇ Save project</button><label>Open project<input type="file" id="gload" accept=".json,application/json"></label><button id="gexp">⬇ Confirmed groups (zip)</button></div></div>
 </div>
 </div></main>
+  <nav id="scrFoot" aria-label="Soft keys"></nav>
  </div></div></section>
  <section id="ctlL">
-  <div class="hwgrp" id="modesGrp"><span class="hwl">MODE</span><div id="modes"><button class="hwb mode" data-page="start"><i class="led"></i>MAIN</button><button class="hwb mode" data-page="chop"><i class="led"></i>CHOP</button><button class="hwb mode" data-page="parts"><i class="led"></i>STEMS</button><button class="hwb mode" data-page="groups"><i class="led"></i>GROUPS</button><button class="hwb mode" data-page="sounds"><i class="led"></i>BROWSE</button><button class="hwb mode" data-page="pads"><i class="led"></i>PROGRAM</button><button class="hwb mode" data-page="sequence"><i class="led"></i>STEP SEQ</button><button class="hwb mode" data-page="brain"><i class="led"></i>BRAIN</button><button class="hwb mode" data-page="live"><i class="led"></i>LIVE</button><button class="hwb mode" data-page="keys"><i class="led"></i>KEYS</button><button class="hwb mode" data-page="dj"><i class="led"></i>DJ</button><button class="hwb mode" data-page="arrange"><i class="led"></i>ARRANGE</button><button class="hwb mode" data-page="song"><i class="led"></i>SONG</button></div></div>
+  <div class="hwrow hwrow2"><div class="hwgrp" id="modesGrp"><span class="hwl">MODE</span><div id="modes"><button class="hwb mode" data-page="start"><i class="led"></i>MAIN</button><button class="hwb mode" data-page="chop"><i class="led"></i>CHOP</button><button class="hwb mode" data-page="parts"><i class="led"></i>STEMS</button><button class="hwb mode" data-page="groups"><i class="led"></i>GROUPS</button><button class="hwb mode" data-page="sounds"><i class="led"></i>BROWSE</button><button class="hwb mode" data-page="pads"><i class="led"></i>PROGRAM</button><button class="hwb mode" data-page="sequence"><i class="led"></i>STEP SEQ</button><button class="hwb mode" data-page="brain"><i class="led"></i>BRAIN</button><button class="hwb mode" data-page="live"><i class="led"></i>LIVE</button><button class="hwb mode" data-page="keys"><i class="led"></i>KEYS</button><button class="hwb mode" data-page="dj"><i class="led"></i>DJ</button><button class="hwb mode" data-page="arrange"><i class="led"></i>ARRANGE</button><button class="hwb mode" data-page="song"><i class="led"></i>SONG</button></div></div>
+   <div class="hwgrp" id="dataGrp"><span class="hwl">DATA</span><div id="dataBox"><button class="hwb sq" id="hwMinus" aria-label="Decrease"><i class="led"></i>−</button><div id="jog" role="slider" tabindex="0" aria-label="Data wheel"><div id="jogCap"><i></i></div></div><button class="hwb sq" id="hwPlus" aria-label="Increase"><i class="led"></i>+</button></div><span id="dataT">TEMPO</span></div></div>
   <div class="hwrow">
-   <div class="hwgrp" id="trGrp"><span class="hwl">TRANSPORT</span><div id="transport"></div></div>
+   <div class="hwgrp" id="trGrp"><span class="hwl">TRANSPORT</span><div id="transport"><button class="hwb" id="hwOvd"><i class="led"></i>OVERDUB</button><button class="hwb" id="hwPst"><i class="led"></i>PLAY START</button></div></div>
    <div class="hwgrp" id="seqGrp"><span class="hwl">SEQUENCE</span><div id="seqSlot"></div></div>
   </div>
  </section>
@@ -238,7 +242,7 @@
   <div class="hwgrp" id="knobGrp"><span class="hwl">Q-LINK</span><div id="knobs"><div class="knob" data-for="psBpm" data-min="40" data-max="240" data-step="0.5" data-def="90"><div class="kcap"><i></i></div><span class="kl">TEMPO</span><span class="kv"></span></div><div class="knob" data-for="psSw" data-min="0" data-max="100" data-step="1" data-def="0"><div class="kcap"><i></i></div><span class="kl">SWING</span><span class="kv"></span></div><div class="knob" data-for="psFk" data-min="-100" data-max="100" data-step="1" data-def="0"><div class="kcap"><i></i></div><span class="kl">FILTER</span><span class="kv"></span></div><div class="knob" data-for="djPump" data-min="0" data-max="100" data-step="1" data-def="0"><div class="kcap"><i></i></div><span class="kl">PUMP</span><span class="kv"></span></div></div></div>
   <div class="hwgrp" id="bankGrp"><span class="hwl">PAD BANK</span><div id="banksSlot"></div></div>
   <div id="padsSlot"><div id="padBlank"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
-  <div class="hwgrp" id="fnGrp"><div id="padFn"></div></div>
+  <div class="hwgrp" id="fnGrp"><span class="hwl">PAD FUNCTION</span><div id="padFn"></div><div id="padFn2"><button class="hwb" id="hwShift"><i class="led"></i>SHIFT</button><button class="hwb" id="hwErase"><i class="led"></i>ERASE</button><button class="hwb" id="hwCopy"><i class="led"></i>COPY</button><button class="hwb" id="hwTC"><i class="led"></i>TC</button><button class="hwb" id="hwFull"><i class="led"></i>FULL LEVEL</button><button class="hwb" id="hwMute"><i class="led"></i>PAD MUTE</button></div></div>
  </section>
 </div>
 <div id="scrim"></div>

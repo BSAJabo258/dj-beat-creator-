@@ -87,12 +87,13 @@ function flash(j){const el=padEl[j];if(!el)return;el.classList.add('on');clearTi
 function recEv(sb,sj,vel,st){if(!(TR.playing&&TR.rec))return null;const nb=beatNow(),seg=TR.seg;if(nb<0||!seg)return null;let pos=nb-seg.start;pos=((pos%seg.len)+seg.len)%seg.len;
  let t=PS.q>0?Math.round(pos/PS.q)*PS.q:pos;if(t>=seg.len-1e-4)t=0;if(!TR.recSnap){pushUndo();TR.recSnap=true}
  const ev={t:+t.toFixed(4),b:sb,p:sj,v:+vel.toFixed(2),st:st||0,d:0,_skip:seg.id};PS.pats[seg.pat].ev.push(ev);seqDirty=true;dirty();return ev}
-function hit(b,j,vel){if(!ac)return null;resume();flash(j);
+function hit(b,j,vel){if(!ac)return null;resume();flash(j);if(HW.full)vel=1;
+ if(!PS.keys&&HW.erase){hwEraseHit(b,j);return null}if(!PS.keys&&HW.mute){hwMuteHit(b,j);return null}
  if(PS.keys&&PS.kp){const p=PS.banks[PS.kp.b][PS.kp.j];if(!p)return null;const vs=[],evs=[],t=ac.currentTime;
   keyNotes(p,j).forEach((st,i)=>{const v=voice(ac,busFor(p),p.mode==='latch'||p.mode==='cue'?{...p,mode:'gate'}:p,t+i*.008,vel*(PS.chord?.75:1),st,0,null);if(v)vs.push(v);const ev=recEv(PS.kp.b,PS.kp.j,vel,st);if(ev)evs.push(ev)});
   return{vs,evs,p:p.mode==='latch'||p.mode==='cue'?{...p,mode:'gate'}:p,b0:beatNow()}}
  const p=PS.banks[b][j];if(!p)return null;PS.lastHit={b,j};
- if((NR.on||SHIFT)&&p.mode!=='latch'&&p.mode!=='cue'){const k=b+':'+j;nrStart(k,b,j,vel);return{vs:[],evs:[],p:{...p,mode:'one'},b0:0,nr:k}}
+ if((NR.on||SHIFT||HW.shift)&&p.mode!=='latch'&&p.mode!=='cue'){const k=b+':'+j;nrStart(k,b,j,vel);return{vs:[],evs:[],p:{...p,mode:'one'},b0:0,nr:k}}
  if(p.mode==='latch'||p.mode==='cue'){const k=b+':'+j,on=LATCH.get(k);
   if(on&&p.mode==='cue'){vStop(on.v,ac.currentTime,.008);LATCH.delete(k);on.done=1}
   if(on&&!on.done){vStop(on.v,TR.playing&&on.ev===null?nextBeatT():ac.currentTime,.03);LATCH.delete(k);if(on.ev){on.ev.d=+Math.max(.25,beatNow()-on.b0).toFixed(3)}if(padEl[j])padEl[j].classList.remove('hold');return null}
@@ -124,7 +125,7 @@ function sched(a,b,seg){
  for(let k=Math.ceil(a-1e-9);k<b-1e-9;k++){if(k<0)click(TR.t0+k*bd(),((k%4)+4)%4===0);else if(PS.metro)click(TR.t0+k*bd(),((k-seg.start)%4+4)%4===0)}
  const lo=Math.max(a,seg.start);if(b<=lo)return;const P=PS.pats[seg.pat],sw=PS.swing/100/6;
  for(const ev of P.ev){if(ev.t>=seg.len||ev._skip===seg.id)continue;const at=seg.start+ev.t;if(at<lo-1e-9||at>=b-1e-9)continue;
-  const p=PS.banks[ev.b]&&PS.banks[ev.b][ev.p];if(!p)continue;const odd=Math.abs(((ev.t*4)%2)-1)<.02,when=TR.t0+(at+(odd?sw:0))*bd();
+  const p=PS.banks[ev.b]&&PS.banks[ev.b][ev.p];if(!p||HW.mutes.has(ev.b+':'+ev.p))continue;const odd=Math.abs(((ev.t*4)%2)-1)<.02,when=TR.t0+(at+(odd?sw:0))*bd();
   let d=(ev.d||0)*bd();if(!d&&(p.mode==='loop'||p.mode==='latch'||p.mode==='cue'))d=(seg.len-ev.t)*bd();
   const v=voice(ac,busFor(p),p,Math.max(when,ac.currentTime),ev.v,ev.st||0,d,CK);if(v)TR.vs.push(v);
   if(ev.b===PS.bank&&!PS.keys){const j=ev.p;setTimeout(()=>flash(j),Math.max(0,(when-ac.currentTime)*1000))}}}
@@ -271,7 +272,7 @@ async function magic(){const btn=$('psMagicGo');btn.disabled=true;try{msg('🪄 
  smartBeat(2,{bank:0,chainBank:1,loopBank:2,keyBank:3,seed:sd+5,loops:true,keys:true,noKick:true,chops:false,style:sty,energy:30});
  smartBeat(3,{bank:0,chainBank:1,keyBank:3,seed:sd+9,keys:true,style:sty,energy:Math.min(100,+$('psEn').value+25)});
  PS.song=[0,0,1,0,2,3,3,1];PS.songMode=false;PS.bank=0;PS.pat=0;syncCtl();renderAll();dirty();
- msg('🪄 Done: '+made.join(', ')+'. Bank F holds hot cues for DJing the track. P1 = beat, P2 = beat + loop, P3 = breakdown, P4 = hook. The song chain is set. Press ▶ to hear it, or ⛶ Perform, then ● REC.')}
+ msg('🪄 Done: '+made.join(', ')+'. Bank F holds hot cues for DJing the track. P1 = beat, P2 = beat + loop, P3 = breakdown, P4 = hook. The song chain is set. Press PLAY to hear it, or REC to record over it.')}
  catch(e){msg('Build stopped: '+(e.message||e))}btn.disabled=false}
 
 /* ---------- rendering ---------- */
@@ -284,7 +285,7 @@ function buildGrid(){const g=$('psGrid');g.className=PS.layout;g.textContent='';
  for(const j of order){const el=document.createElement('button');el.className='pp';el.dataset.j=j;el.innerHTML='<canvas></canvas><span class="kk"></span><span class="nb"></span><span class="nm"></span>';padEl[j]=el;padHandlers(el,j);g.appendChild(el)}
  builtLay=PS.layout}
 function renderPads(){if(builtLay!==PS.layout)buildGrid();const B=PS.banks[PS.bank],kp=PS.keys&&PS.kp?PS.banks[PS.kp.b][PS.kp.j]:null;
- padEl.forEach((el,j)=>{const p=PS.keys?kp:B[j],miss=p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs);el.className='pp'+(p?'':' emp')+(miss?' miss':'')+(!PS.keys&&PS.sel&&PS.sel.b===PS.bank&&PS.sel.j===j?' sel':'')+(!PS.keys&&PS.swapSrc===j&&PS.mode==='arr'?' sw':'');
+ padEl.forEach((el,j)=>{const p=PS.keys?kp:B[j],miss=p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs);el.className='pp'+(p?'':' emp')+(miss?' miss':'')+(!PS.keys&&PS.sel&&PS.sel.b===PS.bank&&PS.sel.j===j?' sel':'')+(!PS.keys&&PS.swapSrc===j&&PS.mode==='arr'?' sw':'')+(!PS.keys&&HW.mutes.has(PS.bank+':'+j)?' mut':'');
   el.style.setProperty('--pc',p?p.col:'#868e96');el.querySelector('.kk').textContent=PK[j].toUpperCase();
   el.querySelector('.nb').textContent=PS.keys?(kp?keyName(kp,j):''):BL[PS.bank]+String(j+1).padStart(2,'0');
   el.querySelector('.nm').textContent=PS.keys?(kp?(j===0?kp.name:''):'—'):p?(miss?'⚠ '+p.name:p.name+(p.mode==='latch'?' ⟳':p.mode==='cue'?' ▶':'')):'empty';
@@ -338,7 +339,7 @@ function edSet(fn){const s=PS.sel;if(!s)return;const p=PS.banks[s.b][s.j];if(!p)
 /* ---------- export ---------- */
 async function renderMix(list,rep,tail){const segs=[];let tot=0;for(let r=0;r<rep;r++)for(const i of list){segs.push({pat:i,start:tot,len:patLen(i)});tot+=patLen(i)}
  const secs=tot*bd()+(tail?1.5:0),oc=new OfflineAudioContext(2,Math.ceil(secs*sr),sr),m=oc.createGain(),c=oc.createDynamicsCompressor();c.threshold.value=-8;c.ratio.value=4;m.gain.value=.85;m.connect(c);c.connect(oc.destination);
- const sw=PS.swing/100/6,all=[];for(const sg of segs)for(const ev of PS.pats[sg.pat].ev){if(ev.t>=sg.len)continue;const p=PS.banks[ev.b]&&PS.banks[ev.b][ev.p];if(!p||!padBuf(p))continue;const odd=Math.abs(((ev.t*4)%2)-1)<.02;all.push({ev,p,at:(sg.start+ev.t+(odd?sw:0))*bd(),rest:(sg.len-ev.t)*bd()})}
+ const sw=PS.swing/100/6,all=[];for(const sg of segs)for(const ev of PS.pats[sg.pat].ev){if(ev.t>=sg.len)continue;const p=PS.banks[ev.b]&&PS.banks[ev.b][ev.p];if(!p||!padBuf(p)||HW.mutes.has(ev.b+':'+ev.p))continue;const odd=Math.abs(((ev.t*4)%2)-1)<.02;all.push({ev,p,at:(sg.start+ev.t+(odd?sw:0))*bd(),rest:(sg.len-ev.t)*bd()})}
  if(!all.length)throw new Error('That pattern has no hits yet. Record or use 🧠 Smart Beat first.');all.sort((a,b)=>a.at-b.at);const ck=new Map();
  const omus=oc.createGain(),opump=oc.createGain();omus.connect(opump);opump.connect(m);
  for(const x of all){let d=(x.ev.d||0)*bd();if(!d&&(x.p.mode==='loop'||x.p.mode==='latch'||x.p.mode==='cue'))d=x.rest;const dr=DRUMR.has(x.p.role);voice(oc,dr?m:omus,x.p,x.at,x.ev.v,x.ev.st||0,d,ck);if(x.p.role==='kick')duck(opump.gain,x.at)}
@@ -357,6 +358,7 @@ function velOf(e,el){if(!PS.vel)return .9;const r=el.getBoundingClientRect();ret
 function padAt(e){const el=document.elementFromPoint(e.clientX,e.clientY),p=el&&el.closest&&el.closest('.pp');return p&&$('psGrid').contains(p)?+p.dataset.j:null}
 function padHandlers(el,j){
  el.onpointerdown=e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(x){}
+  if(!PS.keys&&(HW.erase||HW.mute)){flash(j);HW.erase?hwEraseHit(PS.bank,j):hwMuteHit(PS.bank,j);return}
   if(PS.armed.length&&!PS.keys){assignItems(j,PS.armed);return}
   if(PS.keys||PS.mode==='play'){if(!PS.keys)el.classList.add('hold');act.set(e.pointerId,{h:hit(PS.bank,j,velOf(e,el)),el});return}
   if(PS.mode==='edit'){PS.sel={b:PS.bank,j};renderPads();openEd();audition(PS.banks[PS.bank][j]);if(innerWidth<900)setTimeout(()=>$('psEd').scrollIntoView({behavior:'smooth',block:'nearest'}),50);return}
@@ -417,7 +419,7 @@ function buildStatic(){
  $('psAdd').onclick=()=>$('psAddF').click();
  $('psAddF').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;msg('Decoding '+f.name+'…');try{const b=await ac.decodeAudioData(await f.arrayBuffer()),nm=f.name.replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_');
   const C=[];for(let c=0;c<Math.min(2,b.numberOfChannels);c++)C.push(b.getChannelData(c).slice());PS.srcs[nm]={chs:C,len:C[0].length,main:false,sl:autoSlice(C,nm)};PS.cur=nm;PBUF.clear();renderBin();renderPads();msg('Added '+nm+' — '+PS.srcs[nm].sl.length+' slices. Any saved pads that use it work again.')}catch(x){msg('Could not read that file.')}};
- $('psFillGo').onclick=async e=>{e.currentTarget.disabled=true;try{await fill($('psFill').value,$('psFrom').value)}catch(x){msg('Fill failed: '+(x.message||x))}e.currentTarget.disabled=false};
+ $('psFillGo').onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{await fill($('psFill').value,$('psFrom').value)}catch(x){msg('Fill failed: '+(x.message||x))}b.disabled=false};
  $('psSongM').onclick=()=>{PS.songMode=!PS.songMode;renderSong();renderPats();dirty();msg(PS.songMode?(PS.song.length?'🎼 Song mode on: ▶ plays the song chain.':'Song mode is on, but the song is empty. Add patterns below.'):'Song mode off: ▶ loops the current pattern.')};
  $('psSongAdd').onclick=()=>{pushUndo();PS.song.push(PS.pat);renderSong();dirty()};$('psSongClr').onclick=()=>{pushUndo();PS.song=[];renderSong();dirty()};
  $('psXwav').onclick=e=>busy(e.currentTarget,async()=>{const{list,tag}=xList(),d=await renderMix(list,+$('psXr').value,tag==='song');return save(fname+'_'+tag+'.wav',new Blob([wav(d)],{type:'audio/wav'}))});
@@ -539,7 +541,7 @@ function tapIn(ctx){if(TAP&&TAP.ctx===ctx)return TAP.g;const g=ctx.createGain(),
  _con.call(g,sp);_con.call(sp,z);_con.call(z,ctx.destination);
  sp.onaudioprocess=e=>{const ib=e.inputBuffer,l=ib.getChannelData(0).slice(),r=(ib.numberOfChannels>1?ib.getChannelData(1):ib.getChannelData(0)).slice();REC.ch.push({t:ctx.currentTime-l.length/ctx.sampleRate,l,r});while(REC.ch.length*1024>ctx.sampleRate*10)REC.ch.shift();if(TK.on)TK.buf.push([l,r])};
  TAP={ctx,g,sp};return g}
-AudioNode.prototype.connect=function(d,...a){const r=_con.call(this,d,...a);try{if(d&&typeof AudioDestinationNode!=='undefined'&&d instanceof AudioDestinationNode&&!this._noRec&&!(typeof OfflineAudioContext!=='undefined'&&d.context instanceof OfflineAudioContext))_con.call(this,tapIn(d.context))}catch(e){}return r};
+AudioNode.prototype.connect=function(d,...a){try{if(d&&typeof AudioDestinationNode!=='undefined'&&d instanceof AudioDestinationNode&&!this._noRec&&!(typeof OfflineAudioContext!=='undefined'&&d.context instanceof OfflineAudioContext)){_con.call(this,masterIn(d.context),...a);return d}}catch(e){}return _con.call(this,d,...a)};
 const fmtT=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 let curTab='A',lastSrcTab='A';const TABN={A:'Chopper',P:'Play',C:'Produce',D:'Piano',E:'Parts',G:'Groups',S:'Pad Studio'};
 function recToggle(){if(!ac){toast('Load a song first.');return null}resume();
@@ -847,6 +849,50 @@ function edgeInit(){
  // magic card: apply chosen style through presets too
  $('psSty').addEventListener('change',()=>{const P=PRESETS.find(p=>p.style===$('psSty').value);if(P&&$('bbPre').value!==P.id){$('bbPre').value=P.id;applyPreset(P,true)}});
  applyPreset(PRESETS[0],true)}
+/* ================= MPC HARDWARE FUNCTIONS =================
+   OVERDUB, PLAY START, ERASE, COPY, TC, PAD MUTE, FULL LEVEL, SHIFT, MASTER,
+   and "record from anywhere": with REC armed, sounds played in Live, Keys, Chop and
+   Groups are recorded into the current sequence on pads that are created for them. */
+const HW={erase:false,mute:false,full:false,mutes:new Set(),shift:false};
+function hwOverdub(){if(!ac)return;ensurePS();if(TR.playing){TR.rec=!TR.rec;TR.recSnap=false;uiT()}else{const ci=PS.countIn;PS.countIn=false;TR.rec=true;startT();PS.countIn=ci}}
+function hwPlayStart(){if(!ac)return;ensurePS();if(TR.playing)stopT();startT()}
+function curPat(){return TR.playing&&TR.seg?TR.seg.pat:PS.pat}
+function hwEraseHit(b,j){const P=PS.pats[curPat()],n=P.ev.filter(e=>e.b===b&&e.p===j).length;if(n){pushUndo();P.ev=P.ev.filter(e=>!(e.b===b&&e.p===j))}seqDirty=true;seqDraw();renderPats();dirty();
+ msg(n?'Erased '+n+' hit'+(n>1?'s':'')+' of pad '+BL[b]+(j+1)+' from P'+(curPat()+1)+'. UNDO brings them back.':'Pad '+BL[b]+(j+1)+' has no hits in P'+(curPat()+1)+'.')}
+function hwMuteHit(b,j){const k=b+':'+j;if(HW.mutes.has(k))HW.mutes.delete(k);else HW.mutes.add(k);renderPads();msg('Pad '+BL[b]+(j+1)+(HW.mutes.has(k)?' muted':' unmuted')+'. '+HW.mutes.size+' pad'+(HW.mutes.size===1?' is':'s are')+' muted.')}
+function hwCopy(){ensurePS();const src=curPat();let dst=PS.pats.findIndex((p,i)=>i>src&&!p.ev.length);if(dst<0)dst=PS.pats.findIndex((p,i)=>i!==src&&!p.ev.length);if(dst<0)dst=(src+1)%8;
+ pushUndo();PS.pats[dst]=deep(cleanPats()[src]);renderPats();dirty();return'Copied P'+(src+1)+' to P'+(dst+1)}
+function hwTC(){ensurePS();const s=$('psQ'),o=[...s.options],i=o.findIndex(x=>x.value===s.value);const n=o[(i+1)%o.length];s.value=n.value;PS.q=+n.value;dirty();return'Timing correct '+n.text}
+function hwInfo(){const q=$('psQ');return{pat:curPat()+1,bank:BL[PS.bank],tc:q&&q.selectedOptions[0]?q.selectedOptions[0].text:'',rec:!!TR.rec,playing:!!TR.playing,take:!!TK.on,erase:HW.erase,mute:HW.mute,full:HW.full,shift:HW.shift,mutes:HW.mutes.size}}
+/* --- master volume: everything that reaches the speakers passes one master gain --- */
+let MASTER=null,MVOL=1;
+function masterIn(ctx){if(MASTER&&MASTER.context===ctx)return MASTER;const m=ctx.createGain();m.gain.value=MVOL;m._noRec=1;_con.call(m,ctx.destination);_con.call(m,tapIn(ctx));MASTER=m;return m}
+function hwMaster(v){MVOL=Math.pow(clamp(+v,0,120)/100,1.6);if(MASTER)MASTER.gain.setTargetAtTime(MVOL,MASTER.context.currentTime,.02)}
+/* --- record from anywhere --- */
+let LAST_IN=0;['pointerdown','keydown'].forEach(t=>addEventListener(t,()=>{LAST_IN=performance.now()},true));
+const AB2SRC=new WeakMap();
+function srcForAb(ab,name){let n=AB2SRC.get(ab);if(!n||!PS.srcs[n]){n=abSrc(ab,name);AB2SRC.set(ab,n)}return n}
+function sndOfObj(s,name,role,extra){if(!s)return null;mainFresh();const base=s.ab?{src:srcForAb(s.ab,name),seg:null}:{src:PS.main,seg:[[s.s,s.e]]};return Object.assign(base,{name:name.slice(0,24),role,midi:s.clar>.6?s.midi:undefined},extra||{})}
+function padFor(snd){const seg=snd.seg||[[0,PS.srcs[snd.src].len]],key=snd.src+'|'+JSON.stringify(seg);
+ for(let b=0;b<8;b++)for(let j=0;j<16;j++){const p=PS.banks[b][j];if(p&&!p.rev&&!(p.tune)&&p.src+'|'+JSON.stringify(p.seg)===key)return{b,j,isNew:false}}
+ for(const b of[7,6,5,4,3,2,1,0]){const j=PS.banks[b].findIndex(p=>!p);if(j>=0){PS.banks[b][j]=toPad(Object.assign({},snd,{seg,tune:0,from:'recording on the '+(TABN[curTab]||'')+' page'}));PS.banks[b][j].name='REC '+PS.banks[b][j].name;return{b,j,isNew:true}}}
+ return null}
+function recSound(snd,vel,st){if(!snd||!PS.init||!(TR.playing&&TR.rec)||performance.now()-LAST_IN>200)return;if(TR.seg&&beatNow()<0)return;
+ const at=padFor(snd);if(!at){toast('Every pad is full, so that sound was not recorded. Clear a pad or a bank.');return}
+ recEv(at.b,at.j,clamp(vel||.85,.1,1),clamp(Math.round(st||0),-24,24));if(at.b===PS.bank)flash(at.j);
+ if(at.isNew){renderBanks();if(at.b===PS.bank)renderPads();toast('Recording: new pad '+BL[at.b]+String(at.j+1).padStart(2,'0')+' “'+PS.banks[at.b][at.j].name+'” holds that sound.')}}
+const LRL={KICK:'kick',SNARE:'snare',HAT:'hat',OPEN:'open',PERC:'perc',STAB:'stab',LONG:'long'};
+function hookEngine(){
+ if(typeof window.padDown==='function'&&!window.padDown._dbc){const o=window.padDown;window.padDown=function(j,e,el){const r=o.apply(this,arguments);try{const arr=PL.bank==='drums'?PL.pads:PL.bank==='groups'?(PL.gpads||[]):PL.chops,p=arr[j];
+   if(p)recSound(sndOfObj(p,p.label||'PAD',LRL[(p.label||'').split(' ')[0]]||(PL.bank==='chops'?'chain':'perc'),{choke:p.grp==='hat'?1:0}),.9,0)}catch(x){}return r};window.padDown._dbc=1}
+ if(typeof window.playNote==='function'&&!window.playNote._dbc){const o=window.playNote;window.playNote=function(L,m,vel,when){const r=o.apply(this,arguments);try{const s=L&&L.list&&L.list[L.i];if(s){const nat=s.clar>.6&&s.midi!==undefined?s.midi:L.base-L.base%12+PL.root;let st=m-nat;while(st>24)st-=12;while(st<-24)st+=12;
+   recSound(sndOfObj(s,(L===PNO?'PIANO':L.name||'KEYS'),'tone',{mode:'one'}),vel||.85,st)}}catch(x){}return r};window.playNote._dbc=1}
+ if(typeof window.playSlice==='function'&&!window.playSlice._dbc){const o=window.playSlice;window.playSlice=function(i){const r=o.apply(this,arguments);try{const s=slices[i];if(s)recSound(sndOfObj(s,(s.kind?s.kind.toUpperCase()+' ':'#')+(i+1),KIND2ROLE[s.kind]||''),.9,0)}catch(x){}return r};window.playSlice._dbc=1}
+ if(typeof window.gPlay==='function'&&!window.gPlay._dbc){const o=window.gPlay;window.gPlay=function(g){const r=o.apply(this,arguments);try{if(g&&g.members&&g.members.length){mainFresh();recSound({src:PS.main,seg:mergeSegs(g.members.map(m=>({s:m.start_sample,e:m.end_sample}))),name:(g.name||'GROUP').slice(0,24),role:'group',choke:3},.9,0)}}catch(x){}return r};window.gPlay._dbc=1}}
+hookEngine();
+window.DBC_HW={overdub:hwOverdub,playStart:hwPlayStart,copy:hwCopy,tc:hwTC,info:hwInfo,master:hwMaster,
+ set:(k,v)=>{HW[k]=v;if(k==='shift')SHIFT=v;if(k==='full')PS.vel=false;try{renderPads()}catch(e){}},clearMutes:()=>{HW.mutes.clear();try{renderPads()}catch(e){}}};
+
 window.DBC={ensure:()=>{ensurePS();mainFresh()},camelot,keyText,autoSetup,cam:()=>{try{return PL&&PL.sl?camelot(PL.root,PL.scale):''}catch(e){return''}}};
 
 /* ---------- init + tab hook ---------- */

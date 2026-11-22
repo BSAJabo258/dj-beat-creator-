@@ -25,6 +25,10 @@ jobs:
           node-version: 20
       - name: Syntax-check every script
         run: for f in js/*.js; do node --check "$f" || exit 1; done
+      - name: The single-file build is up to date
+        run: |
+          python3 tools/build-single.py
+          git diff --exit-code dist/ || { echo 'Run python3 tools/build-single.py and commit dist/'; exit 1; }
       - name: Every script and stylesheet referenced by index.html exists
         run: |
           grep -oE '(src|href)="(js|css)/[^"]+"' index.html | sed -E 's/.*="([^"]+)"/\1/' | while read f; do
