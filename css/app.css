@@ -331,3 +331,27 @@ body:has(#gPick:not([hidden])) #pads button,body:has(#gPick:not([hidden])) #psBi
   #gPick .gtabs::-webkit-scrollbar{display:none}
   #gPick .gtabs button{flex:none;padding:4px 8px!important;font-size:11px!important}
 }
+
+/* ===== top half polish ===== */
+/* screen header: one line of readouts, one line for messages */
+#scrHead{display:block;padding:6px 10px 5px}
+#scrHead .sh1{display:flex;align-items:center;gap:10px;min-width:0}
+#scrHead #scrInfo{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#scrHead #st{display:block!important;margin-top:3px;font:500 11.5px var(--mono);color:var(--scrmu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scrPos{flex:none}
+#scrProg{flex:none;cursor:pointer;font:700 10.5px var(--mono);letter-spacing:.08em;padding:2px 8px;border-radius:4px;border:1px solid var(--teal);background:transparent;color:var(--teal)}
+#scrProg.kit{border-color:#c48dff;color:#c48dff}
+#scrProg:hover{background:rgba(94,224,200,.12)}
+/* hardware keys that are <label> elements (LOAD) sit like every other key */
+#device label.hwb{flex-direction:row;align-items:flex-end;justify-content:flex-start;margin:0;gap:0;font:700 9.5px var(--mono);letter-spacing:.08em;color:#d9dce0}
+#loadGrp,#masterGrp,#hwRecSlot{align-self:center}
+#hwTop{align-items:center}
+/* program-aware bank label */
+#bankGrp .hwl{white-space:nowrap}
+@media (max-width:640px){
+  #hwTop{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px}
+  #hwTop .logo{grid-column:1}
+  #loadGrp{grid-column:2}#hwRecSlot{grid-column:3}
+  #oled{grid-column:1/-1;order:0}
+  #scrHead .sh1{gap:7px}#scrHead #scrInfo{font-size:9.5px}
+}

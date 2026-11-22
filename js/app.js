@@ -88,11 +88,11 @@ const refreshKnobs=()=>$$('.knob').forEach(k=>k._show&&k._show());
 /* ---- MPC soft keys: the bar along the bottom of the screen, different for every mode ---- */
 const SOFT={
  start:[['LOAD SONG','@f'],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
- chop:[['SHORTEST','@cyc:minl'],['LONGEST','@cyc:maxl'],['½×','#half'],['2×','#dbl'],['RESET','#rst'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
+ chop:[['SHORTEST','@cyc:minl'],['LONGEST','@cyc:maxl'],['PADS','@prog'],['◀ SLICES','@pg-'],['SLICES ▶','@pg+'],['½×','#half'],['2×','#dbl'],['RESET','#rst'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
  parts:[['ALL','#eall'],['SEPARATE','#esep'],['BUILD TRACK','#ebuild'],['▶ / ■','#eplay'],['WAV','#ewav'],['STEMS ZIP','#ezip']],
  groups:[['ANALYZE','#grun'],['UNDO','#gud'],['REDO','#grd'],['FIND SIMILAR','#gsim'],['SAVE','#gsave'],['GROUPS ZIP','#gexp']],
  sounds:[['CHAIN','#psChain'],['DROP CHAIN','#psChainGo'],['DROP NOTHING','#psDesel'],['ADD FILE','#psAdd'],['FILL BANK','#psFillGo']],
- pads:[['PLAY','#psPadCard .mb[data-m=play]'],['ARRANGE','#psPadCard .mb[data-m=arr]'],['EDIT','#psPadCard .mb[data-m=edit]'],['PICK SOUND','#pePick'],['TUNE TO KEY','#peKey'],['CLEAR PAD','#peClr']],
+ pads:[['PADS','@prog'],['◀ SLICES','@pg-'],['SLICES ▶','@pg+'],['PLAY','#psPadCard .mb[data-m=play]'],['ARRANGE','#psPadCard .mb[data-m=arr]'],['EDIT','#psPadCard .mb[data-m=edit]'],['PICK SOUND','#pePick'],['TUNE TO KEY','#peKey'],['CLEAR PAD','#peClr']],
  sequence:[['SMART BEAT','#psGen'],['QUANTIZE','#psQn'],['CLEAR','#psPClr'],['FOLLOW','#psFol']],
  brain:[['BUILD ALL','#psMagicGo'],['ANALYZE','#bbAn'],['WRITE SONG','#bbSong'],['→ PATTERN','#bbPat'],['◀ VAR','#bbVm'],['VAR ▶','#bbVp'],['PACKS','#bbPk']],
  live:[['DRUMS','#bd'],['CHOPS','#bc'],['GROUPS','#bg'],['◀ PAGE','#np'],['PAGE ▶','#nx'],['KIT ZIP','#kx']],
@@ -100,12 +100,13 @@ const SOFT={
  dj:[['STOP LOOPS','#psDeckX'],['KILL LOW','#psDJ .dk[data-k=lo]'],['KILL MID','#psDJ .dk[data-k=mi]'],['KILL HIGH','#psDJ .dk[data-k=hi]'],['DRUMS OFF','#psDJ .dk[data-k=drum]'],['MUSIC OFF','#psDJ .dk[data-k=mus]'],['PRINT','#psPrint']],
  arrange:[['PRODUCE','#ag'],['▶ PLAY','#apl'],['WAV','#xw2'],['MP3','#xm2'],['MIDI','#xi2']],
  song:[['SONG MODE','#psSongM'],['+ ADD SEQ','#psSongAdd'],['CLEAR SONG','#psSongClr'],['WAV','#psXwav'],['MIDI','#psXmid'],['SAVE SETUP','#psSv']]};
-function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}if(typeof a==='string'&&a.startsWith('@cyc:')){const id=a.slice(5),b=document.createElement('button');b.className='sk cyc';b.dataset.cyc=id;b.dataset.t=t;b.title='Tap for the next setting. With SHIFT on, goes back.';b.onclick=()=>cycle(id,b);f.appendChild(b);cycLabel(b);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
+function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}if(a==='@prog'||a==='@pg-'||a==='@pg+'){const b=document.createElement('button');b.className='sk cyc';b.dataset.hw=a;b.dataset.t=t;b.onclick=()=>{const H=window.DBC_HW;if(!H||!loaded())return;if(a==='@prog')H.prog(H.info().prog==='chop'?'kit':'chop');else H.page(a==='@pg-'?-1:1);softSync();hwSync()};f.appendChild(b);return}
+ if(typeof a==='string'&&a.startsWith('@cyc:')){const id=a.slice(5),b=document.createElement('button');b.className='sk cyc';b.dataset.cyc=id;b.dataset.t=t;b.title='Tap for the next setting. With SHIFT on, goes back.';b.onclick=()=>cycle(id,b);f.appendChild(b);cycLabel(b);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
  b.onclick=()=>{if(typeof a==='function')return a();const el=document.querySelector(a);if(el&&!el.disabled)el.click();setTimeout(softSync,60)};f.appendChild(b)});softSync()}
 const shortOpt=t=>t.replace(' note','').replace('Never (keep whole)','OFF').replace(' beats',' BEATS').replace(' beat',' BEAT').replace(' bars',' BARS').replace(' bar',' BAR').toUpperCase();
 function cycLabel(b){const el=$(b.dataset.cyc);if(!el)return;b.innerHTML='<small>'+b.dataset.t+'</small>'+shortOpt(el.selectedOptions[0].text)}
 function cycle(id,b){const el=$(id);if(!el)return;const back=window.DBC_HW&&DBC_HW.info().shift;el.selectedIndex=(el.selectedIndex+(back?-1:1)+el.options.length)%el.options.length;el.dispatchEvent(new Event('change',{bubbles:true}));cycLabel(b);oled((id==='minl'?'SHORTEST SLICE ':'SPLIT SLICES LONGER THAN ')+shortOpt(el.selectedOptions[0].text))}
-function softSync(){$$('#scrFoot .sk.cyc').forEach(cycLabel);$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
+function softSync(){$$('#scrFoot .sk.cyc[data-cyc]').forEach(cycLabel);const H=window.DBC_HW,I=H&&loaded()?H.info():null;$$('#scrFoot .sk[data-hw]').forEach(b=>{const a=b.dataset.hw;if(!I){b.disabled=true;return}if(a==='@prog'){b.disabled=false;b.innerHTML='<small>PADS PLAY</small>'+(I.prog==='chop'?'CHOP':'KIT')}else{b.innerHTML=b.dataset.t;b.disabled=I.prog!=='chop'||(a==='@pg-'?I.page<=0:I.page>=I.pages-1)}});$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
 
 /* ---- DATA wheel and −/+: change whichever value you touched last ---- */
 let DATA_T=null;
@@ -130,7 +131,7 @@ function jog(){const J=$('jog'),cap=$('jogCap');let ang=0,last=null,acc=0;const 
  document.addEventListener('pointerdown',e=>{const t=e.target;if(t.closest&&t.closest('#scrBody')&&t.matches&&t.matches('input[type=number],input[type=range],select'))setDataTarget(t)},true)}
 
 /* ---- MPC function keys ---- */
-function hwKeys(){const H=()=>window.DBC_HW,need=()=>{if(!loaded()){note('Load a song first.');return false}if(window.DBC)DBC.ensure();return true};
+function hwKeys(){$('scrProg').onclick=()=>{const H=window.DBC_HW;if(!H||!loaded())return;H.prog(H.info().prog==='chop'?'kit':'chop');hwSync();softSync()};const H=()=>window.DBC_HW,need=()=>{if(!loaded()){note('Load a song first.');return false}if(window.DBC)DBC.ensure();return true};
  $('hwOvd').onclick=()=>{if(need())H().overdub()};$('hwPst').onclick=()=>{if(need())H().playStart()};
  const latch=(id,k,on,off)=>{$(id).onclick=()=>{if(!need())return;const v=!H().info()[k];H().set(k,v);oled(v?on:off);hwSync()}};
  latch('hwShift','shift','SHIFT held: pads note-repeat','SHIFT released');latch('hwErase','erase','ERASE: press a pad to erase its hits','ERASE off');
@@ -141,7 +142,9 @@ function hwKeys(){const H=()=>window.DBC_HW,need=()=>{if(!loaded()){note('Load a
 function hwSync(){const H=window.DBC_HW;if(!H)return;const i=H.info();
  [['hwShift','shift'],['hwErase','erase'],['hwFull','full'],['hwMute','mute']].forEach(([id,k])=>$(id).classList.toggle('on',!!i[k]));
  $('hwOvd').classList.toggle('on',i.rec&&i.playing);$('hwMute').classList.toggle('has',i.mutes>0);
- $('scrInfo').textContent='SEQ '+String(i.pat).padStart(2,'0')+' · BANK '+i.bank+' · TC '+i.tc+(i.mutes?' · '+i.mutes+' MUTED':'');
+ $('scrProg').textContent=i.prog==='chop'?'CHOP':'KIT';$('scrProg').classList.toggle('kit',i.prog!=='chop');
+ $('scrInfo').textContent='SEQ '+String(i.pat).padStart(2,'0')+' · BANK '+i.bank+(i.prog==='chop'?' · SLICES '+(i.page*128+'ABCDEFGH'.indexOf(i.bank)*16+1)+'–'+(i.page*128+'ABCDEFGH'.indexOf(i.bank)*16+16):'')+' · TC '+i.tc+(i.mutes?' · '+i.mutes+' MUTED':'');
+ const bl=document.querySelector('#bankGrp .hwl');if(bl)bl.textContent=i.prog==='chop'?'PAD BANK · CHOP PROGRAM'+(i.pages>1?' · PAGE '+(i.page+1)+'/'+i.pages:''):'PAD BANK · KIT PROGRAM';
  $('scrRec').hidden=!i.rec;$('scrTake').hidden=!i.take}
 
 /* ---- display + song changes ---- */
