@@ -5,12 +5,12 @@ let ac,buf,sr,y,chs=[],on=[],phase=0,slices=[],bars=[],result=null,prev=null,src
 const setSt=t=>$('st').textContent=t;
 function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 async function load(ab,name){setSt('Decoding…');
- try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();buf=await ac.decodeAudioData(ab);}catch(x){setSt('Could not read that file.');return}
+ try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();buf=await new Promise((res,rej)=>{try{const p=ac.decodeAudioData(ab.slice(0),res,e=>rej(e||new Error('decode failed')));if(p&&p.then)p.then(res,rej)}catch(e){rej(e)}});}catch(x){setSt('Could not read “'+name+'”. This browser cannot decode that file. WAV or MP3 always work.');return}
  stop();fname=name.replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_')||'beat';sr=buf.sampleRate;const n=buf.length,ch=Math.min(2,buf.numberOfChannels);y=new Float32Array(n);chs=[];
  for(let c=0;c<ch;c++){const d=buf.getChannelData(c);chs.push(d);for(let i=0;i<n;i++)y[i]+=d[i]/ch}
  setSt('Analyzing rhythm…');await new Promise(r=>setTimeout(r,20));analyze();$('app').hidden=false;prev=null;manual={add:[],del:[]};
  setSt(name+' · '+(n/sr).toFixed(1)+' s · '+ch+' ch · '+sr+' Hz');rebuild();}
-$('f').onchange=e=>{const f=e.target.files[0];if(f)f.arrayBuffer().then(b=>load(b,f.name))};
+$('f').onchange=e=>{const inp=e.target,f=inp.files&&inp.files[0];if(!f)return;setSt('Loading '+f.name+'…');f.arrayBuffer().then(b=>load(b,f.name)).catch(x=>setSt('Could not open '+f.name+': '+(x.message||x))).finally(()=>{inp.value=''})};
 (()=>{const t=$('demodata').textContent.trim();if(!t)return;$('demo').hidden=false;$('demo').onclick=()=>{const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);load(u.buffer,'Taco_Dan_ramintro.m4a')}})();
 let env,blk,manual={add:[],del:[]},barPhase=0;
 function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}

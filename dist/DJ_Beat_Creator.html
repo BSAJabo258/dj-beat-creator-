@@ -448,12 +448,27 @@ kbd{background:#0a0d10!important;color:var(--scrtx)!important;border-color:#3340
   #scrFoot .sk{min-width:72px}
 }
 
+/* loading a song */
+.vh{position:absolute!important;width:1px!important;height:1px!important;opacity:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.loadbtn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:6px;cursor:pointer;font:700 13px 'Archivo';color:#1b1200;background:var(--amber);border:1px solid var(--amber)}
+.loadbtn:hover{background:#ffbf47}
+.vh:focus-visible + *,#f:focus-visible~.loadbtn{outline:2px solid var(--amber)}
+#loadMsg{min-height:18px;font:500 12px var(--mono);color:var(--scrmu)}
+#loadMsg.busy{color:var(--teal)}#loadMsg.busy::before{content:'● ';animation:blink 1s steps(2) infinite}
+#loadMsg.err{color:#ff8b8b}
+#loadGrp{padding:12px 10px 8px}
+#device label.hwb{cursor:pointer;user-select:none}
+#scrFoot label.sk{display:flex;align-items:center;justify-content:center;cursor:pointer}
+@media (max-width:1099px){#scrHead{flex-wrap:wrap;row-gap:3px}#scrHead #st{order:9;flex:1 1 100%}}
+@media (max-width:640px){#loadGrp .hwl{display:none}#loadGrp{padding:0;border:none}}
+
 </style>
 </head><body>
 <div id="device">
  <header id="hwTop">
   <div class="logo"><b>DJ BEAT CREATOR</b><span>BC-16 · sampler · sequencer · DJ</span></div>
   <div id="oled"><b id="projName">NO SONG</b><span id="projMeta">insert a song</span></div>
+  <div class="hwgrp" id="loadGrp"><span class="hwl">SONG</span><label for="f" class="hwb" id="hwLoad"><i class="led"></i>LOAD</label></div>
   <div class="hwgrp" id="masterGrp"><span class="hwl">MASTER</span><input type="range" id="hwMasterIn" min="0" max="120" value="100" hidden><div class="knob sm" data-label="MASTER" data-for="hwMasterIn" data-min="0" data-max="120" data-step="1" data-def="100"><div class="kcap"><i></i></div><span class="kv"></span></div></div>
   <div id="hwRecSlot" class="hwgrp"><span class="hwl">TAKE REC</span></div>
   <button id="menuBtn" class="hwb" aria-label="Modes"><i class="led"></i>MODE</button>
@@ -463,7 +478,7 @@ kbd{background:#0a0d10!important;color:var(--scrtx)!important;border-color:#3340
   <main id="scrBody"><section class="page" id="pgStart" data-page="start">
 <header class="phead"><h1>Main</h1><p>Load a song. The tempo, key and every hit are found for you and the pads light up.</p></header>
 <div class="drop" id="drop"><h2>Drop a song on the machine</h2><p>WAV, MP3, M4A, FLAC or OGG. Loading another song swaps everything over to it; each song keeps its own pads and patterns.</p>
-<div class="acts2"><label class="filebtn"><input type="file" id="f" accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg"></label><button id="demo" hidden>Load the demo beat</button></div></div>
+<div class="acts2"><label for="f" class="loadbtn">Load a song</label><button id="demo" hidden>Load the demo beat</button><input type="file" id="f" class="vh" accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg,.aac,.aif,.aiff"></div><div id="loadMsg" role="status" aria-live="polite"></div></div>
 <div id="startStats" hidden><div class="stats"><div><b id="sBpm">—</b><span>BPM</span></div><div><b id="sSl">—</b><span>slices</span></div><div><b id="sBars">—</b><span>bars</span></div><div><b id="sKey">—</b><span>key</span></div><div><b id="sCam">—</b><span>Camelot</span></div></div></div>
 <div class="next">
 <a href="#brain" data-page="brain"><b>Make a beat from it</b><span>Pick a preset and Beat Brain writes a full song from your own sounds.</span></a>
@@ -701,12 +716,12 @@ let ac,buf,sr,y,chs=[],on=[],phase=0,slices=[],bars=[],result=null,prev=null,src
 const setSt=t=>$('st').textContent=t;
 function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 async function load(ab,name){setSt('Decoding…');
- try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();buf=await ac.decodeAudioData(ab);}catch(x){setSt('Could not read that file.');return}
+ try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();buf=await new Promise((res,rej)=>{try{const p=ac.decodeAudioData(ab.slice(0),res,e=>rej(e||new Error('decode failed')));if(p&&p.then)p.then(res,rej)}catch(e){rej(e)}});}catch(x){setSt('Could not read “'+name+'”. This browser cannot decode that file. WAV or MP3 always work.');return}
  stop();fname=name.replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_')||'beat';sr=buf.sampleRate;const n=buf.length,ch=Math.min(2,buf.numberOfChannels);y=new Float32Array(n);chs=[];
  for(let c=0;c<ch;c++){const d=buf.getChannelData(c);chs.push(d);for(let i=0;i<n;i++)y[i]+=d[i]/ch}
  setSt('Analyzing rhythm…');await new Promise(r=>setTimeout(r,20));analyze();$('app').hidden=false;prev=null;manual={add:[],del:[]};
  setSt(name+' · '+(n/sr).toFixed(1)+' s · '+ch+' ch · '+sr+' Hz');rebuild();}
-$('f').onchange=e=>{const f=e.target.files[0];if(f)f.arrayBuffer().then(b=>load(b,f.name))};
+$('f').onchange=e=>{const inp=e.target,f=inp.files&&inp.files[0];if(!f)return;setSt('Loading '+f.name+'…');f.arrayBuffer().then(b=>load(b,f.name)).catch(x=>setSt('Could not open '+f.name+': '+(x.message||x))).finally(()=>{inp.value=''})};
 (()=>{const t=$('demodata').textContent.trim();if(!t)return;$('demo').hidden=false;$('demo').onclick=()=>{const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);load(u.buffer,'Taco_Dan_ramintro.m4a')}})();
 let env,blk,manual={add:[],del:[]},barPhase=0;
 function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -2320,7 +2335,7 @@ function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
   if(P.t==='S'){if($('tS').hidden)engineTab('S');showSub(P.sub);$('psHead').innerHTML=headFor(p)}
   else if(P.t){engineTab(P.t);const pane=$('t'+P.t);if(pane)ensureHead(pane,p)}
  }finally{routing=false}
- cur=p;softKeys(p);$$('[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
+ cur=p;softKeys(p);$$('a[data-page],button[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
  if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0}
 window.goPage=goPage;
 window.tab=function(t){engineTab(t);if(routing)return;
@@ -2359,7 +2374,7 @@ const refreshKnobs=()=>$$('.knob').forEach(k=>k._show&&k._show());
 
 /* ---- MPC soft keys: the bar along the bottom of the screen, different for every mode ---- */
 const SOFT={
- start:[['LOAD SONG',()=>$('f').click()],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
+ start:[['LOAD SONG','@f'],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
  chop:[['½×','#half'],['2×','#dbl'],['RESET','#rst'],['RECONFIGURE','#go'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
  parts:[['ALL','#eall'],['SEPARATE','#esep'],['BUILD TRACK','#ebuild'],['▶ / ■','#eplay'],['WAV','#ewav'],['STEMS ZIP','#ezip']],
  groups:[['ANALYZE','#grun'],['UNDO','#gud'],['REDO','#grd'],['FIND SIMILAR','#gsim'],['SAVE','#gsave'],['GROUPS ZIP','#gexp']],
@@ -2372,7 +2387,7 @@ const SOFT={
  dj:[['STOP LOOPS','#psDeckX'],['KILL LOW','#psDJ .dk[data-k=lo]'],['KILL MID','#psDJ .dk[data-k=mi]'],['KILL HIGH','#psDJ .dk[data-k=hi]'],['DRUMS OFF','#psDJ .dk[data-k=drum]'],['MUSIC OFF','#psDJ .dk[data-k=mus]'],['PRINT','#psPrint']],
  arrange:[['PRODUCE','#ag'],['▶ PLAY','#apl'],['WAV','#xw2'],['MP3','#xm2'],['MIDI','#xi2']],
  song:[['SONG MODE','#psSongM'],['+ ADD SEQ','#psSongAdd'],['CLEAR SONG','#psSongClr'],['WAV','#psXwav'],['MIDI','#psXmid'],['SAVE SETUP','#psSv']]};
-function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
+function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
  b.onclick=()=>{if(typeof a==='function')return a();const el=document.querySelector(a);if(el&&!el.disabled)el.click();setTimeout(softSync,60)};f.appendChild(b)});softSync()}
 function softSync(){$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
 
@@ -2435,12 +2450,16 @@ function dnd(){const dz=$('drop');let depth=0;const over=on=>{dz.classList.toggl
   note('Loading '+f.name+'…');f.arrayBuffer().then(b=>load(b,f.name))})}
 
 function init(){buildSubs();dnd();knobs();mountHW();jog();hwKeys();
+ /* loading feedback: mirror the engine's status into the drop zone, the display and a message */
+ const st=$('st'),lm=$('loadMsg');new MutationObserver(()=>{const t=st.textContent;if(/^(Loading|Decoding|Analyzing)/.test(t)){lm.textContent=t;lm.className='busy';$('projMeta').dataset.flash=1;$('projMeta').textContent=t.toUpperCase();document.body.classList.add('loading')}
+  else if(/^Could not/.test(t)){lm.textContent=t;lm.className='err';delete $('projMeta').dataset.flash;document.body.classList.remove('loading');if(cur!=='start')goPage('start')}
+  else if(document.body.classList.contains('loading')){document.body.classList.remove('loading');lm.textContent='';lm.className='';delete $('projMeta').dataset.flash}}).observe(st,{childList:true,characterData:true,subtree:true});
  const hint=$('psHint');if(hint)new MutationObserver(()=>{const t=hint.textContent.trim();if(t)note(t)}).observe(hint,{childList:true,characterData:true,subtree:true});
  setInterval(()=>{hwSync();softSync()},250);
  const pick=$('gPick');if(pick){$('screen').insertBefore(pick,$('scrBody'));$$('[data-t]',pick).forEach(b=>{const m={A:'chop',P:'live',D:'keys',E:'parts',G:'groups',S:'sounds'};b.onclick=e=>{e.stopPropagation();goPage(m[b.dataset.t])}})}
  const pf=$('psPerf');if(pf)pf.hidden=true;const gt=$('gToast');if(gt)$('screen').appendChild(gt);
  $('menuBtn').onclick=()=>document.body.classList.toggle('modesopen');$('scrim').onclick=()=>document.body.classList.remove('modesopen');
- $$('[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(!a.classList.contains('off'))goPage(a.dataset.page)}));
+ $$('a[data-page],button[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(!a.classList.contains('off'))goPage(a.dataset.page)}));
  addEventListener('hashchange',()=>{const p=location.hash.slice(1);if(p&&p!==cur)goPage(p)});
  new MutationObserver(status).observe($('app'),{attributes:true,attributeFilter:['hidden']});
  setInterval(status,1000);status();

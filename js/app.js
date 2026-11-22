@@ -48,7 +48,7 @@ function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
   if(P.t==='S'){if($('tS').hidden)engineTab('S');showSub(P.sub);$('psHead').innerHTML=headFor(p)}
   else if(P.t){engineTab(P.t);const pane=$('t'+P.t);if(pane)ensureHead(pane,p)}
  }finally{routing=false}
- cur=p;softKeys(p);$$('[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
+ cur=p;softKeys(p);$$('a[data-page],button[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
  if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0}
 window.goPage=goPage;
 window.tab=function(t){engineTab(t);if(routing)return;
@@ -87,7 +87,7 @@ const refreshKnobs=()=>$$('.knob').forEach(k=>k._show&&k._show());
 
 /* ---- MPC soft keys: the bar along the bottom of the screen, different for every mode ---- */
 const SOFT={
- start:[['LOAD SONG',()=>$('f').click()],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
+ start:[['LOAD SONG','@f'],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
  chop:[['½×','#half'],['2×','#dbl'],['RESET','#rst'],['RECONFIGURE','#go'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
  parts:[['ALL','#eall'],['SEPARATE','#esep'],['BUILD TRACK','#ebuild'],['▶ / ■','#eplay'],['WAV','#ewav'],['STEMS ZIP','#ezip']],
  groups:[['ANALYZE','#grun'],['UNDO','#gud'],['REDO','#grd'],['FIND SIMILAR','#gsim'],['SAVE','#gsave'],['GROUPS ZIP','#gexp']],
@@ -100,7 +100,7 @@ const SOFT={
  dj:[['STOP LOOPS','#psDeckX'],['KILL LOW','#psDJ .dk[data-k=lo]'],['KILL MID','#psDJ .dk[data-k=mi]'],['KILL HIGH','#psDJ .dk[data-k=hi]'],['DRUMS OFF','#psDJ .dk[data-k=drum]'],['MUSIC OFF','#psDJ .dk[data-k=mus]'],['PRINT','#psPrint']],
  arrange:[['PRODUCE','#ag'],['▶ PLAY','#apl'],['WAV','#xw2'],['MP3','#xm2'],['MIDI','#xi2']],
  song:[['SONG MODE','#psSongM'],['+ ADD SEQ','#psSongAdd'],['CLEAR SONG','#psSongClr'],['WAV','#psXwav'],['MIDI','#psXmid'],['SAVE SETUP','#psSv']]};
-function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
+function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
  b.onclick=()=>{if(typeof a==='function')return a();const el=document.querySelector(a);if(el&&!el.disabled)el.click();setTimeout(softSync,60)};f.appendChild(b)});softSync()}
 function softSync(){$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
 
@@ -163,12 +163,16 @@ function dnd(){const dz=$('drop');let depth=0;const over=on=>{dz.classList.toggl
   note('Loading '+f.name+'…');f.arrayBuffer().then(b=>load(b,f.name))})}
 
 function init(){buildSubs();dnd();knobs();mountHW();jog();hwKeys();
+ /* loading feedback: mirror the engine's status into the drop zone, the display and a message */
+ const st=$('st'),lm=$('loadMsg');new MutationObserver(()=>{const t=st.textContent;if(/^(Loading|Decoding|Analyzing)/.test(t)){lm.textContent=t;lm.className='busy';$('projMeta').dataset.flash=1;$('projMeta').textContent=t.toUpperCase();document.body.classList.add('loading')}
+  else if(/^Could not/.test(t)){lm.textContent=t;lm.className='err';delete $('projMeta').dataset.flash;document.body.classList.remove('loading');if(cur!=='start')goPage('start')}
+  else if(document.body.classList.contains('loading')){document.body.classList.remove('loading');lm.textContent='';lm.className='';delete $('projMeta').dataset.flash}}).observe(st,{childList:true,characterData:true,subtree:true});
  const hint=$('psHint');if(hint)new MutationObserver(()=>{const t=hint.textContent.trim();if(t)note(t)}).observe(hint,{childList:true,characterData:true,subtree:true});
  setInterval(()=>{hwSync();softSync()},250);
  const pick=$('gPick');if(pick){$('screen').insertBefore(pick,$('scrBody'));$$('[data-t]',pick).forEach(b=>{const m={A:'chop',P:'live',D:'keys',E:'parts',G:'groups',S:'sounds'};b.onclick=e=>{e.stopPropagation();goPage(m[b.dataset.t])}})}
  const pf=$('psPerf');if(pf)pf.hidden=true;const gt=$('gToast');if(gt)$('screen').appendChild(gt);
  $('menuBtn').onclick=()=>document.body.classList.toggle('modesopen');$('scrim').onclick=()=>document.body.classList.remove('modesopen');
- $$('[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(!a.classList.contains('off'))goPage(a.dataset.page)}));
+ $$('a[data-page],button[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(!a.classList.contains('off'))goPage(a.dataset.page)}));
  addEventListener('hashchange',()=>{const p=location.hash.slice(1);if(p&&p!==cur)goPage(p)});
  new MutationObserver(status).observe($('app'),{attributes:true,attributeFilter:['hidden']});
  setInterval(status,1000);status();

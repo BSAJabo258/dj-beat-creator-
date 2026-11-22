@@ -13,6 +13,7 @@
  <header id="hwTop">
   <div class="logo"><b>DJ BEAT CREATOR</b><span>BC-16 · sampler · sequencer · DJ</span></div>
   <div id="oled"><b id="projName">NO SONG</b><span id="projMeta">insert a song</span></div>
+  <div class="hwgrp" id="loadGrp"><span class="hwl">SONG</span><label for="f" class="hwb" id="hwLoad"><i class="led"></i>LOAD</label></div>
   <div class="hwgrp" id="masterGrp"><span class="hwl">MASTER</span><input type="range" id="hwMasterIn" min="0" max="120" value="100" hidden><div class="knob sm" data-label="MASTER" data-for="hwMasterIn" data-min="0" data-max="120" data-step="1" data-def="100"><div class="kcap"><i></i></div><span class="kv"></span></div></div>
   <div id="hwRecSlot" class="hwgrp"><span class="hwl">TAKE REC</span></div>
   <button id="menuBtn" class="hwb" aria-label="Modes"><i class="led"></i>MODE</button>
@@ -22,7 +23,7 @@
   <main id="scrBody"><section class="page" id="pgStart" data-page="start">
 <header class="phead"><h1>Main</h1><p>Load a song. The tempo, key and every hit are found for you and the pads light up.</p></header>
 <div class="drop" id="drop"><h2>Drop a song on the machine</h2><p>WAV, MP3, M4A, FLAC or OGG. Loading another song swaps everything over to it; each song keeps its own pads and patterns.</p>
-<div class="acts2"><label class="filebtn"><input type="file" id="f" accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg"></label><button id="demo" hidden>Load the demo beat</button></div></div>
+<div class="acts2"><label for="f" class="loadbtn">Load a song</label><button id="demo" hidden>Load the demo beat</button><input type="file" id="f" class="vh" accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg,.aac,.aif,.aiff"></div><div id="loadMsg" role="status" aria-live="polite"></div></div>
 <div id="startStats" hidden><div class="stats"><div><b id="sBpm">—</b><span>BPM</span></div><div><b id="sSl">—</b><span>slices</span></div><div><b id="sBars">—</b><span>bars</span></div><div><b id="sKey">—</b><span>key</span></div><div><b id="sCam">—</b><span>Camelot</span></div></div></div>
 <div class="next">
 <a href="#brain" data-page="brain"><b>Make a beat from it</b><span>Pick a preset and Beat Brain writes a full song from your own sounds.</span></a>

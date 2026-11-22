@@ -297,3 +297,17 @@ kbd{background:#0a0d10!important;color:var(--scrtx)!important;border-color:#3340
   #padFn{gap:6px}
   #scrFoot .sk{min-width:72px}
 }
+
+/* loading a song */
+.vh{position:absolute!important;width:1px!important;height:1px!important;opacity:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.loadbtn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:6px;cursor:pointer;font:700 13px 'Archivo';color:#1b1200;background:var(--amber);border:1px solid var(--amber)}
+.loadbtn:hover{background:#ffbf47}
+.vh:focus-visible + *,#f:focus-visible~.loadbtn{outline:2px solid var(--amber)}
+#loadMsg{min-height:18px;font:500 12px var(--mono);color:var(--scrmu)}
+#loadMsg.busy{color:var(--teal)}#loadMsg.busy::before{content:'● ';animation:blink 1s steps(2) infinite}
+#loadMsg.err{color:#ff8b8b}
+#loadGrp{padding:12px 10px 8px}
+#device label.hwb{cursor:pointer;user-select:none}
+#scrFoot label.sk{display:flex;align-items:center;justify-content:center;cursor:pointer}
+@media (max-width:1099px){#scrHead{flex-wrap:wrap;row-gap:3px}#scrHead #st{order:9;flex:1 1 100%}}
+@media (max-width:640px){#loadGrp .hwl{display:none}#loadGrp{padding:0;border:none}}
