@@ -39,7 +39,10 @@ function regMain(){if(typeof chs==='undefined'||!chs||!chs.length)return;const n
  for(const k in PS.srcs)if(k!==nm)PS.srcs[k].main=false;
  const S=PS.srcs[nm]||(PS.srcs[nm]={});S.chs=chs;S.len=chs[0].length;S.main=true;S.slRef=slices;
  sweet();S.sl=slices.map((x,i)=>({src:nm,s:x.s,e:x.e,kind:x.kind||'',i,midi:x.clar>.6&&x.midi!==undefined?x.midi:undefined,sw:x._sw||0,star:!!x._star}));
- if(PS.main!==nm){PS.main=nm;PS.cur=nm}if(!PS.cur||!PS.srcs[PS.cur]||!PS.srcs[PS.cur].chs)PS.cur=nm}
+ if(PS.main!==nm){const prev=PS.main;if(prev&&PS.init){try{LS.set('bcrps:auto:'+prev,ser())}catch(e){}}PS.main=nm;PS.cur=nm;if(prev)songSwitch(nm)}if(!PS.cur||!PS.srcs[PS.cur]||!PS.srcs[PS.cur].chs)PS.cur=nm}
+function songSwitch(nm){try{stopT()}catch(e){}LATCH.clear();PS.banks=Array.from({length:8},emptyBank);PS.pats=Array.from({length:8},()=>({bars:2,ev:[]}));PS.song=[];PS.songMode=false;PS.undo=[];PS.sel=null;PS.kp=null;PS.keys=false;PS.armed=[];PS.pat=0;PS.bank=0;PS.keySet=false;
+ const a=LS.get('bcrps:auto:'+nm);if(a&&Array.isArray(a.banks)){try{applyProj(a,{noChop:true});PS.undo=[];autoDoneFor=nm}catch(e){}}
+ if(PS.init){try{syncCtl();renderAll()}catch(e){}}}
 function mainFresh(){const S=PS.srcs[PS.main];if(!S||S.slRef!==slices||PS.main!==fname)regMain()}
 const isMainCur=()=>PS.cur===PS.main&&PS.srcs[PS.cur]&&PS.srcs[PS.cur].slRef===slices;
 
@@ -128,8 +131,8 @@ function sched(a,b,seg){
 function togglePlay(){TR.playing?stopT():startT()}
 function toggleRec(){TR.rec=!TR.rec;TR.recSnap=false;if(TR.rec&&!TR.playing)startT();uiT()}
 function setBpm(v){v=clamp(+v||PS.bpm,40,240);if(TR.playing){const nb=beatNow();PS.bpm=v;TR.t0=ac.currentTime-nb*bd()}else PS.bpm=v;$('psBpm').value=v;dirty()}
-function uiT(){$('psRec').classList.toggle('on',TR.rec);$('psPlay').classList.toggle('on',TR.playing);$('psPlay').textContent=TR.playing?'▶ PLAYING':'▶ PLAY'}
-function loop(){cancelAnimationFrame(raf);const f=()=>{if(!TR.playing||$('tS').hidden)return;const nb=beatNow(),seg=TR.seg;
+function uiT(){$('psRec').classList.toggle('on',TR.rec);$('psPlay').classList.toggle('on',TR.playing);(!$('psPlay').dataset.hw&&($('psPlay').textContent=TR.playing?'▶ PLAYING':'▶ PLAY'))}
+function loop(){cancelAnimationFrame(raf);const f=()=>{if(!TR.playing)return;const nb=beatNow(),seg=TR.seg;
  if(TR.segChanged){TR.segChanged=false;if(PS.pat!==seg.pat){PS.pat=seg.pat;seqDraw();$('psBars').value=PS.pats[PS.pat].bars}renderPats()}
  if(nb<0)$('psPos').textContent='Count-in '+Math.ceil(-nb);else{const pos=Math.max(0,nb-seg.start);$('psPos').textContent=(TR.rec?'● ':'')+'P'+(seg.pat+1)+' · '+(Math.floor(pos/4)+1)+'.'+(Math.floor(pos%4)+1)}
  const ph=$('psPh');if(seg.pat===PS.pat&&nb>=0){const x=LW+(nb-seg.start)*4*CW;ph.style.display='block';ph.style.left=x+'px';
@@ -437,8 +440,8 @@ function buildStatic(){
  $('peBkClr').onclick=()=>{pushUndo();PS.banks[PS.bank]=emptyBank();PS.sel=null;renderAll();dirty();msg('Cleared bank '+BL[PS.bank]+' (↩ Undo brings it back).')};
  const T=$('tS');T.addEventListener('change',e=>{if(e.target.tagName==='SELECT')e.target.blur()});T.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTimeout(()=>b.blur(),0)});
  djInit();brainInit();edgeInit();
- addEventListener('resize',()=>{if(!$('tS').hidden)renderPads()});
- addEventListener('keydown',e=>{if($('tS').hidden||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();
+ addEventListener('resize',()=>{if(PS.init)renderPads()});
+ addEventListener('keydown',e=>{if(!PS.init||(window.psKeysOK?!psKeysOK():$('tS').hidden)||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();
   if(k==='escape'&&T.classList.contains('perf')){perf(false);return}if(/INPUT|SELECT|TEXTAREA/.test((document.activeElement||{}).tagName||''))return;
   if(k===' '){e.preventDefault();if(!e.repeat)togglePlay();return}if(k==='enter'){e.preventDefault();if(!e.repeat)toggleRec();return}
   if(FXK[e.key]){e.preventDefault();if(!e.repeat)fxDown(FXK[e.key]);return}
@@ -448,7 +451,7 @@ function buildStatic(){
   if(k==='arrowleft'){e.preventDefault();setBank((PS.bank+7)%8)}else if(k==='arrowright'){e.preventDefault();setBank((PS.bank+1)%8)}
   else if(k==='arrowup'){e.preventDefault();selPat(((TR.next??(TR.playing?TR.seg.pat:PS.pat))+7)%8)}else if(k==='arrowdown'){e.preventDefault();selPat(((TR.next??(TR.playing?TR.seg.pat:PS.pat))+1)%8)}
   else if(k==='backspace'){e.preventDefault();undo()}else if(k==='l')toggleKeys();else if(k==='0'){PS.metro=!PS.metro;$('psMet').checked=PS.metro;msg('Click '+(PS.metro?'on':'off'))}});
- addEventListener('keyup',e=>{if($('tS').hidden)return;const k=e.key.toLowerCase();if(FXK[e.key]){fxUp(FXK[e.key]);return}if(k===' ')e.preventDefault();const h=held.get(k);if(held.has(k)){held.delete(k);release(h)}});
+ addEventListener('keyup',e=>{if(!PS.init)return;const k=e.key.toLowerCase();if(FXK[e.key]){fxUp(FXK[e.key]);return}if(k===' ')e.preventDefault();const h=held.get(k);if(held.has(k)){held.delete(k);release(h)}});
 }
 function perf(on){const T=$('tS');T.classList.toggle('perf',on);const gd=$('gDock');if(gd)gd.classList.toggle('hid',on);$('psPerf').textContent=on?'✕ Exit full screen':'⛶ Full screen';document.documentElement.style.overflow=on?'hidden':'';
  if(on&&T.requestFullscreen)T.requestFullscreen().catch(()=>{});else if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(renderPads,60)}
@@ -546,7 +549,7 @@ function recToggle(){if(!ac){toast('Load a song first.');return null}resume();
  if(z-a<sr*.2){toast('Nothing was playing, so the take was empty.');return null}
  const tk={id:++TK.n,name:'Take_'+TK.n,tab:TK.tab,L:L.slice(a,z),R:R.slice(a,z)};tk.dur=tk.L.length/sr;TK.takes.unshift(tk);renderTakes();
  toast('Saved Take '+tk.id+' ('+tk.dur.toFixed(1)+' s, from '+tk.tab+').',[['⬇ WAV',()=>busy($('gTk'),()=>save(fname+'_'+tk.name+'.wav',new Blob([wav([tk.L,tk.R])],{type:'audio/wav'})))],['➕ Slice bin',()=>takeToBin(tk)],['All takes',()=>{if(window.goPage)goPage('song');renderTakes()}]]);return tk}
-function uiRec(){const b=$('gRec');b.classList.toggle('on',TK.on);b.textContent=TK.on?'⏹ STOP':'⏺ REC';const p=$('psPrint');if(p){p.classList.toggle('on',TK.on);p.textContent=TK.on?'⏹ STOP PRINT':'⏺ PRINT'}}
+function uiRec(){const b=$('gRec');b.classList.toggle('on',TK.on);if(!b.dataset.hw)b.textContent=TK.on?'⏹ STOP':'⏺ REC';const p=$('psPrint');if(p){p.classList.toggle('on',TK.on);p.textContent=TK.on?'⏹ STOP PRINT':'⏺ PRINT'}}
 setInterval(()=>{if(TK.on&&ac)$('gRecT').textContent='● '+fmtT(ac.currentTime-TK.t0)+' · '+TK.tab;else $('gRecT').textContent=''},250);
 function takeToBin(tk){const nm=tk.name;PS.srcs[nm]={chs:[tk.L,tk.R],len:tk.L.length,main:false,sl:autoSlice([tk.L,tk.R],nm)};PS.cur=nm;if(window.goPage)goPage('sounds');else tab('S');PS.cur=nm;renderBin();msg(nm+' is in the slice bin as '+PS.srcs[nm].sl.length+' slices. Tap to hear, then tap or hold to load pads.')}
 function renderTakes(){const c=$('gTkL');c.textContent='';$('gTk').textContent='🎙 Takes ('+TK.takes.length+')';if(!TK.takes.length){c.innerHTML='<div class="mt">No takes yet. Press ⏺ REC on any tab, play, then press ⏹.</div>';return}
@@ -607,7 +610,7 @@ function deliver(snd,T){
  else if(T.kind==='layer'){const L=LAYERS.find(l=>l.id===T.id),s=toInstrument(snd);L.list=L.list||[];L.list.unshift(s);L.i=0;tab('P');lab(L);keysFor(L);toast(L.name+' now plays '+snd.name+'.')}}
 function ensurePS(){if(!PS.init)psInit()}
 function quickSend(snd){ensurePS();const B=PS.banks[PS.bank];let j=B.findIndex(p=>!p);if(j<0){toast('Bank '+BL[PS.bank]+' is full. Hold an empty pad in another bank, or switch banks in Pad Studio.',[['Open Pad Studio',()=>tab('S')]]);return}
- pushUndo();B[j]=toPad(snd);dirty();if(!$('tS').hidden)renderAll();
+ pushUndo();B[j]=toPad(snd);dirty();renderAll();
  toast('Sent '+snd.name+' → pad '+BL[PS.bank]+String(j+1).padStart(2,'0'),[['Go to pad',()=>{tab('S');const el=padEl[j];if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}],['↩ Undo',()=>{undo();}]])}
 /* --- long-press engine --- */
 const LP_SEL='#pads button,#psBin .tl,#pg .pad,#lays .key,#lays .lh .ls,#lays .lh b,#zk .wk,#zk .bk,#zpl,#zpk,#glist .gc2,#gpads button,#eparts > div,#estems > div,#psGrid .pp';
@@ -806,7 +809,7 @@ function applyPreset(P,quiet){$('psSty').value=P.style;$('psEn').value=P.energy;
 const STYN={det:'Detroit / Flint bounce',trap:'trap',drill:'drill',boom:'boom bap',flip:'chop-flip'};
 /* --- automatic setup when a new song loads --- */
 let autoDoneFor=null;
-async function autoSetup(){if(!LS.get('bcrps:autoset')&&LS.get('bcrps:autoset')!==null)return;ensurePS();mainFresh();if(!PS.main||autoDoneFor===PS.main||!isEmpty())return;autoDoneFor=PS.main;
+async function autoSetup(){ensurePS();mainFresh();try{renderAll()}catch(e){}if(!LS.get('bcrps:autoset')&&LS.get('bcrps:autoset')!==null)return;if(!PS.main||autoDoneFor===PS.main||!isEmpty())return;autoDoneFor=PS.main;
  toast('Setting up pads for '+PS.main+'…');try{await magic();toast('Pads are ready: kit, chains, loops, tuned sounds, groups and hot cues, levels matched and in key. Open Pads to play, or Beat Brain to pick a preset.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
 /* --- UI --- */
 function edgeInit(){
@@ -844,7 +847,7 @@ function edgeInit(){
  // magic card: apply chosen style through presets too
  $('psSty').addEventListener('change',()=>{const P=PRESETS.find(p=>p.style===$('psSty').value);if(P&&$('bbPre').value!==P.id){$('bbPre').value=P.id;applyPreset(P,true)}});
  applyPreset(PRESETS[0],true)}
-window.DBC={camelot,keyText,autoSetup,cam:()=>{try{return PL&&PL.sl?camelot(PL.root,PL.scale):''}catch(e){return''}}};
+window.DBC={ensure:()=>{ensurePS();mainFresh()},camelot,keyText,autoSetup,cam:()=>{try{return PL&&PL.sl?camelot(PL.root,PL.scale):''}catch(e){return''}}};
 
 /* ---------- init + tab hook ---------- */
 async function psInit(){if(typeof chs==='undefined'||!chs||!chs.length)return;const first=!PS.init;if(first){PS.init=true;PS.bpm=+(songBpm()).toFixed(1);buildStatic()}
@@ -856,7 +859,7 @@ const _tab=tab;
 tab=function(t){curTab=t;if('APEG'.includes(t))lastSrcTab=t;if(t==='S'){try{stopAll()}catch(e){}try{lyStopAll()}catch(e){}try{eStop()}catch(e){}try{aStop()}catch(e){}try{stop()}catch(e){}
   ['tA','tP','tC','tD','tE','tG'].forEach(id=>$(id).hidden=true);['ta','tb','tc','td','te','tg'].forEach(id=>$(id).classList.remove('on'));
   $('tS').hidden=false;$('tps').classList.add('on');document.body.classList.add('wide');psInit();return}
- if(!$('tS').hidden){stopT();perf(false)}$('tS').hidden=true;$('tps').classList.remove('on');document.body.classList.remove('wide');return _tab(t)};
+ if(!$('tS').hidden){perf(false)}$('tS').hidden=true;$('tps').classList.remove('on');document.body.classList.remove('wide');return _tab(t)};
 $('tps').onclick=()=>tab('S');
-const _rb=rebuild;rebuild=function(){const r=_rb.apply(this,arguments);gMean=0;if(PS.init&&!$('tS').hidden){regMain();renderBin()}return r};
+const _rb=rebuild;rebuild=function(){const r=_rb.apply(this,arguments);gMean=0;if(PS.init){regMain();renderBin()}return r};
 })();

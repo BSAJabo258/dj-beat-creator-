@@ -15,25 +15,32 @@ python3 -m http.server 8000
 
 Pushing to `main` runs the checks in `.github/workflows/site.yml` and publishes the site to GitHub Pages. To turn that on, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
 
-## Pages
+## The machine
 
-The left rail lists the pages in the order you work, from source to finished track.
+The app is laid out as one instrument, the BC-16:
+
+- **Screen.** Shows one mode at a time. The mode buttons under it switch between them.
+- **Pads, pad banks A–H, the sequence keys P1–P8, the transport and the Q-link knobs.** These are physical controls on the body. They stay put and keep working whatever is on the screen, so you can play and record pads while you're in Chop, DJ or Brain.
+- **Q-link knobs.** Tempo, swing, filter and sidechain pump. Drag up or down, scroll, use the arrow keys, or double-click to reset.
+- **Loading another song** swaps everything over to it. Each song keeps its own pads, patterns and song order, and switching back brings them back.
+
+## Modes
 
 | Group | Page | What it's for |
 |---|---|---|
-| Source | **Start** | Drop a song in. Shows tempo, slices, bars, key and Camelot code. |
+| Source | **Main** | Drop a song in. Shows tempo, slices, bars, key and Camelot code. |
 | | **Chop** | Tempo and hit detection. Tap the waveform to add or remove cuts. Re-arrange and export the result. |
-| | **Parts** | Split a stretch of the song into kick, snare, hats, bass, vocals, melody and FX, then rebuild it. |
+| | **Stems** | Split a stretch of the song into kick, snare, hats, bass, vocals, melody and FX, then rebuild it. |
 | | **Groups** | Collect slices that sound alike into named groups. |
-| Build | **Sounds** | The slice bin: every slice, take and added file. Smart fills load a whole bank at once. |
-| | **Pads** | Eight banks of sixteen pads, with recording, note repeat, a pad editor and full-screen performance. |
-| | **Sequence** | A step grid for the current pattern, plus Smart Beat. |
+| Build | **Browse** | The slice bin: every slice, take and added file. Smart fills load a whole bank at once. |
+| | **Program** | Eight banks of sixteen pads, with recording, note repeat, a pad editor and full-screen performance. |
+| | **Step seq** | A step grid for the current pattern, plus Smart Beat. |
 | | **Beat Brain** | Presets, repeatable variations, full-song writing and smart sound packs. |
 | Perform | **Live** | Drum pads plus lead, chord and bass keyboard layers. |
 | | **Keys** | A piano that plays any sound locked to the song's key. |
 | | **DJ** | Hot cues, loops, rolls, gate, echo, backspin, tape stop, filter, kills and sidechain pump. |
 | Finish | **Arrange** | An automatic new arrangement of the song. |
-| | **Song & export** | Pattern order, WAV/MP3/MIDI export, kit zips, takes and saved setups. |
+| | **Song** | Pattern order, WAV/MP3/MIDI export, kit zips, takes and saved setups. |
 
 ## Moving sounds between pages
 
@@ -96,10 +103,10 @@ The workflow borrows proven ideas from hardware and software samplers: Note Repe
 
 ```
 index.html        app shell and every page
-css/app.css       design system (the hardware look)
+css/app.css       the instrument skin: body, screen, pads, keys, knobs
 css/engine.css    structural styles for the engine panels
 js/engine.js      analysis, chopping, Live, Keys, Parts, Groups, Arrange
 js/studio.js      pads, sequencer, DJ engine, Beat Brain, presets, automation, connections
-js/app.js         pages and navigation, drag-and-drop loading
+js/app.js         modes, physical controls, Q-link knobs, drag-and-drop loading
 js/demo-audio.js  the demo beat
 ```
