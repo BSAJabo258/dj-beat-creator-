@@ -40,8 +40,8 @@
 <label>BPM<input type="number" id="bpm" min="40" max="240" step="0.5"></label>
 <button id="half">½×</button><button id="dbl">2×</button></div>
 <div class="row" style="margin-top:10px"><label>Sensitivity <span id="sv">50</span>%<input type="range" id="sens" min="0" max="100" value="50"></label>
-<label>Shortest slice<select id="minl"><option value="0.125">1/32 note</option><option value="0.25" selected>1/16 note</option><option value="0.5">1/8 note</option><option value="1">1 beat</option></select></label>
-<label>Split slices longer than<select id="maxl"><option value="0">Never</option><option value="4">1 bar</option><option value="2">2 beats</option><option value="1" selected>1 beat</option><option value="0.5">1/2 beat</option></select></label></div>
+<label>Shortest slice<select id="minl"><option value="0.125">1/32 note</option><option value="0.25" selected>1/16 note</option><option value="0.5">1/8 note</option><option value="1">1 beat</option><option value="2">2 beats</option><option value="4">1 bar</option><option value="8">2 bars</option></select></label>
+<label>Split slices longer than<select id="maxl"><option value="0.5">1/2 beat</option><option value="1" selected>1 beat</option><option value="2">2 beats</option><option value="4">1 bar</option><option value="8">2 bars</option><option value="16">4 bars</option><option value="0">Never (keep whole)</option></select></label></div>
 <div class="h" style="margin-top:10px"><span>Tap the waveform to add a cut, tap a cut to remove it. Tap a pad to hear a slice.</span><button id="rst" style="padding:2px 8px;font-size:12px">Reset edits</button></div>
 <div id="pads"></div></div>
 <div class="card"><div class="row">

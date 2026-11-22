@@ -88,7 +88,7 @@ const refreshKnobs=()=>$$('.knob').forEach(k=>k._show&&k._show());
 /* ---- MPC soft keys: the bar along the bottom of the screen, different for every mode ---- */
 const SOFT={
  start:[['LOAD SONG','@f'],['DEMO BEAT','#demo'],['BUILD ALL','#psMagicGo'],['BRAIN',()=>goPage('brain')],['PROGRAM',()=>goPage('pads')]],
- chop:[['½×','#half'],['2×','#dbl'],['RESET','#rst'],['RECONFIGURE','#go'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
+ chop:[['SHORTEST','@cyc:minl'],['LONGEST','@cyc:maxl'],['½×','#half'],['2×','#dbl'],['RESET','#rst'],['▶ ORIGINAL','#pa'],['▶ NEW','#pr'],['WAV','#dw']],
  parts:[['ALL','#eall'],['SEPARATE','#esep'],['BUILD TRACK','#ebuild'],['▶ / ■','#eplay'],['WAV','#ewav'],['STEMS ZIP','#ezip']],
  groups:[['ANALYZE','#grun'],['UNDO','#gud'],['REDO','#grd'],['FIND SIMILAR','#gsim'],['SAVE','#gsave'],['GROUPS ZIP','#gexp']],
  sounds:[['CHAIN','#psChain'],['DROP CHAIN','#psChainGo'],['DROP NOTHING','#psDesel'],['ADD FILE','#psAdd'],['FILL BANK','#psFillGo']],
@@ -100,9 +100,12 @@ const SOFT={
  dj:[['STOP LOOPS','#psDeckX'],['KILL LOW','#psDJ .dk[data-k=lo]'],['KILL MID','#psDJ .dk[data-k=mi]'],['KILL HIGH','#psDJ .dk[data-k=hi]'],['DRUMS OFF','#psDJ .dk[data-k=drum]'],['MUSIC OFF','#psDJ .dk[data-k=mus]'],['PRINT','#psPrint']],
  arrange:[['PRODUCE','#ag'],['▶ PLAY','#apl'],['WAV','#xw2'],['MP3','#xm2'],['MIDI','#xi2']],
  song:[['SONG MODE','#psSongM'],['+ ADD SEQ','#psSongAdd'],['CLEAR SONG','#psSongClr'],['WAV','#psXwav'],['MIDI','#psXmid'],['SAVE SETUP','#psSv']]};
-function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
+function softKeys(p){const f=$('scrFoot');f.textContent='';(SOFT[p]||[]).forEach(([t,a])=>{if(a==='@f'){const l=document.createElement('label');l.className='sk';l.htmlFor='f';l.textContent=t;f.appendChild(l);return}if(typeof a==='string'&&a.startsWith('@cyc:')){const id=a.slice(5),b=document.createElement('button');b.className='sk cyc';b.dataset.cyc=id;b.dataset.t=t;b.title='Tap for the next setting. With SHIFT on, goes back.';b.onclick=()=>cycle(id,b);f.appendChild(b);cycLabel(b);return}const b=document.createElement('button');b.className='sk';b.textContent=t;if(typeof a==='string')b.dataset.sel=a;
  b.onclick=()=>{if(typeof a==='function')return a();const el=document.querySelector(a);if(el&&!el.disabled)el.click();setTimeout(softSync,60)};f.appendChild(b)});softSync()}
-function softSync(){$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
+const shortOpt=t=>t.replace(' note','').replace('Never (keep whole)','OFF').replace(' beats',' BEATS').replace(' beat',' BEAT').replace(' bars',' BARS').replace(' bar',' BAR').toUpperCase();
+function cycLabel(b){const el=$(b.dataset.cyc);if(!el)return;b.innerHTML='<small>'+b.dataset.t+'</small>'+shortOpt(el.selectedOptions[0].text)}
+function cycle(id,b){const el=$(id);if(!el)return;const back=window.DBC_HW&&DBC_HW.info().shift;el.selectedIndex=(el.selectedIndex+(back?-1:1)+el.options.length)%el.options.length;el.dispatchEvent(new Event('change',{bubbles:true}));cycLabel(b);oled((id==='minl'?'SHORTEST SLICE ':'SPLIT SLICES LONGER THAN ')+shortOpt(el.selectedOptions[0].text))}
+function softSync(){$$('#scrFoot .sk.cyc').forEach(cycLabel);$$('#scrFoot .sk').forEach(b=>{if(!b.dataset.sel)return;const el=document.querySelector(b.dataset.sel);b.disabled=!el||el.disabled;b.classList.toggle('on',!!(el&&el.classList.contains('on')))})}
 
 /* ---- DATA wheel and −/+: change whichever value you touched last ---- */
 let DATA_T=null;

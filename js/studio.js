@@ -92,7 +92,7 @@ function hit(b,j,vel){if(!ac)return null;resume();flash(j);if(HW.full)vel=1;
  if(PS.keys&&PS.kp){const p=PS.banks[PS.kp.b][PS.kp.j];if(!p)return null;const vs=[],evs=[],t=ac.currentTime;
   keyNotes(p,j).forEach((st,i)=>{const v=voice(ac,busFor(p),p.mode==='latch'||p.mode==='cue'?{...p,mode:'gate'}:p,t+i*.008,vel*(PS.chord?.75:1),st,0,null);if(v)vs.push(v);const ev=recEv(PS.kp.b,PS.kp.j,vel,st);if(ev)evs.push(ev)});
   return{vs,evs,p:p.mode==='latch'||p.mode==='cue'?{...p,mode:'gate'}:p,b0:beatNow()}}
- const p=PS.banks[b][j];if(!p)return null;PS.lastHit={b,j};
+ const p=PS.banks[b][j];if(!p){if(!PICK)msg('Pad '+BL[b]+String(j+1).padStart(2,'0')+' is empty. Hold it for ½ second to choose a sound for it.');return null}PS.lastHit={b,j};
  if((NR.on||SHIFT||HW.shift)&&p.mode!=='latch'&&p.mode!=='cue'){const k=b+':'+j;nrStart(k,b,j,vel);return{vs:[],evs:[],p:{...p,mode:'one'},b0:0,nr:k}}
  if(p.mode==='latch'||p.mode==='cue'){const k=b+':'+j,on=LATCH.get(k);
   if(on&&p.mode==='cue'){vStop(on.v,ac.currentTime,.008);LATCH.delete(k);on.done=1}
@@ -225,7 +225,7 @@ async function fill(kind,from){mainFresh();const S=PS.srcs[PS.cur];if(!S)return;
   ['kick','snare','hat','tone'].forEach((k,r)=>{top(k,4).forEach((o,c)=>{pads[r*4+c]=mkPad(PS.main,[[o.s.s,o.s.e]],k.toUpperCase()+' '+(o.i+1),k,{midi:o.s.clar>.6?o.s.midi:undefined})})})}
  else if(kind==='order'||kind==='chain2'||kind==='chain4'){const n=kind==='order'?1:kind==='chain2'?2:4;for(let j=0;j<16;j++){const a=from+j*n,g=L.slice(a,a+n);if(!g.length)break;pads.push(mkPad(S===PS.srcs[PS.main]?PS.main:PS.cur,mergeSegs(g),n===1?(g[0].kind?g[0].kind.toUpperCase()+' ':'#')+(a+1):'#'+(a+1)+'–'+(a+g.length),n>1?'chain':(KIND2ROLE[g[0].kind]||''),{midi:n===1?g[0].midi:undefined,choke:n>1?3:0}))}}
  else if(kind==='beats'){const beat=60/songBpm(),dur=y.length/sr,t0=Math.max(0,barPhase)+from*beat;for(let j=0;j<16;j++){const a=t0+j*beat;if(a>=dur-.05)break;const sa=snapMin(a,.012),sb=Math.min(y.length,snapMin(Math.min(a+beat,dur),.012));if(sb-sa>400)pads.push(mkPad(PS.main,[[sa,sb]],'BEAT '+(Math.floor((from+j)/4)+1)+'.'+((from+j)%4+1),'chain',{choke:3,lb:1,bpm:songBpm()}))}}
- else if(kind==='half'||kind==='bars2'){const beat=60/songBpm(),L=kind==='half'?beat/2:beat*8,dur=y.length/sr,t0=Math.max(0,barPhase)+from*L;for(let j=0;j<16;j++){const a=t0+j*L;if(a>=dur-.05)break;const sa=snapMin(a,.008),sb=Math.min(y.length,snapMin(Math.min(a+L,dur),.008));if(sb-sa>300)pads.push(mkPad(PS.main,[[sa,sb]],(kind==='half'?'½B ':'2BAR ')+(from+j+1),kind==='half'?'chain':'loop',kind==='half'?{choke:3,lb:.5,bpm:songBpm()}:{choke:4,mode:'latch',sync:true,bpm:songBpm(),lb:8}))}}
+ else if(kind==='half'||kind==='bars2'||kind==='bars4'){const beat=60/songBpm(),L=kind==='half'?beat/2:kind==='bars4'?beat*16:beat*8,dur=y.length/sr,t0=Math.max(0,barPhase)+from*L;for(let j=0;j<16;j++){const a=t0+j*L;if(a>=dur-.05)break;const sa=snapMin(a,.008),sb=Math.min(y.length,snapMin(Math.min(a+L,dur),.008));if(sb-sa>300)pads.push(mkPad(PS.main,[[sa,sb]],(kind==='half'?'½B ':kind==='bars4'?'4BAR ':'2BAR ')+(from+j+1),kind==='half'?'chain':'loop',kind==='half'?{choke:3,lb:.5,bpm:songBpm()}:{choke:4,mode:'latch',sync:true,bpm:songBpm(),lb:kind==='bars4'?16:8}))}}
  else if(kind==='rand'){const st=slices.map((s,i)=>({s,i})).filter(o=>o.s._star),Rr=rng(VS().seed);for(let k=st.length-1;k>0;k--){const q=Math.floor(Rr()*(k+1));[st[k],st[q]]=[st[q],st[k]]}st.slice(0,16).sort((a,b)=>a.i-b.i).forEach(o=>pads.push(mkPad(PS.main,[[o.s.s,o.s.e]],'★ '+(o.s.kind?o.s.kind.toUpperCase()+' ':'#')+(o.i+1),KIND2ROLE[o.s.kind]||'',{midi:o.s.clar>.6?o.s.midi:undefined,why:'★ sweet spot picked by variation '+VS().v}))) }
  else if(kind==='bars'){for(let j=0;j<16;j++){const b=bars[from+j];if(!b)break;pads.push(mkPad(PS.main,[[slices[b[0]].s,slices[b[b.length-1]].e]],'BAR '+(from+j+1),'loop',{choke:4,mode:'latch',sync:true,bpm:songBpm(),lb:4}))}}
  const old=PS.banks[PS.bank],B=emptyBank();if(old.some(p=>p&&p.lock)){old.forEach((p,j)=>{if(p&&p.lock)B[j]=p});let k=0;pads.filter(Boolean).forEach(p=>{while(k<16&&B[k])k++;if(k<16)B[k++]=p})}else pads.slice(0,16).forEach((p,j)=>B[j]=p||null);const ap=autoProcessBank(B);pushUndo();PS.banks[PS.bank]=B;PS.sel=null;renderAll();dirty();
@@ -285,7 +285,7 @@ function buildGrid(){const g=$('psGrid');g.className=PS.layout;g.textContent='';
  for(const j of order){const el=document.createElement('button');el.className='pp';el.dataset.j=j;el.innerHTML='<canvas></canvas><span class="kk"></span><span class="nb"></span><span class="nm"></span>';padEl[j]=el;padHandlers(el,j);g.appendChild(el)}
  builtLay=PS.layout}
 function renderPads(){if(builtLay!==PS.layout)buildGrid();const B=PS.banks[PS.bank],kp=PS.keys&&PS.kp?PS.banks[PS.kp.b][PS.kp.j]:null;
- padEl.forEach((el,j)=>{const p=PS.keys?kp:B[j],miss=p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs);el.className='pp'+(p?'':' emp')+(miss?' miss':'')+(!PS.keys&&PS.sel&&PS.sel.b===PS.bank&&PS.sel.j===j?' sel':'')+(!PS.keys&&PS.swapSrc===j&&PS.mode==='arr'?' sw':'')+(!PS.keys&&HW.mutes.has(PS.bank+':'+j)?' mut':'');
+ padEl.forEach((el,j)=>{const p=PS.keys?kp:B[j],miss=p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs);el.className='pp'+(p?'':' emp')+(miss?' miss':'')+(!PS.keys&&PS.sel&&PS.sel.b===PS.bank&&PS.sel.j===j?' sel':'')+(!PS.keys&&PS.swapSrc===j&&PS.mode==='arr'?' sw':'')+(!PS.keys&&HW.mutes.has(PS.bank+':'+j)?' mut':'')+(PICK&&PICK.kind==='pad'&&PICK.b===PS.bank&&PICK.j===j?' pick':'');
   el.style.setProperty('--pc',p?p.col:'#868e96');el.querySelector('.kk').textContent=PK[j].toUpperCase();
   el.querySelector('.nb').textContent=PS.keys?(kp?keyName(kp,j):''):BL[PS.bank]+String(j+1).padStart(2,'0');
   el.querySelector('.nm').textContent=PS.keys?(kp?(j===0?kp.name:''):'—'):p?(miss?'⚠ '+p.name:p.name+(p.mode==='latch'?' ⟳':p.mode==='cue'?' ▶':'')):'empty';
@@ -601,12 +601,13 @@ function targetAt(el){let t;if(!el||!el.closest)return null;
  if((t=el.closest('#lays .lh b'))){const L=LAYERS.find(x=>x.el&&x.el.contains(t));if(L)return{kind:'layer',id:L.id}}
  return null}
 const tName=T=>T.kind==='pad'?'pad '+BL[T.b]+String(T.j+1).padStart(2,'0'):T.kind==='piano'?'the Piano':'the '+(LAYERS.find(l=>l.id===T.id)||{}).name+' layer';
-function startPick(T){PICK=T;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choose a sound for '+tName(T)+': hold any slice, pad, key, group or part for ½ second.';
+const oneCol=()=>innerWidth<1100;
+function startPick(T){PICK=T;PICK.cand=null;if($('gPickGo'))$('gPickGo').hidden=true;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choosing a sound for '+tName(T)+'. Tap sounds to hear them, then press the yellow button — or hold one for ½ second to load it straight away.';
  if(T.kind==='pad'&&PS.init&&!$('tS').hidden&&$('tS').classList.contains('perf'))perf(false);
- (window.goPage?goPage(({A:'chop',P:'live',E:'parts',G:'groups'})[go]||'chop'):tab(go));setTimeout(()=>{const el=go==='A'?$('pads'):go==='P'?$('pg'):go==='G'?$('glist'):go==='E'?$('eparts'):go==='D'?$('zk'):null;if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},120)}
-function endPick(){PICK=null;$('gPick').hidden=true}
+ (window.goPage?goPage(({A:'chop',P:'live',E:'parts',G:'groups'})[go]||'chop'):tab(go));try{renderPads()}catch(e){}if(oneCol())setTimeout(()=>$('screenWrap')&&$('screenWrap').scrollIntoView({behavior:'smooth',block:'start'}),60);setTimeout(()=>{const el=go==='A'?$('pads'):go==='P'?$('pg'):go==='G'?$('glist'):go==='E'?$('eparts'):go==='D'?$('zk'):null;if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},120)}
+function endPick(){PICK=null;$('gPick').hidden=true;try{renderPads()}catch(e){}}
 function deliver(snd,T){
- if(T.kind==='pad'){ensurePS();pushUndo();PS.banks[T.b][T.j]=toPad(snd);dirty();tab('S');setBank(T.b);PS.sel=PS.mode==='edit'?{b:T.b,j:T.j}:PS.sel;renderAll();const el=padEl[T.j];if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('drop');setTimeout(()=>el.classList.remove('drop'),900)}audition(PS.banks[T.b][T.j]);
+ if(T.kind==='pad'){ensurePS();pushUndo();PS.banks[T.b][T.j]=toPad(snd);dirty();tab('S');setBank(T.b);PS.sel=PS.mode==='edit'?{b:T.b,j:T.j}:PS.sel;renderAll();const el=padEl[T.j];if(el){el.scrollIntoView({behavior:'smooth',block:oneCol()?'center':'nearest'});el.classList.add('drop');setTimeout(()=>el.classList.remove('drop'),900)}audition(PS.banks[T.b][T.j]);
   toast('Loaded '+snd.name+' into pad '+BL[T.b]+String(T.j+1).padStart(2,'0')+'.',[['↩ Undo',undo]])}
  else if(T.kind==='piano'){const s=toInstrument(snd);PNO.list.unshift(s);PNO.i=0;tab('D');pnUI();toast('The Piano now plays '+snd.name+'.')}
  else if(T.kind==='layer'){const L=LAYERS.find(l=>l.id===T.id),s=toInstrument(snd);L.list=L.list||[];L.list.unshift(s);L.i=0;tab('P');lab(L);keysFor(L);toast(L.name+' now plays '+snd.name+'.')}}
@@ -624,6 +625,7 @@ document.addEventListener('pointermove',e=>{if(LPS&&LPS.id===e.pointerId&&Math.h
 document.addEventListener('pointerup',lpCancel,true);document.addEventListener('pointercancel',lpCancel,true);
 document.addEventListener('click',e=>{if(Date.now()-lpFired<600){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest(LP_SEL))e.preventDefault()},true);
+document.addEventListener('click',e=>{if(!PICK||Date.now()-lpFired<600)return;const t=e.target;if(!t.closest||t.closest('#gPick'))return;const el=t.closest(LP_SEL);if(!el||targetAt(t))return;const snd=soundAt(t);if(!snd)return;PICK.cand=snd;const g=$('gPickGo');if(g){g.hidden=false;g.textContent='Put “'+snd.name+'” on '+tName(PICK)}});
 function fire(tgt,el){if(!LPS)return;LPS.el.classList.remove('lpress');LPS=null;lpFired=Date.now();if(navigator.vibrate)try{navigator.vibrate(25)}catch(x){}
  if(PICK){const snd=soundAt(tgt);if(snd){const T=PICK;endPick();deliver(snd,T);return}}
  const T=targetAt(tgt);if(T){startPick(T);return}
@@ -635,7 +637,7 @@ function glUI(){const d=document.createElement('div');d.innerHTML=`<div id="gPic
 <div id="gTakes" class="card" hidden><div class="h"><b style="color:var(--fg)">🎙 Takes — recorded from any tab</b><button id="gTkX" style="padding:2px 9px">✕</button></div><div id="gTkL"></div></div>`;
  while(d.firstChild)document.body.appendChild(d.firstChild);
  $('gRec').onclick=recToggle;$('gTk').onclick=()=>{$('gTakes').hidden=!$('gTakes').hidden;renderTakes()};$('gTkX').onclick=()=>$('gTakes').hidden=true;$('gPS').onclick=()=>tab('S');
- $('gPickX').onclick=endPick;$$('#gPick .gtabs [data-t]').forEach(b=>b.onclick=()=>{tab(b.dataset.t);if(b.dataset.t==='S')setTimeout(()=>$('psBin').scrollIntoView({behavior:'smooth',block:'center'}),100)});
+ $('gPickX').onclick=endPick;{const go=document.createElement('button');go.id='gPickGo';go.className='p';go.hidden=true;go.onclick=e=>{e.stopPropagation();if(PICK&&PICK.cand){const T=PICK,s2=PICK.cand;endPick();deliver(s2,T)}};$('gPickT').after(go)}$$('#gPick .gtabs [data-t]').forEach(b=>b.onclick=()=>{tab(b.dataset.t);if(b.dataset.t==='S')setTimeout(()=>$('psBin').scrollIntoView({behavior:'smooth',block:'center'}),100)});
  // section hints + explicit pick buttons
  const hint=(after,html)=>{const el=$(after);if(!el)return;const h=document.createElement('div');h.className='h gh';h.innerHTML='<span>'+html+'</span>';el.parentNode.insertBefore(h,el.nextSibling)};
  hint('pads','<b>Hold</b> a slice for ½ s to send it to Pad Studio, or to the pad you are picking for.');
@@ -832,7 +834,7 @@ function edgeInit(){
  $('peMo').onchange=e=>edSet(p=>p.mono=e.target.checked);$('peLk').onchange=e=>edSet(p=>p.lock=e.target.checked);
  $('peKey').onclick=()=>{const s=PS.sel,p=s&&PS.banks[s.b][s.j];if(!p)return;if(p.midi===undefined){$('peKeyI').textContent='No clear pitch in this sound, so there is nothing to tune.';return}const was=p.tune||0;edSet(q=>tuneToKey(q));const now=PS.banks[s.b][s.j].tune||0;$('peKeyI').textContent=now===was?'Already in '+NN[PS.root]+' '+(PS.scale==='maj'?'major':'minor')+'.':'Moved '+(now-was>0?'+':'')+(now-was)+' semitone'+(Math.abs(now-was)>1?'s':'')+' into the key.';audition(PS.banks[s.b][s.j])};
  // fill options
- const fsel=$('psFill');[['half','½ beat per pad'],['bars2','2 bars per pad'],['rand','Pick 16 from ★ sweet spots (by variation)']].forEach(([v,t])=>fsel.add(new Option(t,v)));
+ const fsel=$('psFill');[['half','½ beat per pad'],['bars2','2 bars per pad'],['bars4','4 bars per pad'],['rand','Pick 16 from ★ sweet spots (by variation)']].forEach(([v,t])=>fsel.add(new Option(t,v)));
  // brain: presets, variations, automation switches
  const bb=$('psBrain');const pr=document.createElement('div');pr.className='tb';pr.style.marginTop='8px';
  pr.innerHTML='<label class="ck">Preset <select id="bbPre"></select></label><label class="ck">Variation <button id="bbVm" aria-label="Previous variation">◀</button><input type="number" id="bbVar" value="1" min="1" max="999" style="width:72px"><button id="bbVp" aria-label="Next variation">▶</button></label><input type="text" id="bbPreN" placeholder="Name for your preset" style="width:180px"><button id="bbPreS">Save as my preset</button>';
