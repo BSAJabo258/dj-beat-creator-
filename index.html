@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DJ Beat Creator</title>
+<meta name="description" content="Slice a song, build kits on pads, write beats with Beat Brain and DJ it live — in the browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Martian+Mono:wdth,wght@75..112,400..700&display=swap">
+<link rel="stylesheet" href="css/engine.css">
+<link rel="stylesheet" href="css/app.css">
+</head><body>
+<div id="shell">
+<aside id="rail" aria-label="Pages">
+<a class="brand" href="#start" data-page="start"><b>DJ BEAT<br>CREATOR</b><small>sample · sequence · DJ</small></a>
+<nav class="path">
+<div class="grp"><span class="gl">Source</span><a href="#start" data-page="start"><i></i><span>Start</span><em></em></a><a href="#chop" data-page="chop"><i></i><span>Chop</span><em id="nChop"></em></a><a href="#parts" data-page="parts"><i></i><span>Parts</span><em></em></a><a href="#groups" data-page="groups"><i></i><span>Groups</span><em></em></a></div>
+<div class="grp"><span class="gl">Build</span><a href="#sounds" data-page="sounds"><i></i><span>Sounds</span><em></em></a><a href="#pads" data-page="pads"><i></i><span>Pads</span><em></em></a><a href="#sequence" data-page="sequence"><i></i><span>Sequence</span><em></em></a><a href="#brain" data-page="brain"><i></i><span>Beat Brain</span><em></em></a></div>
+<div class="grp"><span class="gl">Perform</span><a href="#live" data-page="live"><i></i><span>Live</span><em></em></a><a href="#keys" data-page="keys"><i></i><span>Keys</span><em></em></a><a href="#dj" data-page="dj"><i></i><span>DJ</span><em></em></a></div>
+<div class="grp"><span class="gl">Finish</span><a href="#arrange" data-page="arrange"><i></i><span>Arrange</span><em></em></a><a href="#song" data-page="song"><i></i><span>Song &amp; export</span><em></em></a></div>
+</nav>
+<p class="railfoot">Everything runs in your browser. Your audio never leaves this device.</p>
+</aside>
+<div id="main">
+<header id="top"><button id="menuBtn" aria-label="Open pages">☰</button>
+<div id="proj"><b id="projName">No song loaded</b><span id="projMeta">Drop a song to start</span></div>
+<div id="st">Load a WAV / MP3 / M4A / FLAC / OGG to start.</div>
+<div class="topr"><span id="topRec"></span><button id="takesLink">Takes</button></div></header>
+<main id="pages">
+<section class="page" id="pgStart" data-page="start">
+<header class="phead"><h1>Start</h1><p>Load a song to work with. It never leaves your device.</p></header>
+<div class="drop" id="drop"><h2>Drop a song here</h2><p>WAV, MP3, M4A, FLAC or OGG. The tempo, key and every hit are found for you, then each page below opens up.</p>
+<div class="acts2"><label class="filebtn">Choose a file<input type="file" id="f" accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg"></label><button id="demo" hidden>Try the demo beat</button></div></div>
+<div id="startStats" class="card" hidden><div class="stats"><div><b id="sBpm">—</b><span>BPM</span></div><div><b id="sSl">—</b><span>slices</span></div><div><b id="sBars">—</b><span>bars</span></div><div><b id="sKey">—</b><span>key</span></div><div><b id="sCam">—</b><span>Camelot</span></div></div></div>
+<div class="next">
+<a href="#brain" data-page="brain"><b>Make a beat from it</b><span>Beat Brain builds kits from your slices and writes a full song you can edit.</span></a>
+<a href="#sounds" data-page="sounds"><b>Flip it on pads</b><span>Pick the slices you like, load them onto pads and play your own chops.</span></a>
+<a href="#dj" data-page="dj"><b>DJ it live</b><span>Jump between hot cues, hold loops and ride rolls, echo and filter.</span></a>
+</div>
+<div id="guide"></div>
+</section>
+<div id="app" hidden>
+<div class="tabs"><button id="ta" class="on">🎛️ Chopper</button><button id="tps">Pad Studio</button><button id="tb">🎹 Play</button><button id="tc">🎬 Produce</button><button id="td">🎹 Piano</button><button id="te">🧬 Parts</button><button id="tg">🧩 Groups</button></div>
+<div id="tA">
+<div class="card"><div class="h"><span>Original + slice points</span><span id="info"></span></div><canvas id="c1"></canvas>
+<div class="row" style="margin-top:10px">
+<label>Slice method<select id="mode"><option value="smart">Smart hits (recommended)</option><option value="trans">Hits only</option><option value="grid">16th grid</option><option value="beat">Beats</option><option value="bar">Bars</option></select></label>
+<label>BPM<input type="number" id="bpm" min="40" max="240" step="0.5"></label>
+<button id="half">½×</button><button id="dbl">2×</button></div>
+<div class="row" style="margin-top:10px"><label>Sensitivity <span id="sv">50</span>%<input type="range" id="sens" min="0" max="100" value="50"></label>
+<label>Shortest slice<select id="minl"><option value="0.125">1/32 note</option><option value="0.25" selected>1/16 note</option><option value="0.5">1/8 note</option><option value="1">1 beat</option></select></label>
+<label>Split slices longer than<select id="maxl"><option value="0">Never</option><option value="4">1 bar</option><option value="2">2 beats</option><option value="1" selected>1 beat</option><option value="0.5">1/2 beat</option></select></label></div>
+<div class="h" style="margin-top:10px"><span>Tap the waveform to add a cut, tap a cut to remove it. Tap a pad to hear a slice.</span><button id="rst" style="padding:2px 8px;font-size:12px">Reset edits</button></div>
+<div id="pads"></div></div>
+<div class="card"><div class="row">
+<label>Reconfigure style<select id="pre"><option value="remix">Remix (shuffle bars + swaps)</option><option value="stutter">Stutter (repeat hits)</option><option value="flip">Flip (reverse hits)</option><option value="glitch">Glitch (all of it)</option></select></label>
+<label>Intensity <span id="iv">45</span>%<input type="range" id="int" min="0" max="100" value="45"></label></div>
+<div class="row" style="margin-top:8px"><label class="ck"><input type="checkbox" id="lock" checked> Keep each bar's downbeat in place</label>
+<label class="ck"><input type="checkbox" id="norm" checked> Normalize</label><label class="ck"><input type="checkbox" id="loop"> Loop playback</label></div>
+<div class="row" style="margin-top:10px"><button class="p" id="go">🎲 Reconfigure</button><button id="pa">▶ Original</button><button id="pr">▶ New</button><button id="bk" disabled>↩ Previous</button></div>
+<div class="h" style="margin-top:12px"><span>New arrangement</span><span id="info2"></span></div><canvas id="c2"></canvas></div>
+<div class="card"><h2>Export</h2><div class="row">
+<label>Repeat arrangement<select id="rep"><option>1</option><option>2</option><option>4</option><option>8</option></select>×</label>
+<label>MP3 bitrate<select id="kb"><option>128</option><option selected>192</option><option>256</option><option>320</option></select></label></div>
+<div class="row" style="margin-top:10px"><button class="p" id="dw">⬇ WAV</button><button id="dm">⬇ MP3</button><button id="ds">⬇ Slices (zip of WAVs)</button><button id="dj">⬇ Arrangement (JSON)</button></div></div>
+</div>
+<div id="tP" hidden>
+<div class="pbar"><span id="ki"></span><button id="stg">⛶ Stage mode</button></div>
+<div class="deck">
+<div class="padsec"><div class="lh"><button id="bd" class="tg on">Drums</button><button id="bc" class="tg">Chops</button><button id="bg" class="tg">Groups</button><span class="sp"></span><button id="np">‹</button><span id="nl"></span><button id="nx">›</button></div>
+<div id="chopx" class="lh" hidden><label class="ck"><select id="cm"><option value="beat">Chop by beat</option><option value="hit">Chop by hit</option></select></label><label class="ck"><input type="checkbox" id="cutc" checked> Cut previous</label></div>
+<div id="pg"></div></div>
+<div class="laysec" id="lays"></div></div>
+<details class="card tone"><summary>Tone, key &amp; settings</summary>
+<div class="row" style="margin-top:8px"><label>Key<select id="kr"><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9" selected>A</option><option value="10">A#</option><option value="11">B</option></select></label>
+<label>Scale<select id="ks"><option value="min">Minor</option><option value="maj">Major</option><option value="pmin">Minor pentatonic</option><option value="pmaj">Major pentatonic</option><option value="dor">Dorian</option><option value="blu">Blues</option><option value="chr">Chromatic</option></select></label></div>
+<div class="row" style="margin-top:8px"><label>Filter<input type="range" id="fc" min="0" max="100" value="100"></label><label>Reverb<input type="range" id="fr" min="0" max="100" value="0"></label></div>
+<div class="row" style="margin-top:8px"><label class="ck"><input type="checkbox" id="tv" checked> Touch velocity (tap lower = louder)</label><label class="ck"><input type="checkbox" id="hp" checked> Haptics</label></div></details>
+<div class="card exp"><h2>Take these sounds to your recorder</h2><div class="row"><button class="p" id="kx">⬇ Kit pack (zip)</button><button id="ax">⬇ All slices, sorted (zip)</button></div>
+<div class="h" style="margin-top:8px"><span>The kit pack has the drums as numbered pads, tuned keys named by note, and the current chops.</span></div></div>
+</div>
+<div id="tC" hidden>
+<div class="card"><div class="row"><label>Mode<select id="am"><option value="rework">Rework — keep the song's loop, add new drums + bass</option><option value="rebuild">Rebuild — everything new from the slices</option><option value="beat">Beat only — drums + bass</option></select></label>
+<label>Structure<select id="as"><option value="loop">Beat loop (8 bars)</option><option value="ab">Verse + Hook (16 bars)</option><option value="full" selected>Full track (52 bars)</option><option value="pro">Long track (88 bars)</option></select></label></div>
+<div class="row" style="margin-top:8px"><label>Style<select id="ast"><option value="boom">Boom bap</option><option value="trap">Trap</option><option value="house">House</option><option value="lofi">Lo-fi</option></select></label>
+<label>Tempo (BPM)<input type="number" id="at" min="40" max="220" step="0.5" value="90"></label></div>
+<div class="row" style="margin-top:8px"><label>Energy <span id="aev">55</span>%<input type="range" id="ae" min="0" max="100" value="55"></label><label>Swing <span id="awv">20</span>%<input type="range" id="aw" min="0" max="60" value="20"></label><label>Loop level <span id="alv">80</span>%<input type="range" id="al" min="0" max="100" value="80"></label></div>
+<div class="row" style="margin-top:8px"><label class="ck"><input type="checkbox" id="tgl" checked> Song loop</label><label class="ck"><input type="checkbox" id="tgd" checked> Drums</label><label class="ck"><input type="checkbox" id="tgb" checked> Bass</label><label class="ck"><input type="checkbox" id="tgc"> Chords</label><label class="ck"><input type="checkbox" id="tgy"> Lead</label></div>
+<div class="h" style="margin-top:6px"><span>If the loop runs at a different speed than the song, press ½× or 2× in the Chopper tab first. Changing tempo here speeds the loop up or down.</span></div>
+<div class="row" style="margin-top:10px"><button class="p" id="ag">🎲 Produce a new version</button><button id="apl">▶ Play</button></div>
+<div class="h" style="margin-top:12px"><span>Tap the timeline to jump</span><span id="ai"></span></div><canvas id="c4" style="height:44px"></canvas>
+<div class="h" style="margin-top:10px"><span>Sections — edit, remove, or 🎲 re-roll one</span></div><div id="secs"></div></div>
+<div class="card"><h2>Export</h2><div class="row"><button class="p" id="xw2">⬇ WAV</button><button id="xm2">⬇ MP3</button><button id="xi2">⬇ MIDI</button></div>
+<div class="row" style="margin-top:10px"><label>Stem<select id="sx"><option value="beat">Drums + bass (the beat)</option><option value="drum">Drums</option><option value="bass">Bass</option><option value="chord">Chords</option><option value="lead">Lead</option><option value="loop">Song loop</option></select></label><button id="sb">⬇ Stem</button></div></div>
+</div>
+<div id="tE" hidden>
+<div class="card"><h2>🧬 Parts: separate what is in the beat</h2>
+<div class="row"><label>From slice #<input type="number" id="epa" min="1"></label><label>To slice #<input type="number" id="epb" min="1"></label><button id="eall">All</button></div>
+<div class="h" style="margin-top:6px"><span id="eri"></span></div>
+<div class="row" style="margin-top:8px"><button class="p" id="esep">🧬 Separate parts</button><label>Tap a slice to hear<select id="eaud"><option value="mix">Full mix</option><option value="drum">Drums</option><option value="bass">Bass</option><option value="vocal">Lead / vocal</option><option value="melody">Pads / wide</option><option value="air">Air / FX</option></select></label></div>
+<div class="h" style="margin-top:8px"><span id="einfo"></span></div><div id="estems"></div></div>
+<div class="card"><h2>Slices in range</h2><div id="eparts" style="max-height:340px;overflow:auto"></div></div>
+<div class="card"><h2>Build a track from this range</h2><div class="row"><label>Structure<select id="estr"><option value="loop">Loop (4 bars)</option><option value="ab">Verse + hook (8 bars)</option><option value="full" selected>Full track (26 bars)</option></select></label><label>Drums<select id="edr"><option value="both" selected>Original + new</option><option value="new">New pattern only</option><option value="orig">Original only</option></select></label><label>Style<select id="esty"><option value="boom">Boom bap</option><option value="trap">Trap</option></select></label></div>
+<div class="row" style="margin-top:8px"><label>Energy<input type="range" id="een" min="0" max="100" value="55"></label></div>
+<div class="row" style="margin-top:8px"><button class="p" id="ebuild">🎲 Build track</button><button id="eplay">▶ / ■</button><button id="ewav">⬇ WAV</button><button id="ezip">⬇ Stems (zip)</button></div>
+<div class="h" id="estt" style="margin-top:8px"></div></div>
+</div>
+<div id="tD" hidden>
+<div class="card"><div class="lh"><b>🎹 Piano</b><button id="zpp">‹</button><span id="zpl"></span><button id="zpn">›</button><span class="sp"></span><button id="zo1">Oct −</button><button id="zo2">Oct +</button></div>
+<div class="lh" style="margin-top:6px"><button id="zmd" class="tg">Pitched sound</button><button id="zhd" class="tg">Hold</button><button id="zsn" class="tg on">Snap to key</button><select id="zw" style="width:auto"><option value="2">2 oct</option><option value="3">3 oct</option></select><button class="p" id="zaf">✨ Auto-fit</button></div>
+<div id="zk"></div><div class="h" style="margin-top:6px"><span id="zi"></span></div>
+<div class="h"><span>Computer keys: A W S E D F T G Y H U J K O L P ;</span></div></div>
+<div class="card"><div class="lh"><b>🎚️ Beat layers</b><span class="sp"></span><label class="ck">Master BPM <input type="number" id="zmb" min="40" max="240" step="0.5" style="width:78px"></label></div>
+<div class="lh" style="margin-top:6px"><button id="za0">+ Original</button><button id="za1">+ New arrangement</button><button id="za2">+ Produced beat</button><button id="za3">+ File</button><input type="file" id="zf" accept="audio/*" hidden></div>
+<div class="lh" style="margin-top:6px"><button class="p" id="zplay">▶ Play all</button><button id="zsync">✨ Smart sync</button><button id="zchk">Check pads</button></div>
+<div id="zrows"></div><div class="h" id="zst" style="margin-top:6px"><span>Add two or more beats, then press Smart sync. Play the piano on top.</span></div></div>
+</div>
+<div id="tS" hidden>
+<div id="psTr" class="card"><div class="tb">
+<button id="psRec" class="psb rec">● REC</button><button id="psPlay" class="psb play">▶ PLAY</button><button id="psStop" class="psb">■</button>
+<label class="ck">BPM <input type="number" id="psBpm" min="40" max="240" step="0.5" style="width:78px"></label><button id="psTap" class="psb">Tap</button>
+<span class="sp"></span><span id="psPos" class="pspos">Stopped</span><button id="psPerf" class="psb">⛶ Full screen</button></div>
+<div class="tb px" style="margin-top:8px">
+<label class="ck">Quantize <select id="psQ"><option value="0">Off</option><option value="0.5">1/8</option><option value="0.25" selected>1/16</option><option value="0.125">1/32</option><option value="0.1666667">1/16 T</option></select></label>
+<label class="ck">Swing <input type="range" id="psSw" min="0" max="100" value="0" style="width:90px"><span id="psSwv">0</span>%</label>
+<label class="ck">Bars <select id="psBars"><option>1</option><option selected>2</option><option>4</option><option>8</option></select></label>
+<label class="ck"><input type="checkbox" id="psMet" checked> Click</label><label class="ck"><input type="checkbox" id="psCi" checked> Count-in</label><label class="ck"><input type="checkbox" id="psVel"> Tap-height velocity</label>
+<button id="psSyncB">⟲ Song tempo</button></div></div>
+
+<div class="card px" id="psMagic"><h2>Build everything from my slices</h2>
+<div class="h"><span>Makes a smart kit (bank A), chains (B), loops (C), melodic sounds for Keys (D) and the Groups engine's picks (E). Bank F gets hot cues for DJing the track. Then it writes four beats from those sounds and chains them into a song. After that: press ⛶ Full screen, then ● REC, and play.</span></div>
+<div class="tb" style="margin-top:6px"><label class="ck">Style <select id="psSty"><option value="det">Detroit / Flint bounce</option><option value="trap">Trap</option><option value="drill">Drill</option><option value="boom">Boom bap</option><option value="flip">Chop flip (sample-led)</option></select></label>
+<label class="ck">Energy <input type="range" id="psEn" min="0" max="100" value="60" style="width:90px"></label>
+<button class="p" id="psMagicGo">🪄 Build it</button></div></div>
+
+<div class="card px" id="psBrain"><h2>Write and pack</h2>
+<div class="h"><span>Reads your kits: what each sound is (kick, 808, keys, chop, loop…), its attack, weight, brightness and pitch, and whether it's in key. Then it writes like a producer: the 808 locks to the kick and follows the chord roots, keys stay in key, chops answer each other bar to bar, hat rolls only lead into the next phrase, and sections build from intro to hook.</span></div>
+<div class="tb" style="margin-top:6px"><label class="ck">Kit <select id="bbSrc"><option value="all">All banks</option></select></label><button id="bbAn">🔎 Analyze kit</button><button class="p" id="bbSong">🧠 Write full song</button>
+<label class="ck">or one <select id="bbSec"><option value="verse">verse</option><option value="hook" selected>hook</option><option value="intro">intro</option><option value="bridge">bridge</option><option value="outro">outro</option></select></label><button id="bbPat">→ current pattern</button></div>
+<div class="tb" style="margin-top:8px"><button class="p" id="bbPk">🎁 Build packs</button><button id="bbSave">💾 Save bank as pack</button><button id="bbZipAll">⬇ Zip all packs</button><span class="mt">Style and Energy come from the 🪄 card above.</span></div>
+<div class="mt" id="bbOut" style="margin-top:8px;color:var(--fg)"></div>
+<div id="bbPacks"></div></div>
+<div id="psPadCard" class="card padcard">
+<div class="h"><span>Banks · keys 1–8 (or ← →)</span><span id="psBankInfo"></span></div><div id="psBanks"></div>
+<div class="h" style="margin-top:8px"><span>Patterns · keys Z X C V B N M , — changes on the next loop while playing</span><span id="psPatInfo"></span></div><div id="psPats"></div>
+<div class="tb" style="margin-top:8px"><button class="mb" data-m="play">▶ Play</button><button class="mb" data-m="arr">✋ Arrange</button><button class="mb" data-m="edit">✏️ Edit</button>
+<button id="psKeys" class="tg">🎹 Keys mode (L)</button><button id="psChd" class="tg">Chord</button>
+<span class="sp"></span><select id="psLay"><option value="g44">4×4 pads</option><option value="g28">2×8 keyboard</option></select><button id="psUndo">↩ Undo</button></div>
+<div id="psKeyRow" class="tb" style="margin-top:6px" hidden><label class="ck">Key <select id="psRoot"></select></label><label class="ck">Scale <select id="psScale"><option value="min">Minor</option><option value="maj">Major</option><option value="pmin">Minor pentatonic</option><option value="pmaj">Major pentatonic</option><option value="dor">Dorian</option><option value="blu">Blues</option><option value="chr">Chromatic</option></select></label><label class="ck">Octave <select id="psOct"><option value="-1">−1</option><option value="0" selected>0</option><option value="1">+1</option></select></label></div>
+<div id="psHint" class="h"></div>
+<div id="psGrid"></div></div>
+
+<div class="card" id="psDJ"><div class="tb"><b class="cardt">Performance FX</b>
+<label class="ck">Filter <span class="mt">LP</span><input type="range" id="psFk" min="-100" max="100" value="0" style="width:130px"><span class="mt">HP</span></label><button id="psFk0">Center</button>
+<button class="tg dk" data-k="lo">Kill LOW <small>9</small></button><button class="tg dk" data-k="mi">Kill MID <small>-</small></button><button class="tg dk" data-k="hi">Kill HIGH <small>=</small></button>
+<button class="tg dk" data-k="drum">Drums off</button><button class="tg dk" data-k="mus">Music off</button><button id="psDeckX">⏹ Stop loops/cues</button></div>
+<div class="fxg" id="psFxB"></div>
+<div class="tb" style="margin-top:8px"><button id="psPrint" class="psb rec">⏺ PRINT</button><button id="psPrintDl" disabled>⬇ Last print (WAV)</button><span class="mt px">Hold an FX button (or its key) to use it. PRINT records everything you hear and drops it back into the slice bin as new sounds.</span></div></div>
+<div class="card px" id="psEd" hidden><div class="h"><b id="psEdT" style="color:var(--fg);font-size:14px"></b><button id="psEdX" style="padding:2px 9px">✕</button></div>
+<div class="mt" id="psWhy" style="margin-bottom:4px"></div><canvas id="psEdC"></canvas>
+<div class="row" style="margin-top:8px"><label>Name<input type="text" id="peN"></label><label>Plays as<select id="peM"><option value="one">One-shot</option><option value="gate">Gate — plays while held</option><option value="loop">Loop while held</option><option value="latch">Loop on/off (tap to toggle)</option><option value="cue">Hot cue (plays the track from here)</option></select></label><label>Cut group<select id="peC"><option value="0">None</option><option value="1">1 (hats)</option><option value="2">2</option><option value="3">3 (chops)</option><option value="4">4 (loops)</option><option value="5">5 (hot cues)</option></select></label></div>
+<div class="row" style="margin-top:8px"><label>Volume <span id="peGv"></span><input type="range" id="peG" min="0" max="150"></label><label>Pan <span id="pePv"></span><input type="range" id="peP" min="-100" max="100"></label><label>Tune <span id="peTv"></span> st<input type="range" id="peT" min="-24" max="24"></label></div>
+<div class="row" style="margin-top:8px"><label>Trim start <span id="peSv"></span> ms<input type="range" id="peS" min="0" max="1000"></label><label>Trim end <span id="peEv"></span> ms<input type="range" id="peE" min="0" max="1000"></label><label class="ck"><input type="checkbox" id="peR"> Reverse</label><label class="ck"><input type="checkbox" id="peY"> Follow tempo (shifts pitch)</label></div>
+<div class="sws" id="peCol" style="margin-top:8px"></div>
+<div class="tb" style="margin-top:8px"><button id="peDup">Duplicate → next empty</button><button id="peClr">Clear pad</button><select id="peBk"><option value="">Copy this bank to…</option></select><button id="peBkClr">Clear bank</button></div></div>
+
+<div id="psSeqCard" class="card px"><div class="h"><span>Step sequencer — pattern <b id="psSqN"></b>, bank <b id="psSqB"></b>. Tap a cell to add or remove a hit. Tap a name to hear it.</span></div>
+<div class="tb"><button id="psGen" class="p">🧠 Smart Beat → this pattern</button><button id="psQn">Quantize now</button><button id="psPClr">Clear pattern</button><select id="psPCp"><option value="">Copy pattern to…</option></select><button id="psFol" class="tg on">Follow</button></div>
+<div id="psSeqW"><canvas id="psSeq"></canvas><div id="psPh"></div></div></div>
+
+<div id="psBinCard" class="card px"><h2>Slice bin</h2>
+<div class="h"><span>Tap a slice to hear it and pick it up, then tap a pad to drop it in. With a mouse you can drag it onto a pad. 🔗 Chain lets you pick several slices, which then play back-to-back from one pad.</span></div>
+<div class="tb" style="margin-top:6px"><select id="psSrc"></select><button id="psAdd">+ Add sound file</button><input type="file" id="psAddF" hidden accept="audio/*,.m4a,.mp3,.wav,.flac,.ogg"><button id="psChain" class="tg">🔗 Chain</button><button id="psChainGo">Drop chain → next empty pad</button><button id="psDesel">Drop nothing</button></div>
+<div class="tb" id="psFilt" style="margin-top:6px"></div>
+<div id="psBin"></div>
+<div class="h" style="margin-top:10px"><span>Smart fill this bank</span><span id="psBinInfo"></span></div>
+<div class="tb"><select id="psFill">
+<option value="kit">🧠 Smart kit — drums sorted by sound</option>
+<option value="chains">🔗 Smart chains — slices that link into phrases</option>
+<option value="loops">🔁 Smart loops — seamless 1/2/4-bar loops</option>
+<option value="groups">🧩 Smart groups — from the Groups engine</option>
+<option value="cues">🎧 Hot cues — jump points where the track changes</option>
+<option value="keys">🎹 Melodic sounds — tuned, for Keys mode</option>
+<option value="type">Rows by type — kicks, snares, hats, tones</option>
+<option value="order">16 slices in order</option>
+<option value="chain2">2 slices per pad</option>
+<option value="chain4">4 slices per pad</option>
+<option value="beats">1 beat per pad</option>
+<option value="bars">1 bar per pad</option></select>
+<label class="ck">from # <input type="number" id="psFrom" min="1" value="1" style="width:70px"></label><button class="p" id="psFillGo">Fill bank</button></div></div>
+
+<div id="psSongCard" class="card px"><h2>Song order</h2>
+<div class="tb"><button id="psSongM" class="tg">🎼 Song mode</button><button id="psSongAdd">+ Add current pattern</button><button id="psSongClr">Clear song</button></div>
+<div id="psSong" class="mem" style="margin-top:6px"></div>
+<div class="tb" style="margin-top:10px"><select id="psXw"><option value="pat">Current pattern</option><option value="song">Song</option></select><select id="psXr"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option></select>
+<button class="p" id="psXwav">⬇ WAV</button><button id="psXmp3">⬇ MP3</button><button id="psXmid">⬇ MIDI</button><button id="psXkit">⬇ This bank as kit (zip)</button></div>
+<div class="h" style="margin-top:6px"><span>In the MIDI file, bank A is channel 1, bank B is channel 2, and so on. Pad 1 = note 36 (C1), pad 16 = note 51.</span></div></div>
+
+<div id="psSaveCard" class="card px"><h2>Saved setups</h2>
+<div class="tb"><input type="text" id="psSvN" placeholder="Name this setup" style="flex:1;min-width:160px"><button class="p" id="psSv">💾 Save</button></div>
+<div id="psSvL"></div>
+<div class="tb" style="margin-top:8px"><button id="psDl">⬇ Download project file</button><label class="ck">Open project file <input type="file" id="psOp" accept=".json,application/json" style="width:auto"></label></div>
+<div class="h" style="margin-top:6px"><span>Saves your cut points, all 8 banks, pad settings, patterns and song order. Audio stays on your device, so reopen the same song file to use a save. Your latest setup is also auto-saved for each song.</span></div></div>
+
+<div id="psGuide" class="card px"><details><summary style="cursor:pointer;font-weight:700">How the pieces fit, and the music logic behind the smart picks</summary>
+<h2 style="margin-top:10px">Getting around</h2><ul class="ev"><li><b>Hold any sound for ½ second</b> (a Chopper slice, a Play pad or key, a piano key, a group, a Parts row or stem, a slice-bin tile) and it goes to the next empty pad in Pad Studio. A message shows where it went, with Go to pad and Undo.</li><li><b>Hold an empty pad</b> (or any pad in ✋ Arrange or ✏️ Edit) and you jump to your slices with an orange banner. Hold the sound you want and it drops onto that pad, then brings you back. The banner's buttons jump between Chopper, Play, Piano, Parts, Groups and the slice bin.</li><li><b>Piano and Play layers work the same way:</b> tap 🎯 Load sound on the Piano, or hold LEAD / CHORDS / BASS in Play, then hold any sound.</li><li><b>⏺ Record in the top bar works on every tab.</b> Play live anywhere, press ⏹, then save the take as WAV or MP3 or send it to the slice bin to chop it again.</li><li><b>🧠 Beat Brain</b> reads your kits and writes a full song or one section. 🎁 Build packs drafts four curated kits from all your sounds: audition them, load one into a bank to edit, save it back, and export it as a zip.</li></ul>
+<h2 style="margin-top:10px">Flip a sample into your own beat</h2><ol class="ev"><li>Cut the song in Chopper. ½× / 2× fixes the tempo if it's off.</li><li>Here, fill a bank with 🔗 Smart chains, or tap ★ Sweet spots in the bin and load the ones you like.</li><li>Pick P1, press ● REC and play a chop line. Chops cut each other off (cut group 3) like an MPC.</li><li>🧠 Smart Beat adds drums from your kit underneath. Press it again for another variation.</li><li>Lay out patterns in the Song row, then ⬇ WAV, MIDI or the kit zip.</li></ol>
+<h2>DJ the track</h2><ol class="ev"><li>Fill a bank with 🎧 Hot cues, then ⛶ Full screen.</li><li>Tap cues to jump around the track. While the beat is running they wait for the next beat, so they always land in time.</li><li>Use 🔁 Smart loops (tap on/off) to hold a section, then ride Roll, Echo, Gate, Filter and the Kill buttons. Finish with Backspin or Tape stop.</li><li>⏺ PRINT the whole set as you play it.</li></ol>
+<h2>Make new instruments</h2><ol class="ev"><li>Find a ★ tonal slice. In ✏️ Edit, set Gate, trim the attack and tune it.</li><li>Press L for Keys mode: the 16 keys play it in the song's key. Chord stacks triads.</li><li>Record a melody, or PRINT a riff and chop the print again: resampling makes sounds the original never had.</li></ol>
+<h2>The sweet-spot rules the app uses</h2><ul class="ev"><li><b>Strong start:</b> a chop should begin right on a hit, not just before or after it.</li><li><b>On the grid:</b> starts that land on the 1, on a beat or on a 16th rank higher.</li><li><b>Clean tail:</b> endings that fade before the next hit don't click and sit better when chained.</li><li><b>Musical lengths:</b> chains add up to ½, 1, 2 beats or 1 bar. Loops are 1, 2 or 4 bars that repeat what comes after them.</li><li><b>Clear pitch:</b> tonal slices with a confident pitch become instruments.</li><li><b>Phrasing:</b> Smart Beat writes call-and-response (bar A, bar B, A again, then a change), leaves room for the snare, rolls hats into the next bar, and keeps chops off the kick's back.</li><li><b>Section changes:</b> hot cues go where the energy or the number of hits jumps, nudged toward 4- and 8-bar boundaries.</li></ul>
+<div class="mt">Open ✏️ Edit on any smart pad to read why it was picked.</div></details></div>
+<div id="psKeysCard" class="card px"><h2>Keyboard shortcuts</h2><div class="kmap">
+<kbd>1 – 8</kbd><span>Switch bank A–H</span>
+<kbd>A S D F G H J K</kbd><span>Pads 1–8 (bottom row)</span>
+<kbd>Q W E R T Y U I</kbd><span>Pads 9–16 (top row)</span>
+<kbd>Z X C V B N M ,</kbd><span>Patterns 1–8 (queued to the next loop while playing)</span>
+<kbd>Space</kbd><span>Play / stop</span><kbd>Enter</kbd><span>Record on/off (starts with a count-in)</span>
+<kbd>O P [ ]</kbd><span>Hold to roll 1/4, 1/8, 1/16, 1/32</span><kbd>; ' . /</kbd><span>Hold for Gate, Echo · tap for Backspin, Tape stop</span><kbd>9 - =</kbd><span>Kill low / mid / high</span>
+<kbd>L</kbd><span>Keys mode: the 16 keys play the selected sound as notes</span>
+<kbd>0</kbd><span>Click on/off</span><kbd>Backspace</kbd><span>Undo</span><kbd>Esc</kbd><span>Leave Perform</span></div></div>
+</div>
+<div id="tG" hidden>
+<div class="card"><h2>Grouping Studio</h2>
+<div class="row"><label>Producer preset<select id="gpre"></select></label><button id="gpa">Apply</button></div>
+<div class="row" style="margin-top:8px"><label>Save current settings as<input type="text" id="gpn" placeholder="Preset name"></label><button id="gps">Save preset</button></div>
+<div class="row" style="margin-top:10px"><label>Grouping mode<select id="gm"><option value="tight">Tight — short, punchy chops</option><option value="rhythmic">Rhythmic — linked by placement</option><option value="melodic">Melodic — a melodic idea</option><option value="phrase">Phrase — longer continuity</option><option value="hybrid">Hybrid — all relationships</option></select></label>
+<label>Chop character<select id="gch"><option value="tight">Tight</option><option value="balanced">Balanced</option><option value="long">Long</option></select></label></div>
+<div class="row" style="margin-top:8px"><label>Detection sensitivity <span id="gsnv">50</span>%<input type="range" id="gsn" min="0" max="100" value="50"></label><label>Musical intelligence <span id="gmiv">65</span>%<input type="range" id="gmi" min="0" max="100" value="65"></label></div>
+<div class="h" style="margin-top:6px"><span>Sensitivity only finds cut points. Intelligence sets how boldly relationships are suggested. Character sets how long the groups are.</span></div>
+<div class="h"><span>Provider: Local deterministic DSP v1.0.0 — measured analysis only. No machine-learning model is installed, and no audio leaves your device.</span></div>
+<div class="row" style="margin-top:8px"><button class="p" id="grun">🧠 Analyze &amp; group</button><button id="gud">↩ Undo</button><button id="grd">↪ Redo</button></div></div>
+<div class="card"><div class="h"><span>Recording · slices · group lanes</span><span id="gcount"></span></div><canvas id="gcv" style="height:150px"></canvas>
+<div class="h" style="margin-top:6px"><span>Dashed = suggestion · solid = confirmed. Tap the waveform to select slices; tap a lane block to open its group.</span></div>
+<div class="row" style="margin-top:6px"><button id="gmk">Make group from selection</button><button id="gsim">Find similar</button><button id="gclr">Clear</button></div></div>
+<div class="card"><h2>Groups</h2><div id="glist"></div></div>
+<div class="card"><h2>Group pads</h2><label class="ck"><input type="checkbox" id="gas"> Assign mode (open a group, then tap a pad)</label><div id="gpads"></div><div class="h" style="margin-top:6px"><span>The same pads appear in Play → Groups.</span></div></div>
+<div class="card"><h2>Project</h2><div class="row"><button class="p" id="gsave">⬇ Save project</button><label>Open project<input type="file" id="gload" accept=".json,application/json"></label><button id="gexp">⬇ Confirmed groups (zip)</button></div></div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<div id="scrim"></div>
+<nav id="bottom" aria-label="Main pages"><a href="#start" data-page="start"><i></i>Start</a><a href="#chop" data-page="chop"><i></i>Chop</a><a href="#sounds" data-page="sounds"><i></i>Sounds</a><a href="#pads" data-page="pads"><i></i>Pads</a><a href="#song" data-page="song"><i></i>Song</a></nav>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script src="js/demo-audio.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/studio.js"></script>
+<script src="js/app.js"></script>
+</body></html>
