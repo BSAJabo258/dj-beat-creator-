@@ -927,6 +927,64 @@ body[data-pg=build] #screenWrap{display:none}
 .clips{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr)}
 .clip{min-height:70px;padding:7px 10px 12px}.clip b{font-size:17px}.clip canvas{min-height:18px}
 @media (max-width:900px){.sbhow{grid-template-columns:1fr 1fr}.clips{grid-template-rows:none}#focusExit{top:auto;bottom:130px}}
+/* PACK FACTORY */
+#osFactory{display:none;padding:0;background:none;border:0;box-shadow:none}
+body[data-pg=factory] #osFactory{display:flex}body[data-pg=factory] #screenWrap{display:none}
+.pfwrap{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,1fr) minmax(0,1.2fr);gap:12px}
+.pforder,.pflib{position:relative;display:flex;flex-direction:column;min-height:0;padding:8px 14px 14px;border-radius:14px;border:1px solid #000;--face1:#132220;--face2:#0a1312;
+ background:radial-gradient(circle 4px at 11px 11px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),radial-gradient(circle 4px at calc(100% - 11px) 11px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),linear-gradient(180deg,color-mix(in srgb,var(--acc) 7%,transparent),transparent 30%),repeating-linear-gradient(90deg,rgba(255,255,255,.017) 0 1px,transparent 1px 3px),linear-gradient(180deg,var(--face1),var(--face2));box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px rgba(0,0,0,.55)}
+.pfkey small{display:block;font:500 11px 'Archivo';color:#8d97a6;margin-top:2px}.pfkey a{color:var(--acc)}
+.pfkey .hwl,.pforder .hwl,.pflib .hwl{position:static}
+#pfKey,#pfGFind,#pfFind,.pfopts input:not([type=checkbox]){background:#06080c;border:1px solid #000;border-radius:6px;color:#fff;padding:8px 10px;font:500 13px 'Archivo';box-shadow:inset 0 0 0 1px #2b2f39;min-width:0}
+#pfGFind{flex:1;padding:5px 9px;font-size:12px}#pfFind{flex:1}
+.pfchips{display:flex;flex-wrap:wrap;gap:5px}
+.pfopts{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font:700 10px var(--mono);color:var(--silk2)}
+.pfopts label{display:flex;align-items:center;gap:6px}.pfopts select{background:#0b0d12;color:#fff;border:1px solid #000;border-radius:6px;padding:6px;font:600 11px var(--mono)}
+.pfwide{flex:1 1 100%}.pfwide input{flex:1}
+.pfgo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}#pfSum{flex:1;font:500 12px 'Archivo';color:#b6bfcc;min-width:180px}
+.pfjobs{display:flex;flex-direction:column;gap:4px}
+.job{display:grid;grid-template-columns:12px 1fr;gap:0 8px;padding:6px 8px;border-radius:7px;background:rgba(0,0,0,.25)}
+.job i{grid-row:1/3;align-self:center;width:9px;height:9px;border-radius:50%;background:#555}.job b{font:700 11.5px 'Archivo';color:#fff}.job span{font:500 10.5px var(--mono);color:#8d97a6}
+.job.sent i,.job.text i,.job.first i,.job.queued i{background:var(--acc);animation:breathe 1s infinite}.job.done i{background:#38e07b}.job.failed i{background:#ff3b5c}.job.failed span{color:#ff8a9c}
+.pfitems{display:flex;flex-direction:column;gap:6px}
+.pfi{display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;gap:6px 10px;padding:8px;border-radius:10px;background:linear-gradient(180deg,#1b1e24,#131519);border:1px solid #000;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 18%,transparent)}
+.pfi img,.pfimg{grid-row:1/3;width:52px;height:52px;border-radius:7px;object-fit:cover;background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.pft b{display:block;font:800 13px 'Archivo';color:#fff}.pft span{font:600 10.5px var(--mono);color:var(--acc)}.pft em{display:block;font:500 10px var(--mono);font-style:normal;color:#7f8898}
+.pfi.off .pft em{color:#38e07b}
+.pfb{display:flex;flex-wrap:wrap;gap:5px}.pfb button{padding:6px 9px;border-radius:7px;border:1px solid #000;background:#22252d;color:#e4e8ee;font:700 10.5px var(--mono);cursor:pointer}
+.pfb button.p{background:var(--acc);color:#000}
+@media (max-width:900px){.pfwrap{grid-template-columns:1fr}}
+/* PACK STORE */
+#osStore{display:none;--face1:#13221d;--face2:#0a130f}
+body[data-pg=store] #osStore{display:flex}body[data-pg=store] #screenWrap{display:none}
+.stbody{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;padding:2px 6px 10px;display:flex;flex-direction:column;gap:14px}
+.sthead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sthead h2{margin:0;font:900 24px 'Archivo';font-stretch:125%;color:#fff}.sthead p{margin:4px 0 0;color:#a7b0be;font:500 13.5px 'Archivo';max-width:60ch}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:stretch}
+.plan{position:relative;display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:14px;border:1px solid #000;background:linear-gradient(180deg,#1c1f26,#121419);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.plan small{font:700 10px var(--mono);letter-spacing:.1em;color:#8d97a6;text-transform:uppercase}
+.plan>b{font:900 22px 'Archivo';font-stretch:125%;color:#fff}
+.pr{display:flex;align-items:baseline;gap:8px}.pr em{font:900 34px 'Archivo';font-style:normal;color:#fff}.pr span{font:500 11px var(--mono);color:#9aa3b2;line-height:1.3}
+.per{font:700 11px var(--mono);color:var(--acc)}.save{font:700 11px var(--mono);color:#ffd23e}
+.plan ul{margin:6px 0 10px;padding:0 0 0 18px;color:#c3cad5;font:500 13px/1.5 'Archivo';flex:1}
+.plan.hl{transform:translateY(-6px);box-shadow:inset 0 0 0 2px var(--acc),0 0 40px color-mix(in srgb,var(--acc) 25%,transparent),0 16px 40px rgba(0,0,0,.5);background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 14%,#1c1f26),#121419)}
+.plan.hl small{color:var(--acc)}
+.plan.mine{outline:2px dashed #fff;outline-offset:3px}
+.plan .hwb{justify-content:center}
+.stsingle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,.25);font:500 13px 'Archivo';color:#b8c0cc}
+.stsingle b{color:#fff}.stsingle em{font-style:normal;font-weight:800;color:#fff}.stsingle span{flex:1}
+.stlic .hwl{position:static}.stlic small{display:block;font:500 12px 'Archivo';color:var(--acc);min-height:16px}
+#stKey,.ownb input,.ownb select{background:#06080c;border:1px solid #000;border-radius:6px;color:#fff;padding:8px 10px;font:500 13px 'Archivo';box-shadow:inset 0 0 0 1px #2b2f39;flex:1;min-width:0}
+.sth{margin:4px 0 -4px;font:800 12px var(--mono);letter-spacing:.12em;color:var(--acc)}
+.stpacks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.spk{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;border:1px solid #000;background:linear-gradient(180deg,#1d2026,#14161b);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 25%,transparent)}
+.spk img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
+.spk b{font:800 13.5px 'Archivo';color:#fff}.spk span{font:500 12px 'Archivo';color:#9aa3b2;flex:1}.spk em{font:800 10px var(--mono);font-style:normal;color:var(--acc)}
+.spk.lock{opacity:.85}.spk.lock em{color:#ffd23e}
+.stown summary{cursor:pointer;font:700 12px var(--mono);color:#8d97a6}
+.ownb{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.ownb p,.ownb small,.ownb .kfact{grid-column:1/-1;color:#9aa3b2;font:500 12.5px 'Archivo'}
+.ownb label{display:flex;flex-direction:column;gap:3px;font:700 10px var(--mono);color:var(--silk2)}
+@media (max-width:900px){.plans{grid-template-columns:1fr}.plan.hl{transform:none}.ownb{grid-template-columns:1fr}}
 
 </style>
 </head><body>
@@ -2865,7 +2923,7 @@ const PAGES={
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
  song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
- build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
+ store:{os:1,title:'PACK STORE',d:'Packs and plans.'},factory:{os:1,title:'PACK FACTORY',d:'AI sample packs.'},build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
@@ -2887,7 +2945,7 @@ function ensureHead(pane,p){let h=pane.querySelector(':scope > .phead');if(!h){h
 
 /* ---- modes ---- */
 function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
- if(p!=='start'&&p!=='guide'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
+ if(p!=='start'&&p!=='guide'&&p!=='factory'&&p!=='store'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
  const prev=cur;
  routing=true;try{
   const P=PAGES[p];$('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start'||!!P.os);
@@ -3063,11 +3121,12 @@ const I={
  live:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><path d="M6 5.5l3 1.5-3 1.5z"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
  lab:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>',
  brain:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>',
+ lib:'<path d="M4 4v16M8 4v16M12 5l4 15M17 4h3v16h-3z"/>',
  guide:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3"/><path d="M20 4v14h-7"/>'};
 const GROUPS=[
  {id:'home',l:'DECK',pages:['start']},{id:'chop',l:'CHOP',pages:['chop']},{id:'kit',l:'KITS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},
  {id:'seq',l:'SEQ',pages:['sequence']},{id:'keys',l:'KEYS',pages:['tower','keys','live']},{id:'song',l:'SONG',pages:['build','song','arrange']},
- {id:'live',l:'LIVE',pages:['launch','dj']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},{id:'brain',l:'BRAIN',pages:['brain']},{id:'guide',l:'GUIDE',pages:['guide']}];
+ {id:'live',l:'LIVE',pages:['launch','dj']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},{id:'brain',l:'BRAIN',pages:['brain']},{id:'lib',l:'LIBRARY',pages:['factory','store']},{id:'guide',l:'GUIDE',pages:['guide']}];
 const UNITS={
  start:{g:'home',n:'TAPE DECK',m:'TD-1',c:'#29e3ff',c2:'#7a5cff',d:'Load a song. Tempo, key and every hit are found for you.'},
  chop:{g:'chop',n:'SAMPLER',m:'CS-1',c:'#29e3ff',c2:'#00ffa3',d:'Set how the song is cut. The PAD MATRIX plays the cuts in order.'},
@@ -3086,6 +3145,8 @@ const UNITS={
  parts:{g:'lab',n:'STEM SPLITTER',m:'SS-4',c:'#3d8bff',c2:'#b6ff3b',d:'Split a stretch into drums, bass, vocals and melody.'},
  groups:{g:'lab',n:'SOUND SORTER',m:'GS-1',c:'#3d8bff',c2:'#ff3df2',d:'Slices that sound alike, gathered into groups.'},
  brain:{g:'brain',n:'BEAT BRAIN',m:'BB-9',c:'#ff6ad5',c2:'#7a5cff',d:'Presets, variations, full songs and smart kits.'},
+ factory:{g:'lib',n:'PACK FACTORY',m:'PF-1',c:'#00e5a0',c2:'#29e3ff',d:'AI-generated sample packs in any genre, saved to your own library.'},
+ store:{g:'lib',n:'PACK STORE',m:'PS-3',c:'#00e5a0',c2:'#ffd23e',d:'Free starter packs, premium drops and memberships.'},
  guide:{g:'guide',n:'STUDIO MANUAL',m:'OS',c:'#5effc8',c2:'#29e3ff',d:'Lessons, the button book and a demo that plays itself.'}};
 const WITH_DECK=new Set(['chop','pads','sequence','launch','dj','sounds','build']);
 
@@ -3113,7 +3174,7 @@ function build(){
  const deck=el('section',{id:'deck',class:'unit'});deck.innerHTML=plate('PAD MATRIX','PM-16','deck','<button id="deckProg" class="pchip" data-help="scrProg">CHOP</button>');
  ['knobGrp','bankGrp','padsSlot','fnGrp','dataGrp'].forEach(id=>{const x=$(id);if(x)deck.append(x)});stage.append(deck);
  const bs=deck.querySelector('#banksSlot');if(bs){bs.insertAdjacentHTML('beforebegin','<button class="hwb sq bstep" id="bankPrev" data-help="bankStep" title="Previous bank (←)"><i class="led"></i>◀</button>');bs.insertAdjacentHTML('afterend','<button class="hwb sq bstep" id="bankNext" data-help="bankStep" title="Next bank (→)"><i class="led"></i>▶</button>');bs.parentElement.classList.add('bankrow');deck.querySelector('#bankPrev').onclick=()=>{if(need()){const b=API().bankStep(-1);say('Pad bank '+BL[b]+'.')}};deck.querySelector('#bankNext').onclick=()=>{if(need()){const b=API().bankStep(1);say('Pad bank '+BL[b]+'.')}}}
- stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder());
+ stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore());
  /* transport bar */
  const bar=el('footer',{id:'tbar'});
  const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (−)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (=)"><i class="led"></i>▶</button></div>');
@@ -3161,7 +3222,7 @@ function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
  $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');$('focusExit').hidden=true;
- if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
  $('osBack').disabled=!hist.length;const pb=hist[hist.length-1];$('subBack').hidden=!pb;if(pb)$('subBack').querySelector('span').textContent=(UNITS[pb]||{n:'BACK'}).n;
  if(coach&&coach.mode==='tour')setTimeout(coachPlace,80)}
 let backing=false;
@@ -3386,6 +3447,186 @@ function buildSync(){if(!$('osBuild'))return;if(!ready()){$('sbParts').innerHTML
  $('sbParts').innerHTML=S.list.length?S.list.map((pi,i)=>{const pp=pats[pi],pd=API().partPads(pi);return'<button class="part'+(i===SB.sel?' sel':'')+(S.mode&&pl&&i===S.pos?' play':'')+(S.nextPos===i?' q':'')+(pi===P&&!S.mode?' cur':'')+'" data-i="'+i+'"><b>'+(i+1)+'</b><span>P'+(pi+1)+'</span><em>'+pp.bars+' BAR'+(pp.bars>1?'S':'')+(pd.bank!=null?' · '+BL[pd.bank]:'')+'</em><small>'+pp.hits+' hits</small></button>'}).join('<i class="parr">›</i>'):'<p class="empty">No parts yet. Loop your first part, then press NEXT PART: it is added here, and the next part starts.</p>';
  $('sbSelT').textContent=SB.sel>=0&&SB.sel<S.list.length?'Part '+(SB.sel+1)+' (P'+(S.list[SB.sel]+1)+') selected:':'Tap a part to select it.'}
 
+/* ================= PACK FACTORY: AI-generated sample libraries for every genre =================
+   Uses the music-generation API the person brings their own key for (sunoapi.org compatible).
+   A request makes 2 tracks. Jobs are polled (no callback server is needed), finished tracks go into a
+   library kept on this device (IndexedDB), and any track can be loaded, auto-chopped and turned into kits. */
+const PF={api:'https://apibox.erweima.ai',genres:new Set(LSg('bc16:pf:g',['detroit'])),types:new Set(LSg('bc16:pf:t',['flip'])),jobs:LSg('bc16:pf:jobs',[]),items:[],filt:'',busy:false};
+const GENRES=[
+ ['detroit','Detroit / Flint','Detroit Flint street rap beat, fast bouncy hi-hats, eerie detuned piano, menacing minor keys, hard knocking drums'],
+ ['trap','Trap','modern trap, rolling hi-hats, booming 808s, dark synth bells, Atlanta'],
+ ['drill','Drill','UK and NY drill, sliding 808 glides, triplet hi-hats, dark strings, choir'],
+ ['boombap','Boom bap','90s boom bap hip hop, dusty swung drums, jazzy samples, vinyl crackle, MPC swing'],
+ ['lofi','Lo-fi hip hop','lo-fi hip hop, mellow Rhodes, tape wobble, soft swung drums, cozy'],
+ ['gfunk','West Coast G-funk','West Coast G-funk, whiny synth lead, talkbox feel, funky bass, laid back'],
+ ['phonk','Memphis phonk','Memphis phonk, cowbell melodies, distorted 808, dark lo-fi, drift'],
+ ['jersey','Jersey club','Jersey club, bouncy kick patterns, bed squeak chops, fast 140 bpm'],
+ ['rnb','R&B','contemporary R&B, lush chords, smooth bass, silky pads, late night'],
+ ['neosoul','Neo soul','neo soul, warm Rhodes, live bass, jazzy extended chords, organic drums'],
+ ['gospel','Gospel','gospel, Hammond organ, church piano, choir pads, uplifting chord changes'],
+ ['soul','Vintage soul','1970s soul record, horns, strings, Wurlitzer, warm analog tape, emotional'],
+ ['funk','Funk','70s funk, slap bass, wah guitar, tight drums, horn stabs'],
+ ['jazz','Jazz','jazz combo, upright bass, brushed drums, piano trio, smoky club'],
+ ['blues','Blues','electric blues, slide guitar, shuffle groove, Hammond'],
+ ['afrobeats','Afrobeats','afrobeats, syncopated percussion, log drum, highlife guitar, warm'],
+ ['amapiano','Amapiano','amapiano, log drum bass, shakers, jazzy piano, deep house groove'],
+ ['reggaeton','Reggaeton','reggaeton dembow rhythm, latin percussion, dark synths'],
+ ['dancehall','Dancehall','dancehall riddim, digital drums, island bass, steel drums'],
+ ['latin','Latin','latin, salsa piano montuno, congas, timbales, brass'],
+ ['house','House','house music, four on the floor, piano chords, groovy bass'],
+ ['deephouse','Deep house','deep house, warm pads, rolling bass, subtle percussion'],
+ ['techno','Techno','techno, driving kick, hypnotic synth sequences, industrial textures'],
+ ['dnb','Drum & bass','drum and bass, fast breakbeats, reese bass, liquid pads'],
+ ['dubstep','Dubstep','dubstep, half time drums, heavy wobble bass, aggressive'],
+ ['edm','EDM','EDM festival, big supersaw leads, build ups, drops'],
+ ['pop','Pop','modern pop production, catchy synth hooks, bright, polished'],
+ ['rock','Rock','rock, electric guitars, live drums, bass guitar, energetic'],
+ ['country','Country','country, acoustic guitar, pedal steel, fiddle, banjo'],
+ ['cinematic','Cinematic','cinematic orchestral, epic strings, brass, timpani, trailer'],
+ ['ambient','Ambient','ambient, evolving pads, textures, calm, spacious'],
+ ['kpop','K-pop','K-pop production, punchy synths, bright hooks, layered'],
+ ['bollywood','Bollywood / Desi','Bollywood and desi, sitar, tabla, strings, melodic'],
+ ['arab','Middle Eastern','Middle Eastern, oud, darbuka, maqam scales, strings']];
+const PTYPES=[
+ ['flip','SAMPLE FLIP','vintage record made for sampling and chopping, {g}, warm analog, dusty vinyl, memorable chord phrases, instrumental','vocals, singing, lyrics, rap'],
+ ['loops','MELODIC LOOPS','instrumental melodic loops for producers, {g}, catchy repeating 4 bar phrases, clean mix, sample pack quality','vocals, singing, lyrics, rap, drums'],
+ ['drums','DRUM BREAK','solo drum break, drums only, {g}, punchy kicks, crisp snares, hats, fills, sample pack quality','melody, bass, piano, guitar, vocals, singing'],
+ ['808','808 & BASS','808 and bass lines only, {g}, deep sub bass, gliding 808 notes, sample pack quality','drums, melody, piano, vocals, singing'],
+ ['keys','CHORDS & KEYS','chord progressions, piano and keys only, {g}, rich voicings, instrumental','drums, vocals, singing, bass'],
+ ['atmos','ATMOSPHERE','atmospheric textures, pads, risers, transitions and FX, {g}, instrumental','drums, vocals, singing'],
+ ['vocal','VOCAL CHOPS','wordless vocal chops, oohs, aahs, ad-libs and harmonies, {g}, made for chopping','rap verses, spoken word'],
+ ['beat','FULL BEAT','full instrumental beat, {g}, intro, verse and hook sections, mixed for chopping','vocals, singing, lyrics, rap']];
+/* --- device library (IndexedDB) --- */
+let IDB=null;
+function idb(){if(IDB)return IDB;IDB=new Promise((res,rej)=>{const r=indexedDB.open('bc16lib',1);r.onupgradeneeded=()=>{r.result.createObjectStore('items',{keyPath:'id'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});return IDB}
+async function idbAll(){const d=await idb();return new Promise(res=>{const q=d.transaction('items').objectStore('items').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([])})}
+async function idbPut(it){const d=await idb();return new Promise(res=>{const t=d.transaction('items','readwrite');t.objectStore('items').put(it);t.oncomplete=()=>res(true);t.onerror=()=>res(false)})}
+async function idbDel(id){const d=await idb();return new Promise(res=>{const t=d.transaction('items','readwrite');t.objectStore('items').delete(id);t.oncomplete=()=>res(true)})}
+function buildFactory(){const u=el('section',{id:'osFactory',class:'unit'});
+ u.innerHTML='<div class="pfwrap"><div class="pforder" id="pfOrder">'+plate('PACK FACTORY','PF-1','pfOrder')+'<div class="kfbody">'+
+ '<div class="pfkey" data-help="pfKey"><span class="hwl">API KEY</span><div class="kfsrow"><input id="pfKey" type="password" autocomplete="off" placeholder="Paste your music API key"><label class="sbchk"><input type="checkbox" id="pfRem"> remember on this device</label></div><small>Uses your own account (sunoapi.org-compatible). Each request makes 2 tracks and spends your credits. The key goes only to the music service. <a href="https://sunoapi.org/api-key" target="_blank" rel="noopener">Get a key</a></small></div>'+
+ '<div data-help="pfGenres"><div class="sbh"><span class="hwl">GENRES</span><input id="pfGFind" placeholder="find a genre"><button class="chip" id="pfGNone">NONE</button></div><div class="pfchips" id="pfGenres"></div></div>'+
+ '<div data-help="pfTypes"><div class="sbh"><span class="hwl">PACK TYPES</span></div><div class="pfchips" id="pfTypes"></div></div>'+
+ '<div class="pfopts" data-help="pfOpts"><label>ENGINE <select id="pfModel"><option value="V6">V6 · best quality</option><option value="V6_MINI">V6 MINI · fastest</option><option value="V6_WILD">V6 WILD · boldest</option></select></label><label>LENGTH <select id="pfDur"><option value="30">30 s</option><option value="60" selected>1 min</option><option value="120">2 min</option><option value="180">3 min</option></select></label><label>VARIETY <select id="pfVar"><option value="0">exact</option><option value="1" selected>balanced</option><option value="2">high</option><option value="3">bold</option></select></label><label class="sbchk"><input type="checkbox" id="pfMatch" checked> match my song’s tempo and key</label><label class="pfwide">EXTRA WORDS <input id="pfExtra" maxlength="300" placeholder="e.g. eerie music box, minor key, 1970s"></label></div>'+
+ '<div class="pfgo"><div id="pfSum">Pick at least one genre and one pack type.</div><button class="hwb np big" id="pfBuild" data-help="pfBuild"><i class="led"></i>BUILD LIBRARY ▶</button></div><div class="pfjobs" id="pfJobs" data-help="pfJobs"></div></div></div>'+
+ '<div class="pflib" id="pfLib">'+plate('SOUND LIBRARY','SL-∞','pfLib')+'<div class="kfbody"><div class="sbh"><input id="pfFind" placeholder="search the library: genre, type, title"><button class="chip" id="pfSaveAll" data-help="pfSaveAll">SAVE ALL OFFLINE</button><button class="chip" id="pfExport" data-help="pfExport">⬇ LIST</button></div><div class="pfitems" id="pfItems" data-help="pfItems"></div><audio id="pfAudio" preload="none"></audio></div></div></div>';
+ return u}
+const gName=id=>(GENRES.find(g=>g[0]===id)||[0,id])[1],tName=id=>(PTYPES.find(t=>t[0]===id)||[0,id])[1];
+function pfKey(){return $('pfKey').value.trim()}
+function pfSave(){LSs('bc16:pf:g',[...PF.genres]);LSs('bc16:pf:t',[...PF.types]);LSs('bc16:pf:jobs',PF.jobs.filter(j=>j.state!=='done'&&j.state!=='failed'||Date.now()-(j.ts||0)<36e5))}
+function pfStyle(g,t){const G=GENRES.find(x=>x[0]===g),T=PTYPES.find(x=>x[0]===t);let s=T[2].replace('{g}',G[2]);
+ if($('pfMatch').checked&&ready()){try{const bpm=Math.round(+$('bpm').value);const kt=window.DBC?DBC.keyText():'';if(bpm)s+=', '+bpm+' BPM';if(kt)s+=', in '+kt}catch(e){}}
+ const ex=$('pfExtra').value.trim();if(ex)s+=', '+ex;return s.slice(0,990)}
+function pfRender(){
+ const q=($('pfGFind').value||'').toLowerCase();
+ $('pfGenres').innerHTML=GENRES.filter(g=>!q||g[1].toLowerCase().includes(q)).map(g=>'<button class="chip'+(PF.genres.has(g[0])?' on':'')+'" data-g="'+g[0]+'">'+g[1]+'</button>').join('');
+ $('pfTypes').innerHTML=PTYPES.map(t=>'<button class="chip'+(PF.types.has(t[0])?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>').join('');
+ const n=PF.genres.size*PF.types.size;$('pfSum').textContent=n?n+' request'+(n>1?'s':'')+' → '+(n*2)+' tracks ('+[...PF.genres].map(gName).join(', ')+' × '+[...PF.types].map(tName).join(', ')+')':'Pick at least one genre and one pack type.';$('pfBuild').disabled=!n||PF.busy;
+ pfJobsRender();pfItemsRender()}
+function pfJobsRender(){const J=PF.jobs.slice(-12).reverse();$('pfJobs').innerHTML=J.length?'<span class="hwl">ORDERS</span>'+J.map(j=>'<div class="job '+j.state+'"><i></i><b>'+gName(j.g)+' · '+tName(j.t)+'</b><span>'+({queued:'waiting to send',sent:'sent, composing…',text:'composing…',first:'first track ready, finishing…',done:'done: in the library',failed:'failed: '+(j.err||'')})[j.state]+'</span></div>').join(''):''}
+function pfItemsRender(){const q=($('pfFind').value||'').toLowerCase().trim();const L=PF.items.filter(it=>!q||(it.title+' '+gName(it.g)+' '+tName(it.t)+' '+(it.tags||'')).toLowerCase().includes(q)).sort((a,b)=>b.created-a.created);
+ $('pfItems').innerHTML=L.length?L.map(it=>'<div class="pfi'+(it.blob?' off':'')+'" data-id="'+esc(it.id)+'">'+(it.img?'<img src="'+esc(it.img)+'" alt="" loading="lazy">':'<div class="pfimg"></div>')+'<div class="pft"><b>'+esc(it.title)+'</b><span>'+gName(it.g)+' · '+tName(it.t)+' · '+(it.dur?Math.round(it.dur)+' s':'')+'</span><em>'+(it.blob?'saved on this device':'online copy · the service keeps it about 14 days, press SAVE')+'</em></div><div class="pfb"><button data-a="play" title="Preview">▶</button><button data-a="load" class="p" title="Load into the machine, chop it and build kits">LOAD &amp; CHOP</button><button data-a="pack" title="Load, chop and save its kits as a pro pack">PRO PACK</button>'+(it.blob?'':'<button data-a="save">SAVE</button>')+'<button data-a="dl" title="Download">⬇</button><button data-a="del" title="Delete">✕</button></div></div>').join(''):'<p class="empty">'+(PF.items.length?'Nothing matches.':'Your library is empty. Pick genres and pack types on the left, then BUILD LIBRARY. Finished tracks land here and stay on this device.')+'</p>'}
+async function pfCall(path,opt){const k=pfKey();if(!k)throw new Error('Paste your API key first.');const r=await fetch(PF.api+path,{...opt,headers:{'Authorization':'Bearer '+k,'Content-Type':'application/json'}});let j=null;try{j=await r.json()}catch(e){}
+ const code=j&&j.code!=null?j.code:r.status;if(code!==200){const M={400:'the request was not accepted',401:'the API key was refused',404:'the service address changed',405:'too many requests, wait a minute',413:'the description is too long',429:'not enough credits on your account',430:'too many requests, wait a minute',455:'the service is under maintenance',500:'the service had an error'};throw new Error((M[code]||'error '+code)+(j&&j.msg?' ('+j.msg+')':''))}return j}
+async function pfBuild(){if(!pfKey()){say('Paste your API key first (left column, top).');$('pfKey').focus();return}const n=PF.genres.size*PF.types.size;if(!n)return;
+ if(!confirm('Send '+n+' request'+(n>1?'s':'')+'? That makes about '+(n*2)+' tracks and uses your credits.'))return;
+ if($('pfRem').checked)LSs('bc16:pf:key',pfKey());PF.busy=true;pfRender();
+ for(const g of PF.genres)for(const t of PF.types)PF.jobs.push({id:Math.random().toString(36).slice(2),g,t,state:'queued',t0:Date.now(),ts:Date.now(),style:pfStyle(g,t),model:$('pfModel').value,dur:+$('pfDur').value,variety:+$('pfVar').value,n:PF.items.filter(x=>x.g===g&&x.t===t).length+1});
+ pfSave();pfJobsRender();await pfPump();PF.busy=false;pfRender()}
+async function pfPump(){for(const j of PF.jobs.filter(j=>j.state==='queued')){const T=PTYPES.find(x=>x[0]===j.t),voc=j.t==='vocal';
+  const body={customMode:true,instrumental:!voc,model:j.model,callBackUrl:'https://example.com/bc16-no-callback',title:(gName(j.g)+' '+tName(j.t)+' '+j.n).slice(0,80),style:j.style,negativeTags:T[3],duration:j.dur,variety:j.variety,styleWeight:.7};
+  if(voc)body.lyrics='[Vocal chops]\nooh, ooh\naah\nyeah, yeah\nhey\nooh, aah';
+  try{const r=await pfCall('/api/v1/generate',{method:'POST',body:JSON.stringify(body)});j.task=r.data&&(r.data.taskId||r.data.task_id);j.state=j.task?'sent':'failed';if(!j.task)j.err='no task id came back'}catch(e){j.state='failed';j.err=e.message;if(/key|credits/.test(e.message)){say('Stopped: '+e.message+'.');pfSave();pfJobsRender();return}}
+  pfSave();pfJobsRender();await sleep(1500)}pfPoll()}
+let pfT=null;
+function pfPoll(){clearTimeout(pfT);const live=PF.jobs.filter(j=>j.task&&['sent','text','first'].includes(j.state));if(!live.length)return;pfT=setTimeout(async()=>{for(const j of live){try{const r=await pfCall('/api/v1/generate/record-info?taskId='+encodeURIComponent(j.task),{method:'GET'});const d=r.data||{},st=d.status||'';
+  const tr=((d.response&&(d.response.sunoData||d.response.data))||[]);
+  for(const a of tr){const url=a.audio_url||a.audioUrl||a.source_audio_url||a.sourceAudioUrl;if(!url)continue;const id=a.id||url;if(PF.items.some(x=>x.id===id))continue;
+   const it={id,g:j.g,t:j.t,title:a.title||(gName(j.g)+' '+tName(j.t)),tags:a.tags||'',dur:+a.duration||0,url,img:a.image_url||a.imageUrl||'',created:Date.now(),style:j.style};PF.items.push(it);await idbPut(it);pfOffline(it,true)}
+  if(st==='SUCCESS'){j.state='done'}else if(st==='FIRST_SUCCESS'){j.state='first'}else if(st==='TEXT_SUCCESS'){j.state='text'}else if(/FAIL|ERROR|EXCEPTION/.test(st)){j.state='failed';j.err=d.errorMessage||st.toLowerCase().replace(/_/g,' ')}
+  if(Date.now()-j.t0>20*60e3&&j.state!=='done'){j.state='failed';j.err='timed out'}}catch(e){if(/key/.test(e.message)){j.state='failed';j.err=e.message}}}
+  pfSave();pfJobsRender();pfItemsRender();pfPoll()},8000)}
+async function pfFetch(it){if(it.blob)return it.blob;const r=await fetch(it.url);if(!r.ok)throw new Error('download failed ('+r.status+')');return await r.blob()}
+async function pfOffline(it,quiet){try{const b=await pfFetch(it);it.blob=b;await idbPut(it);if(!quiet)say('Saved “'+it.title+'” on this device.');pfItemsRender();return true}catch(e){if(!quiet)say('Could not save “'+it.title+'” here: the file host blocks it. Press ⬇ to download it, then drop it on the machine.');return false}}
+async function pfLoad(it){say('Loading “'+it.title+'”…');try{const b=await pfFetch(it);const buf=await b.arrayBuffer();if(!it.blob){it.blob=b;idbPut(it)}load(buf,it.title.replace(/[^\w\- ]+/g,'').trim()||'generated');return true}catch(e){say('Could not load it directly: the file host blocks it. Press ⬇ to download it, then drop the file on the machine.');return false}}
+async function pfPack(it){if(!(await pfLoad(it)))return;say('Loading, chopping and building kits for “'+it.title+'”… this takes a moment.');let n=0;const nm=(it.title.replace(/[^\w\- ]+/g,'').trim()||'generated').replace(/[^\w\-]+/g,'_');
+ while(n<600){await sleep(500);n++;try{if(fname===nm&&ready()&&API().kit(0).some(Boolean))break}catch(e){}}if(n>=600){say('The track loaded; build kits from KIT FORGE.');return}await sleep(1500);
+ let saved=0;for(let b=0;b<8;b++){if(API().kit(b).filter(Boolean).length>=4){API().saveKit(gName(it.g)+' '+tName(it.t)+' · bank '+BL[b],b);saved++}}
+ say('Pro pack ready: '+saved+' kit'+(saved!==1?'s':'')+' from “'+it.title+'” saved under MY KITS in KIT FORGE. The cuts are on the pads now.');go('kit')}
+function factoryWire(){const k=LSg('bc16:pf:key','');if(k){$('pfKey').value=k;$('pfRem').checked=true}
+ $('pfRem').onchange=e=>{if(e.target.checked){if(pfKey())LSs('bc16:pf:key',pfKey())}else localStorage.removeItem('bc16:pf:key')};
+ $('pfKey').onchange=()=>{if($('pfRem').checked)LSs('bc16:pf:key',pfKey())};
+ $('pfGenres').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;const g=b.dataset.g;PF.genres.has(g)?PF.genres.delete(g):PF.genres.add(g);pfSave();pfRender()};
+ $('pfTypes').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;PF.types.has(t)?PF.types.delete(t):PF.types.add(t);pfSave();pfRender()};
+ $('pfGFind').oninput=pfRender;$('pfGNone').onclick=()=>{PF.genres.clear();pfSave();pfRender()};$('pfFind').oninput=pfItemsRender;
+ $('pfBuild').onclick=pfBuild;
+ $('pfSaveAll').onclick=async()=>{let ok=0,bad=0;for(const it of PF.items.filter(x=>!x.blob)){(await pfOffline(it,true))?ok++:bad++}say(ok+' saved on this device'+(bad?', '+bad+' could not be saved here (download them with ⬇)':'')+'.');pfItemsRender()};
+ $('pfExport').onclick=()=>{const data=JSON.stringify(PF.items.map(({blob,...x})=>x),null,1);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='bc16-library.json';a.click()};
+ $('pfItems').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b)return;const it=PF.items.find(x=>x.id===b.closest('.pfi').dataset.id);if(!it)return;const a=b.dataset.a,au=$('pfAudio');
+  if(a==='play'){if(!au.paused&&au.dataset.id===it.id){au.pause();b.textContent='▶';return}$$('#pfItems [data-a="play"]').forEach(x=>x.textContent='▶');au.src=it.blob?URL.createObjectURL(it.blob):it.url;au.dataset.id=it.id;au.play().catch(()=>say('This track will not play here.'));b.textContent='❚❚'}
+  else if(a==='load')pfLoad(it);else if(a==='pack')pfPack(it);else if(a==='save')pfOffline(it);
+  else if(a==='dl'){const x=document.createElement('a');if(it.blob){x.href=URL.createObjectURL(it.blob);x.download=it.title+'.mp3'}else{x.href=it.url;x.target='_blank';x.rel='noopener'}x.click()}
+  else if(a==='del'){if(!confirm('Delete “'+it.title+'” from the library?'))return;PF.items=PF.items.filter(x=>x!==it);await idbDel(it.id);pfItemsRender()}};
+ idbAll().then(L=>{PF.items=L;pfItemsRender()}).catch(()=>{});
+ if(PF.jobs.some(j=>['sent','text','first'].includes(j.state))&&LSg('bc16:pf:key',''))pfPoll();
+ const qd=PF.jobs.filter(j=>j.state==='queued');if(qd.length)qd.forEach(j=>{j.state='failed';j.err='not sent (page closed)'})}
+
+/* ================= PACK STORE: free starter packs, premium drops, memberships =================
+   Pricing follows the classic ladder: a generous free tier (reciprocity), one highlighted middle plan
+   (centre-stage effect), a single-pack price that anchors the plans (a pack costs more than a month of PRO),
+   charm prices, per-pack maths and an annual option worth two free months. No fake timers, counters or reviews.
+   Checkout and license checks go through the owner's own Lemon Squeezy or Gumroad links (owner setup). */
+const PLANS=[
+ {id:'free',n:'STARTER',m:0,y:0,tag:'Free forever',f:['Every BC-16 unit and tool','3 starter packs made from the demo beat','Pack Factory with your own API key','Save kits, songs and setups on your device']},
+ {id:'pro',n:'PRO',m:9.99,y:99,tag:'Most popular',hl:1,f:['Everything in Starter','10 premium packs a month','The full premium catalog to browse','Royalty-free for your releases','Keep every pack you download, even if you cancel']},
+ {id:'studio',n:'STUDIO',m:24.99,y:249,tag:'For heavy producers',f:['Everything in PRO','Unlimited premium packs','Studio-only drops and stem packs','New drops before everyone else','Priority requests for genres and styles']}];
+const SINGLE=14.99,RANK={free:0,pro:1,studio:2};
+const ST={yearly:LSg('bc16:st:y',1),lic:LSg('bc16:st:lic',null),own:LSg('bc16:st:own',{}),cat:[],owner:false};
+const myPlan=()=>ST.lic&&ST.lic.plan&&ST.lic.ok?ST.lic.plan:'free';
+function buildStore(){const u=el('section',{id:'osStore',class:'unit'});
+ u.innerHTML=plate('PACK STORE','PS-3','osStore','<span class="pchip ro" id="stPlan" data-help="stPlan">PLAN: STARTER</span>')+'<div class="stbody">'+
+ '<div class="sthead"><div><h2>Sounds for every session</h2><p>Start free. Upgrade when the free packs are not enough. Cancel any time and keep what you downloaded.</p></div><div class="seg" id="stCycle" data-help="stCycle"><button data-y="0">MONTHLY</button><button data-y="1">YEARLY · 2 MONTHS FREE</button></div></div>'+
+ '<div class="plans" id="stPlans" data-help="stPlans"></div>'+
+ '<div class="stsingle" data-help="stSingle"><b>Just one pack?</b><span>Any single premium pack: <s></s><em>$'+SINGLE+'</em> once. PRO gives you 10 a month for $9.99.</span><button class="hwb" id="stBuy1"><i class="led"></i>BUY ONE PACK</button></div>'+
+ '<div class="stlic" data-help="stLic"><span class="hwl">ALREADY A MEMBER?</span><div class="kfsrow"><input id="stKey" placeholder="Paste your license key" autocomplete="off"><button class="hwb" id="stCheck"><i class="led"></i>UNLOCK</button></div><small id="stLicMsg"></small></div>'+
+ '<h3 class="sth">Free starter packs</h3><div class="stpacks" id="stFree" data-help="stFree"></div>'+
+ '<h3 class="sth">Premium catalog</h3><div class="stpacks" id="stCat" data-help="stCat"></div>'+
+ '<details class="stown" id="stOwn"><summary>Owner setup (only for the person selling the packs)</summary><div class="ownb">'+
+ '<p>Paste the checkout links from your Lemon Squeezy or Gumroad store. Buyers get a license key by email and paste it above. The premium catalog is a JSON file you host (export it from your library below).</p>'+
+ '<label>License service <select id="ownProv"><option value="ls">Lemon Squeezy</option><option value="gr">Gumroad</option></select></label><label>Gumroad product id <input id="ownGr" placeholder="only for Gumroad"></label>'+
+ '<label>PRO monthly link <input id="ownPm"></label><label>PRO yearly link <input id="ownPy"></label><label>STUDIO monthly link <input id="ownSm"></label><label>STUDIO yearly link <input id="ownSy"></label><label>Single pack link <input id="ownS1"></label><label>Catalog URL <input id="ownCat" placeholder="https://…/catalog.json"></label>'+
+ '<div class="kfact"><button class="hwb" id="ownSave"><i class="led"></i>SAVE SETUP</button><button class="hwb" id="ownExport"><i class="led"></i>EXPORT CATALOG FROM MY LIBRARY</button></div><small>Prices shown on the cards are set in the code (PLANS) and must match your store. Checks run in the browser, so treat this as a convenience lock: for strict protection, serve premium files through signed links from your store.</small></div></details></div>';
+ return u}
+const money=v=>v===0?'$0':'$'+(v%1?v.toFixed(2):v);
+function storeRender(){const y=!!ST.yearly,mine=myPlan();
+ $$('#stCycle [data-y]').forEach(b=>b.classList.toggle('on',+b.dataset.y===+y));$('stPlan').textContent='PLAN: '+PLANS.find(p=>p.id===mine).n;
+ $('stPlans').innerHTML=PLANS.map(p=>{const price=y?p.y:p.m,per=p.id==='pro'?(y?p.y/12/10:p.m/10):0;
+  return'<div class="plan'+(p.hl?' hl':'')+(mine===p.id?' mine':'')+'"><small>'+p.tag+'</small><b>'+p.n+'</b><div class="pr">'+(p.m?'<em>'+money(y?+(p.y/12).toFixed(2):p.m)+'</em><span>/ month'+(y?'<br>billed '+money(p.y)+' a year':'')+'</span>':'<em>$0</em><span>forever</span>')+'</div>'+(per?'<div class="per">about $'+per.toFixed(2)+' a pack</div>':'')+(y&&p.m?'<div class="save">you save '+money(+(p.m*12-p.y).toFixed(2))+' a year</div>':'')+
+  '<ul>'+p.f.map(f=>'<li>'+f+'</li>').join('')+'</ul><button class="hwb'+(p.hl?' np':'')+'" data-plan="'+p.id+'"><i class="led"></i>'+(mine===p.id?'YOUR PLAN':p.m?(RANK[mine]>RANK[p.id]?'INCLUDED':'GET '+p.n):'START FREE')+'</button></div>'}).join('');
+ $('stBuy1').querySelector('i').nextSibling;$$('.stsingle s')[0].textContent='';
+ $('stFree').innerHTML=[['A','DETROIT STARTER KIT','The smart drum kit from the demo beat: kicks, snares, hats, percs.'],['B','CHOP CHAINS STARTER','Slices that link into phrases, ready to flip.'],['C','LOOP STARTER','Seamless 1, 2 and 4 bar loops from the demo.']].map(([b,t,d])=>'<div class="spk free"><b>'+t+'</b><span>'+d+'</span><em>FREE</em><button class="hwb" data-free="'+b+'" data-n="'+t+'"><i class="led"></i>GET IT</button></div>').join('');
+ const C=ST.cat;$('stCat').innerHTML=C.length?C.map((c,i)=>{const ok=RANK[mine]>=RANK[c.tier||'pro'];return'<div class="spk'+(ok?'':' lock')+'">'+(c.img?'<img src="'+esc(c.img)+'" alt="">':'')+'<b>'+esc(c.title)+'</b><span>'+esc([c.genre,c.type].filter(Boolean).join(' · '))+'</span><em>'+(c.tier==='studio'?'STUDIO':'PRO')+'</em><button class="hwb'+(ok?' np':'')+'" data-cat="'+i+'"><i class="led"></i>'+(ok?'LOAD &amp; CHOP':'🔒 UNLOCK')+'</button></div>'}).join(''):'<p class="empty">'+(ST.own.cat?'Loading the catalog…':'No premium packs have been published here yet.')+'</p>'}
+async function storeCatalog(){const u=ST.own.cat;if(!u){ST.cat=[];return}try{const r=await fetch(u,{cache:'no-cache'});const j=await r.json();ST.cat=(Array.isArray(j)?j:j.packs||[]).filter(x=>x&&x.url&&x.title);storeRender()}catch(e){ST.cat=[];say('The premium catalog could not be loaded.');storeRender()}}
+async function checkLicense(key){const O=ST.own;let ok=false,plan='pro',name='';
+ if((O.prov||'ls')==='gr'){if(!O.gr)throw new Error('The store owner has not set up Gumroad yet.');const r=await fetch('https://api.gumroad.com/v2/licenses/verify',{method:'POST',body:new URLSearchParams({product_id:O.gr,license_key:key,increment_uses_count:'false'})});const j=await r.json();const P=j.purchase||{};ok=!!j.success&&!P.subscription_cancelled_at&&!P.subscription_failed_at&&!P.subscription_ended_at&&!P.refunded;name=(P.product_name||'')+' '+(P.variants||'')}
+ else{const r=await fetch('https://api.lemonsqueezy.com/v1/licenses/validate',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams({license_key:key})});const j=await r.json();ok=!!j.valid&&(!j.license_key||['active','inactive'].includes(j.license_key.status));name=j.meta?(j.meta.product_name||'')+' '+(j.meta.variant_name||''):''}
+ if(/studio/i.test(name))plan='studio';else if(/single|one pack/i.test(name))plan='single';return{ok,plan:plan==='single'?'free':plan,single:plan==='single',name:name.trim(),key,at:Date.now()}}
+function storeWire(){
+ $('stCycle').onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;ST.yearly=+b.dataset.y;LSs('bc16:st:y',ST.yearly);storeRender()};
+ $('stPlans').onclick=e=>{const b=e.target.closest('[data-plan]');if(!b)return;const p=b.dataset.plan;if(p==='free'){say('You are on STARTER. Grab the free packs below.');$('stFree').scrollIntoView({behavior:'smooth'});return}
+  const k={pro:ST.yearly?'py':'pm',studio:ST.yearly?'sy':'sm'}[p],link=ST.own[k];if(!link){say('Checkout is not set up on this copy yet (owner setup, at the bottom).');return}window.open(link,'_blank','noopener');say('Checkout opened in a new tab. Your license key arrives by email: paste it under ALREADY A MEMBER.')};
+ $('stBuy1').onclick=()=>{if(!ST.own.s1){say('Single-pack checkout is not set up on this copy yet.');return}window.open(ST.own.s1,'_blank','noopener')};
+ $('stCheck').onclick=async()=>{const k=$('stKey').value.trim();if(!k){say('Paste your license key first.');return}$('stLicMsg').textContent='Checking…';try{const L=await checkLicense(k);if(!L.ok){$('stLicMsg').textContent='That key is not active. Check it, or contact the store.';return}ST.lic=L;LSs('bc16:st:lic',L);$('stLicMsg').textContent='Unlocked: '+(L.name||PLANS.find(p=>p.id===L.plan).n)+'.';storeRender()}catch(e){$('stLicMsg').textContent='Could not check the key: '+e.message}};
+ $('stFree').onclick=async e=>{const b=e.target.closest('[data-free]');if(!b)return;const bank='ABCDEFGH'.indexOf(b.dataset.free),n=b.dataset.n;
+  if(!ready()||!/demo|taco/i.test(fnameSafe())){const d=$('demo');if(!d||d.hidden){say('The demo beat is not available in this copy.');return}say('Loading the demo beat to build '+n+'…');d.click();let t=0;while(!(ready()&&API().kit(bank).some(Boolean))&&t<600){await sleep(500);t++}await sleep(1200)}
+  if(!API().kit(bank).some(Boolean)){say('The demo kits are still building. Try again in a moment.');return}API().saveKit(n,bank);say(n+' is saved under MY KITS in KIT FORGE.');go('kit')};
+ $('stCat').onclick=e=>{const b=e.target.closest('[data-cat]');if(!b)return;const c=ST.cat[+b.dataset.cat];if(RANK[myPlan()]<RANK[c.tier||'pro']){$('stPlans').scrollIntoView({behavior:'smooth'});say('“'+c.title+'” is in '+(c.tier==='studio'?'STUDIO':'PRO')+'. Pick a plan above, or buy it as a single pack.');return}
+  const it={id:'cat:'+c.url,g:'',t:'',title:c.title,url:c.url,img:c.img||'',dur:0,created:Date.now()};if(!PF.items.some(x=>x.id===it.id)){PF.items.push(it);idbPut(it)}pfPack(it)};
+ const O=ST.own,f={ownProv:'prov',ownGr:'gr',ownPm:'pm',ownPy:'py',ownSm:'sm',ownSy:'sy',ownS1:'s1',ownCat:'cat'};for(const[id,k]of Object.entries(f))if(O[k])$(id).value=O[k];
+ $('ownSave').onclick=()=>{for(const[id,k]of Object.entries(f))ST.own[k]=$(id).value.trim();LSs('bc16:st:own',ST.own);say('Store setup saved on this device.');storeCatalog();storeRender()};
+ $('ownExport').onclick=()=>{const L=PF.items.filter(x=>x.url&&!/^cat:/.test(x.id)).map(x=>({title:x.title,genre:gName(x.g),type:tName(x.t),tier:'pro',url:x.url,img:x.img||''}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({packs:L},null,1)],{type:'application/json'}));a.download='catalog.json';a.click();say('catalog.json has '+L.length+' packs. Set tier to "studio" on any you want STUDIO-only, host the audio and this file, then paste its link as the Catalog URL.')};
+ storeCatalog()}
+
 /* ================= HELP: every control explains itself ================= */
 const H={
  /* rail */
@@ -3460,6 +3701,22 @@ const H={
  sbSong:['THE SONG','Your parts in order. Tap one to select it; double-tap to jump there. Move it earlier or later, ⧉ REPEAT it, ✕ REMOVE it, ⟲ LOOP it to fix it, or ▶ PLAY FROM HERE.','Song Builder'],
  sbSongPlay:['▶ PLAY THE SONG','Plays every part in order from the top. Use PLAY FROM HERE on a selected part to start in the middle.','Song Builder'],
  sbExport:['EXPORT','Opens the SONG ARRANGER for WAV, MP3, MIDI and saves.','Song Builder'],
+ pfKey:['API KEY','Your own key for the music service (sunoapi.org-compatible). It is sent only to that service. Tick remember to keep it on this device.','Pack Factory'],
+ pfGenres:['GENRES','Pick one or many. Each genre has its own sound description tuned for sampling.','Pack Factory'],
+ pfTypes:['PACK TYPES','What to make: sample flips, melodic loops, drum breaks, 808 and bass, chords, atmosphere, vocal chops or full beats. Genres × types = number of requests.','Pack Factory'],
+ pfOpts:['OPTIONS','Engine, length, how varied the results are, whether to match your song’s tempo and key, and any extra words for the sound.','Pack Factory'],
+ pfBuild:['BUILD LIBRARY','Sends the orders (asks first: it uses your credits). Each request makes 2 tracks; they arrive in a few minutes.','Pack Factory'],
+ pfJobs:['ORDERS','Each request and where it is: composing, first track ready, done, or failed with the reason.','Pack Factory'],
+ pfItems:['SOUND LIBRARY','Every generated track. ▶ preview, LOAD & CHOP puts it in the machine and cuts it, PRO PACK also saves its kits, SAVE keeps the audio on this device, ⬇ downloads, ✕ deletes.','Pack Factory'],
+ pfSaveAll:['SAVE ALL OFFLINE','Keeps every track’s audio on this device; the service only keeps files about 14 days.','Pack Factory'],
+ pfExport:['⬇ LIST','Downloads the library list (titles, genres, links) as a file.','Pack Factory'],
+ stPlan:['YOUR PLAN','The plan unlocked on this device: STARTER (free), PRO or STUDIO.','Pack Store'],
+ stCycle:['MONTHLY / YEARLY','Yearly costs the same as 10 months: two months free.','Pack Store'],
+ stPlans:['PLANS','STARTER is free. PRO adds 10 premium packs a month. STUDIO is unlimited plus studio-only drops. GET opens the store checkout in a new tab.','Pack Store'],
+ stSingle:['ONE PACK','Buy a single premium pack without a membership.','Pack Store'],
+ stLic:['LICENSE KEY','After buying you get a key by email. Paste it here to unlock your plan on this device.','Pack Store'],
+ stFree:['FREE STARTER PACKS','Kits built from the demo beat, free. GET IT saves the kit under MY KITS in KIT FORGE.','Pack Store'],
+ stCat:['PREMIUM CATALOG','Packs published by the store. Unlocked ones load, chop and save as kits in one press.','Pack Store'],
  lcPlay:['PLAY / STOP','Starts or stops the transport.','Launch Console'],lcSong:['+ ADD TO SONG','Adds the current pattern to the end of the song order.','Launch Console']};
 const SOFTH={SHORTEST:'Cuts shorter than this are merged into the next. Tap to step: 1/32 … 2 bars. With SHIFT on it steps back.',LONGEST:'Cuts longer than this are split. Tap to step: ½ beat … 4 bars, or never.',PADS:'Switches the pads between CHOP (cuts in order) and KIT (your kits).','◀ SLICES':'Previous 128 cuts on the pad banks.','SLICES ▶':'Next 128 cuts on the pad banks.'};
 function helpFor(t){let e=t.closest('[data-help]');if(e)return H[e.dataset.help]?[...H[e.dataset.help],e]:null;
@@ -3542,7 +3799,7 @@ function guideRender(){
 function bookRender(){const q=($('gFind').value||'').toLowerCase().trim(),G={};
  for(const[k,[t,d,g]]of Object.entries(H)){if(q&&!(t+' '+d+' '+g).toLowerCase().includes(q))continue;(G[g]=G[g]||[]).push([k,t,d])}
  $('gBook').innerHTML=Object.entries(G).map(([g,a])=>'<section><h4>'+g+'</h4>'+a.map(([k,t,d])=>'<div class="bk1"><b>'+t+'</b><p>'+d+'</p><button class="show" data-k="'+k+'">SHOW ME</button></div>').join('')+'</section>').join('')||'<p class="empty">Nothing matches “'+esc(q)+'”.</p>'}
-const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build'};
+const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build','Pack Factory':'factory','Pack Store':'store'};
 function guideWire(){$('gTour').onclick=()=>coachStart('tour');$('gChap').onclick=e=>{const b=e.target.closest('[data-c]');if(b)courseStart(STEPS.findIndex(s=>s.ci===+b.dataset.c))};$('gDemo').onclick=demoStart;$('gExp').onclick=()=>{explain(true);go(hist[hist.length-1]||'start')};
  $('gMap').onclick=e=>{const n=e.target.closest('.gnode');if(n)go(n.dataset.p)};
  $('gLessons').onclick=e=>{const b=e.target.closest('.glesson');if(b)coachStart(b.dataset.l)};
@@ -3709,6 +3966,12 @@ const CH=[
   ['sounds','#rail .rb[data-grp="lab"]','Open the lab','Press Lab on the rail. The lab has three units for digging deeper.',{z:2.4,need:1,act:async(t,tok)=>railTo('lab',tok)}],
   ['sounds','#psBinCard','Sound browser','The sound browser shows every slice, take and added file. Filter them, tap to hear, and drop them onto pads. Chain lets you pick several slices that play back to back from one pad. Add file brings in your own sounds.',{z:1.4,need:1}],
   ['sounds','#subTabs','Stems and sorter','The stem splitter separates a stretch of the song into drums, bass, vocals and melody. The sound sorter gathers slices that sound alike into groups.',{z:2.2,need:1}]]],
+ ['Your sound library',[
+  ['factory','#rail .rb[data-grp="lib"]','The library','Press Library on the rail. The pack factory makes brand new sample packs with A I, in any genre, using your own music A P I key.',{z:2.4,act:async(t,tok)=>{await railTo('lib',tok);go('factory');await cw(400,tok)}}],
+  ['factory','#pfGenres','Pick genres and pack types','Pick one or more genres, and one or more pack types: sample flips, melodic loops, drum breaks, eight oh eights, chords, atmosphere, vocal chops, or full beats. Each request makes two tracks.',{z:1.6}],
+  ['factory','#pfBuild','Build the library','Press build library. It asks before spending credits. The tracks arrive in a few minutes and land in your sound library, saved on this device.',{z:2.4}],
+  ['factory','#pfItems','Load, chop and pack','For any track, load and chop puts it in the machine and cuts it. Pro pack also saves its kits under my kits, ready to play.',{z:1.6}],
+  ['store','#subTabs','The pack store','The pack store tab has free starter packs, and the premium plans if you want ready made packs every month.',{z:2.2,act:async(t,tok)=>{go('store');await cw(400,tok)}}]]],
  ['Save and come back',[
   ['song','#psSaveCard','Saved setups','Here are your saved setups. Save stores your cut points, all eight banks, pad settings, patterns and song order. Give it a name to keep different versions.',{z:1.5,need:1,act:async(t,tok)=>{go('song');await cw(400,tok)}}],
   ['song','#psSaveCard','Continue later','The audio stays on your device. To continue later, open the same song file again. Your latest work comes back automatically, and your saved setups are listed here. To move a project to another computer, download the project file, then open it there with the same song.',{z:1.5,need:1}],
@@ -3761,12 +4024,12 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
 
 /* ================= boot ================= */
-function init(){build();courseWire();kitWire();builderWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
+function init(){build();courseWire();kitWire();builderWire();factoryWire();storeWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
  window.OS={page,pick};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
- page(window.curPage?curPage():'start');
+ page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
  const loop=()=>{vuDraw();requestAnimationFrame(loop)};requestAnimationFrame(loop);
  let lastF='';setInterval(()=>{const f=fnameSafe();if(f!==lastF&&ready()){lastF=f;TW.key='';KF.list=null;if(curP==='kit')kitRender();if(curP==='tower'){TW.built='';towerRender()}if(curP==='launch')launchRender()}},800);

@@ -17,10 +17,11 @@ Every page is its own piece of studio gear, switched from the **rail** on the le
 | PADS | Drum Machine PM-16 | Play / program pads, CHOP or KIT program |
 | SEQ | Step Sequencer SQ-8 | Draw hits on the grid |
 | KEYS | Key Tower KT-3, Piano, Layer Rig | Three stacked keyboards, each with its own sound and octave; MIDI in |
-| SONG | Song Arranger, Auto Producer | Order patterns, export WAV / MIDI |
+| SONG | Song Builder, Song Arranger, Auto Producer | Loop a part, play over it, NEXT PART, channels per part; export | Order patterns, export WAV / MIDI |
 | LIVE | Launch Console LC-8, DJ Mixer | All 8 patterns to launch (F1–F8), cues, loops, rolls |
 | LAB | Browser, Stem Splitter, Sorter | Dig, split, group |
 | BRAIN | Beat Brain | Presets, variations, smart kits |
+| LIBRARY | Pack Factory, Pack Store | AI sample packs in 34 genres (your own sunoapi.org-compatible key), library saved on the device, free starter packs, PRO / STUDIO memberships (Lemon Squeezy or Gumroad license keys) |
 | GUIDE | Studio Manual | Lessons, studio map, button book, self-playing demo |
 
 Always on screen: the **meter bridge** (song display, VU meter, LOAD, SAVE, MASTER, TAKE REC, EXPLAIN) and the
