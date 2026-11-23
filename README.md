@@ -13,7 +13,6 @@ Every page is its own piece of studio gear, switched from the **rail** on the le
 |---|---|---|
 | DECK | Tape Deck TD-1 | Load a song; tempo, key and hits are found |
 | CHOP | Sampler CS-1, Slice Brain SX-1 | Chop recipes, recommended chop, every cut scored (grid, punch, clean), cut clean-up, best-of kit |
-| (old) CHOP | Sampler CS-1 | Slice length (SHORTEST / LONGEST); the pads follow the cuts |
 | KITS | Kit Forge KF-2 | Light a slot, hold a cut, it lands; save kits by name |
 | PADS | Drum Machine PM-16 | Play / program pads, CHOP or KIT program |
 | SEQ | Step Sequencer SQ-8 | Draw hits on the grid |
