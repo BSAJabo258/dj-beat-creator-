@@ -4,6 +4,29 @@ A sampler, sequencer and DJ deck that runs entirely in the browser. Load a song 
 
 Your audio never leaves your device.
 
+
+## The studio (BC-16 OS)
+
+Every page is its own piece of studio gear, switched from the **rail** on the left (Alt+1 … Alt+0):
+
+| Rail | Unit(s) | What it is for |
+|---|---|---|
+| DECK | Tape Deck TD-1 | Load a song; tempo, key and hits are found |
+| CHOP | Sampler CS-1 | Slice length (SHORTEST / LONGEST); the pads follow the cuts |
+| KITS | Kit Forge KF-2 | Light a slot, hold a cut, it lands; save kits by name |
+| PADS | Drum Machine PM-16 | Play / program pads, CHOP or KIT program |
+| SEQ | Step Sequencer SQ-8 | Draw hits on the grid |
+| KEYS | Key Tower KT-3, Piano, Layer Rig | Three stacked keyboards, each with its own sound and octave; MIDI in |
+| SONG | Song Arranger, Auto Producer | Order patterns, export WAV / MIDI |
+| LIVE | Launch Console LC-8, DJ Mixer | All 8 patterns to launch (F1–F8), cues, loops, rolls |
+| LAB | Browser, Stem Splitter, Sorter | Dig, split, group |
+| BRAIN | Beat Brain | Presets, variations, smart kits |
+| GUIDE | Studio Manual | Lessons, studio map, button book, self-playing demo |
+
+Always on screen: the **meter bridge** (song display, VU meter, LOAD, SAVE, MASTER, TAKE REC, EXPLAIN) and the
+**transport bar** (REC, OVERDUB, STOP, PLAY, PLAY START, TAP, pattern ◀ ▶ / P1–P8 / COPY ▶ / CLEAR, UNDO, ◀ BACK).
+Keys: `-` / `=` previous / next pattern, `` ` `` back, `?` explain mode. Every unit zooms (− ⤢ +).
+
 ## Run it
 
 **One file:** `dist/DJ_Beat_Creator.html` is the whole app in a single file. Download it and open it in Chrome, Edge or Safari, no server needed. Rebuild it after changes with `python3 tools/build-single.py`.

@@ -626,7 +626,7 @@ function targetAt(el){let t;if(!el||!el.closest)return null;
  return null}
 const tName=T=>T.kind==='pad'?'pad '+BL[T.b]+String(T.j+1).padStart(2,'0'):T.kind==='piano'?'the Piano':'the '+(LAYERS.find(l=>l.id===T.id)||{}).name+' layer';
 const oneCol=()=>innerWidth<1100;
-function startPick(T){PICK=T;PICK.cand=null;if($('gPickGo'))$('gPickGo').hidden=true;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choosing a sound for '+tName(T)+'. Tap sounds to hear them, then press the yellow button — or hold one for ½ second to load it straight away.';
+function startPick(T){if(T.kind==='pad'&&window.OS&&OS.pick){OS.pick(T.b,T.j);return}PICK=T;PICK.cand=null;if($('gPickGo'))$('gPickGo').hidden=true;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choosing a sound for '+tName(T)+'. Tap sounds to hear them, then press the yellow button — or hold one for ½ second to load it straight away.';
  if(T.kind==='pad'&&PS.init&&!$('tS').hidden&&$('tS').classList.contains('perf'))perf(false);
  (window.goPage?goPage(({A:'chop',P:'live',E:'parts',G:'groups'})[go]||'chop'):tab(go));try{renderPads()}catch(e){}if(oneCol())setTimeout(()=>$('screenWrap')&&$('screenWrap').scrollIntoView({behavior:'smooth',block:'start'}),60);setTimeout(()=>{const el=go==='A'?$('pads'):go==='P'?$('pg'):go==='G'?$('glist'):go==='E'?$('eparts'):go==='D'?$('zk'):null;if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},120)}
 function endPick(){PICK=null;$('gPick').hidden=true;try{renderPads()}catch(e){}}
@@ -918,6 +918,44 @@ function hookEngine(){
 hookEngine();
 window.DBC_HW={prog:p=>setProg(p),page:d=>chopPage(d),overdub:hwOverdub,playStart:hwPlayStart,copy:hwCopy,tc:hwTC,info:hwInfo,master:hwMaster,
  set:(k,v)=>{HW[k]=v;if(k==='shift')SHIFT=v;if(k==='full')PS.vel=false;try{renderPads()}catch(e){}},clearMutes:()=>{HW.mutes.clear();try{renderPads()}catch(e){}}};
+
+
+/* ================= OS API: the separate units (Kit Forge, Key Tower, Pattern Deck, Launch) talk to the studio here ================= */
+function osPad(src){if(!src)return null;ensurePS();if(src.k==='slice')return chopPad(src.ci);return PS.banks[src.b]&&PS.banks[src.b][src.j]||null}
+const KITKEY=()=>'bcrps:kits:'+(PS.main||'');
+window.DBC_OS={
+ ready:()=>{try{return!!(slices&&slices.length)}catch(e){return false}},
+ nSlices:()=>{try{return slices.length}catch(e){return 0}},
+ slice:ci=>{try{const s=slices[ci];if(!s)return null;return{ci,kind:s.kind||'',name:'#'+(ci+1)+(s.kind?' '+s.kind.toUpperCase():''),s:s.s,e:s.e,dur:(s.e-s.s)/sr,tonal:s.clar>.6,midi:s.clar>.6?s.midi:null,col:KCOL[s.kind]||'#7d8b98'}}catch(e){return null}},
+ kit:b=>{ensurePS();return PS.banks[b].map(p=>p?{name:p.name,col:p.col,role:p.role,mode:p.mode,midi:p.midi}:null)},
+ bank:()=>PS.bank,setBank:b=>{ensurePS();setBank(b)},
+ hear:src=>{ensurePS();if(!ac)return false;resume();const p=osPad(src);if(p)audition(p);return!!p},
+ put:(ci,b,j)=>{const p=osPad({k:'slice',ci});if(!p)return false;pushUndo();const q=deep(p);delete q.ci;delete q.chop;q.why='Picked by hand in Kit Forge (slice #'+(ci+1)+')';PS.banks[b][j]=q;if(PS.prog==='chop')setProg('kit',true);dirty();renderAll();return true},
+ putPad:(fb,fj,b,j)=>{ensurePS();const p=PS.banks[fb][fj];if(!p)return false;pushUndo();PS.banks[b][j]=deep(p);dirty();renderAll();return true},
+ clear:(b,j)=>{ensurePS();if(!PS.banks[b][j])return;pushUndo();PS.banks[b][j]=null;dirty();renderAll()},
+ clearBank:b=>{ensurePS();pushUndo();PS.banks[b]=emptyBank();dirty();renderAll()},
+ swap:(b1,j1,b2,j2)=>{ensurePS();pushUndo();const t=PS.banks[b1][j1];PS.banks[b1][j1]=PS.banks[b2][j2];PS.banks[b2][j2]=t;dirty();renderAll()},
+ kits:()=>Object.keys(LS.get(KITKEY())||{}),
+ saveKit:(name,b)=>{ensurePS();const all=LS.get(KITKEY())||{};all[name]=deep(PS.banks[b]);return LS.set(KITKEY(),all)},
+ loadKit:(name,b)=>{ensurePS();const k=(LS.get(KITKEY())||{})[name];if(!k)return false;pushUndo();PS.banks[b]=deep(k);setProg('kit',true);setBank(b);dirty();renderAll();return true},
+ delKit:name=>{const all=LS.get(KITKEY())||{};delete all[name];LS.set(KITKEY(),all)},
+ prog:()=>PS.prog,setProg:p=>{ensurePS();setProg(p,true)},
+ pats:()=>{ensurePS();return PS.pats.map((p,i)=>({i,bars:p.bars,hits:p.ev.length,ev:p.ev.map(e=>({t:e.t,b:e.b,p:e.p,ci:e.ci,pg:e.pg}))}))},
+ pat:()=>{ensurePS();return curPat()},queued:()=>TR.next,playing:()=>!!TR.playing,rec:()=>!!TR.rec,
+ pos:()=>{if(!TR.playing||!TR.seg)return 0;const nb=beatNow()-TR.seg.start;return Math.max(0,(nb%TR.seg.len)/TR.seg.len)},
+ selPat:i=>{ensurePS();selPat(clamp(i,0,7));renderPats()},
+ dupPat:()=>{ensurePS();const c=curPat();let t=PS.pats.findIndex((p,i)=>i>c&&!p.ev.length);if(t<0)t=PS.pats.findIndex(p=>!p.ev.length);if(t<0)return-1;pushUndo();PS.pats[t]=deep(cleanPats()[c]);dirty();selPat(t);renderPats();return t},
+ clearPat:()=>{ensurePS();const c=curPat();if(!PS.pats[c].ev.length)return false;pushUndo();PS.pats[c].ev=[];dirty();renderAll();return true},
+ undo:()=>{ensurePS();undo()},
+ root:()=>PS.root,scale:()=>PS.scale,scaleSteps:()=>SCALES[PS.scale]||SCALES.min,
+ midiOf:src=>{const p=osPad(src);return p&&p.midi!==undefined?Math.round(p.midi):null},
+ noteOn:(src,m,vel,hold)=>{ensurePS();if(!ac)return null;resume();const p0=osPad(src);if(!p0)return null;
+  const pm=p0.midi!==undefined?Math.round(p0.midi):48+PS.root,st=clamp(m-pm,-36,36),p=hold?{...p0,mode:'one'}:{...p0,mode:'gate'};
+  const v=voice(ac,busFor(p),p,ac.currentTime,vel,st,0,null);const ev=src.k==='slice'?recEv(0,0,vel,st,src.ci):recEv(src.b,src.j,vel,st);return{v,ev,p,b0:beatNow()}},
+ noteOff:h=>{if(!h)return;if(h.v&&h.p.mode==='gate')vStop(h.v,ac.currentTime,.05);if(h.ev)h.ev.d=+Math.max(.0625,beatNow()-h.b0).toFixed(3)},
+ save:()=>{const b=$('psSv');if(b)b.click()},
+ level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
+let OSAN=null,OSBUF=null;
 
 window.DBC={ensure:()=>{ensurePS();mainFresh()},camelot,keyText,autoSetup,cam:()=>{try{return PL&&PL.sl?camelot(PL.root,PL.scale):''}catch(e){return''}}};
 

@@ -507,6 +507,362 @@ body:has(#gPick:not([hidden])) #pads button,body:has(#gPick:not([hidden])) #psBi
 }
 
 </style>
+<style>
+/* BC-16 STUDIO OS — the rack.
+   Dark anodized faceplates with screws and vents (the past), neon power LEDs and liquid light pipes (the future).
+   Every unit glows in its own colour (--acc / --acc2 set per page). Buttons keep the same shape everywhere. */
+body.os{--acc:#29e3ff;--acc2:#7a5cff;--amber:var(--acc);--teal:var(--acc2);--ac:var(--acc);
+ --face1:#1c1f28;--face2:#11131a;--ink:#05060a;--silk:#b8bfcc;--silk2:#6b7283;
+ background:radial-gradient(1400px 800px at 70% -10%,color-mix(in srgb,var(--acc) 10%,transparent),transparent 60%),radial-gradient(900px 700px at -10% 110%,color-mix(in srgb,var(--acc2) 9%,transparent),transparent 60%),#050508;
+ transition:background-color .4s}
+@keyframes liquid{to{background-position:300% 0}}
+@keyframes liquidv{to{background-position:0 300%}}
+@keyframes breathe{50%{opacity:.55}}
+@keyframes blinkq{50%{opacity:.35}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 70%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+
+/* ---------- the frame ---------- */
+body.os #device{max-width:none;height:100vh;margin:0;border-radius:0;border:0;padding:10px 12px 10px 0;box-sizing:border-box;
+ display:grid;grid-template-columns:86px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"rail top" "rail stage" "rail bar";gap:10px 12px;
+ background:transparent;box-shadow:none}
+body.os #ctlL,body.os #ctlR,body.os #menuBtn,body.os #modesGrp{display:none!important}
+
+/* ---------- rail ---------- */
+#rail{grid-area:rail;position:relative;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:10px 8px 10px 10px;overflow-y:auto;scrollbar-width:none;
+ background:linear-gradient(90deg,#0c0d12,#14161d);border-right:1px solid #000;box-shadow:inset -1px 0 0 rgba(255,255,255,.05),8px 0 30px rgba(0,0,0,.5)}
+#rail::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--acc),var(--acc2),var(--acc));background-size:100% 300%;animation:liquidv 10s linear infinite;box-shadow:0 0 14px var(--acc);opacity:.85}
+#rail .brand{display:flex;flex-direction:column;align-items:center;margin:2px 0 10px;line-height:.9}
+#rail .brand b{font:900 22px 'Archivo';font-stretch:125%;color:#fff;letter-spacing:.02em;text-shadow:0 0 18px color-mix(in srgb,var(--acc) 70%,transparent)}
+#rail .brand span{font:700 10px var(--mono);color:var(--acc);letter-spacing:.3em;margin-top:3px}
+#rail .rb{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px 8px;border-radius:10px;border:1px solid #000;cursor:pointer;color:var(--silk2);
+ background:linear-gradient(180deg,#22252e,#171920);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 #000;font:700 9.5px var(--mono);letter-spacing:.1em;transition:color .15s,box-shadow .15s}
+#rail .rb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#rail .rb:hover{color:#dfe3ea}
+#rail .rb .rled{position:absolute;left:5px;top:7px;width:5px;height:5px;border-radius:50%;background:#2a2d35}
+#rail .rb.on{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 26%,#22252e),#14161d);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 60%,transparent),0 0 18px color-mix(in srgb,var(--acc) 35%,transparent),0 2px 0 #000}
+#rail .rb.on svg{filter:drop-shadow(0 0 6px var(--acc))}
+#rail .rb.on .rled{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+#rail .rsp{flex:1;min-height:8px}
+#rail .rb.sm b{font:900 18px 'Archivo';color:inherit;line-height:1}
+#rail .rb.sm.on{color:#fff}
+
+/* ---------- meter bridge ---------- */
+body.os #hwTop{grid-area:top;gap:12px;padding:8px 12px;border-radius:14px;border:1px solid #000;
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px),linear-gradient(180deg,#22252e,#14161c);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 30px rgba(0,0,0,.45)}
+body.os .logo b{font-size:17px}
+body.os .logo span{color:var(--acc)}
+body.os #oled{max-width:none;padding:6px 14px;background:linear-gradient(180deg,#03060a,#071018);border-color:#000;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 22%,transparent),inset 0 0 30px color-mix(in srgb,var(--acc) 12%,transparent)}
+body.os #projName{text-shadow:0 0 10px color-mix(in srgb,var(--acc) 60%,transparent)}
+body.os #projMeta{color:var(--acc)}
+#osLine{font:500 10.5px var(--mono);color:#8f9bab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+#vu{width:118px;height:46px;border-radius:6px;overflow:hidden;border:2px solid #000;box-shadow:0 0 0 1px #3a3d46,inset 0 0 10px rgba(0,0,0,.5),0 0 16px rgba(255,190,90,.15);position:relative}
+#vu canvas{width:100%;height:100%;display:block}
+#vu::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 45%);pointer-events:none}
+#vu.pk{box-shadow:0 0 0 1px #ff3b3b,0 0 18px #ff3b3b}
+body.os .hwgrp .hwl{color:var(--silk2)}
+
+/* ---------- stage ---------- */
+#stage{grid-area:stage;min-height:0;min-width:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"sub" "main"}
+body.os.deck #stage{grid-template-columns:minmax(0,1fr) clamp(330px,28vw,440px);grid-template-areas:"sub sub" "main deck"}
+#stage>.unit{grid-area:main}
+#stage>#deck{grid-area:deck}
+#stage.focusing>.unit:not(.focus){display:none!important}
+#stage.focusing>.unit.focus{grid-column:1/-1}
+#osKit,#osTower,#osLaunch,#osGuide{display:none}
+body[data-pg=kit] #osKit,body[data-pg=tower] #osTower,body[data-pg=launch] #osLaunch,body[data-pg=guide] #osGuide{display:flex}
+body[data-pg=kit] #screenWrap,body[data-pg=tower] #screenWrap,body[data-pg=launch] #screenWrap,body[data-pg=guide] #screenWrap{display:none}
+body.os:not(.deck) #deck{display:none}
+#subBar{grid-area:sub;display:flex;align-items:center;gap:14px;min-width:0}
+#unitTag{display:flex;align-items:baseline;gap:10px;min-width:0;flex:1}
+#unitTag>i{align-self:center;width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc),0 0 22px var(--acc);animation:breathe 2.4s ease-in-out infinite}
+#unitName{font:900 19px 'Archivo';font-stretch:125%;letter-spacing:.03em;color:#fff;white-space:nowrap}
+#unitModel{font:700 11px var(--mono);color:var(--acc);padding:2px 7px;border:1px solid color-mix(in srgb,var(--acc) 50%,transparent);border-radius:4px;letter-spacing:.12em}
+#unitDesc{font:500 12.5px 'Archivo';font-style:normal;color:#8c95a5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#subTabs{display:flex;gap:6px;flex:none}
+.stab{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;border:1px solid #000;background:linear-gradient(180deg,#22252e,#171920);color:var(--silk);font:700 10.5px var(--mono);letter-spacing:.1em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 2px 0 #000}
+.stab i{width:6px;height:6px;border-radius:50%;background:#2c2f37}
+.stab.on{color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 55%,transparent),0 0 14px color-mix(in srgb,var(--acc) 25%,transparent)}
+.stab.on i{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+
+/* ---------- a unit: one piece of rack gear ---------- */
+body.os .unit,.kfrack,.kflib{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;box-sizing:border-box;padding:8px 14px 14px;border-radius:14px;border:1px solid #000;
+ background:
+  radial-gradient(circle 4px at 11px 11px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  radial-gradient(circle 4px at calc(100% - 11px) 11px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  radial-gradient(circle 4px at 11px calc(100% - 11px),#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  radial-gradient(circle 4px at calc(100% - 11px) calc(100% - 11px),#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  linear-gradient(180deg,color-mix(in srgb,var(--acc) 7%,transparent),transparent 30%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.017) 0 1px,transparent 1px 3px),
+  linear-gradient(180deg,var(--face1),var(--face2));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.6),0 18px 40px rgba(0,0,0,.55)}
+body.os #osKit{padding:0;background:none;border:0;box-shadow:none}
+.plate{display:flex;align-items:center;gap:10px;margin:0 6px 10px;padding:6px 0 8px;position:relative;flex:none}
+.plate::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc),var(--acc2));background-size:300% 100%;animation:liquid 12s linear infinite;box-shadow:0 0 12px color-mix(in srgb,var(--acc) 60%,transparent);opacity:.75}
+.pled{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc),0 0 16px var(--acc);flex:none}
+.pn{font:900 13px 'Archivo';font-stretch:125%;letter-spacing:.12em;color:#e9edf3;white-space:nowrap}
+.pm{font:700 10px var(--mono);letter-spacing:.14em;color:var(--acc);text-shadow:0 0 8px color-mix(in srgb,var(--acc) 60%,transparent);white-space:nowrap}
+.vent{flex:1;height:10px;min-width:20px;border-radius:3px;background:repeating-linear-gradient(90deg,#07080b 0 3px,transparent 3px 7px);opacity:.75;box-shadow:inset 0 1px 0 rgba(0,0,0,.4)}
+.zm{display:flex;gap:3px;flex:none}
+.zb{width:24px;height:22px;border-radius:5px;border:1px solid #000;background:linear-gradient(180deg,#2a2d36,#1b1d24);color:var(--silk);font:700 13px var(--mono);line-height:1;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.zb:hover{color:#fff;box-shadow:inset 0 0 0 1px var(--acc)}
+.pchip{font:700 10.5px var(--mono);letter-spacing:.1em;padding:3px 9px;border-radius:5px;border:1px solid var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent);cursor:pointer;white-space:nowrap}
+.pchip.ro{cursor:default}
+.unit.zoomed>:not(.plate){zoom:var(--uz)}
+
+/* the screen unit */
+body.os #screenWrap{padding-bottom:12px}
+body.os #bezel{flex:1;min-height:0;display:flex;border-radius:12px;background:#030407;box-shadow:inset 0 0 0 1px #000,inset 0 2px 0 rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.06)}
+body.os #screen{flex:1;min-height:0;border-radius:10px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 22%,transparent),inset 0 0 40px color-mix(in srgb,var(--acc) 8%,transparent);
+ background:radial-gradient(900px 400px at 50% -20%,color-mix(in srgb,var(--acc) 9%,transparent),transparent 70%),#070a10}
+body.os #scrMode{color:var(--ink);background:var(--acc);box-shadow:0 0 12px color-mix(in srgb,var(--acc) 60%,transparent)}
+
+/* the pad matrix unit */
+body.os #deck{gap:10px;overflow-y:auto;scrollbar-width:thin;padding-bottom:12px}
+body.os #deck>.hwgrp{flex:none}
+body.os #deck #padsSlot{flex:1 1 auto;min-height:250px;aspect-ratio:1/1;max-height:min(100%,520px);width:100%;align-self:center}
+body.os #deck #knobs{justify-content:space-between}
+body.os #deck .knob .kcap{width:46px;height:46px}
+body.os #dataGrp{flex-direction:row;align-items:center;gap:10px}
+body.os #dataGrp .hwl{margin:0}
+body.os #dataBox #jog{width:58px;height:58px}
+body.os #padsSlot .pp.on,body.os #padsSlot .pp.hold{box-shadow:0 0 0 1px #000,0 0 26px var(--pc,var(--acc)),0 0 70px color-mix(in srgb,var(--pc,var(--acc)) 50%,transparent)}
+body.os #padsSlot .pp{background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--pc,#888) 22%,transparent),transparent 60%),linear-gradient(180deg,#30333b,#25272e)}
+
+/* ---------- transport bar ---------- */
+#tbar{grid-area:bar;display:flex;align-items:stretch;gap:14px;padding:8px 14px;border-radius:14px;border:1px solid #000;overflow-x:auto;scrollbar-width:thin;
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px),linear-gradient(180deg,#20232b,#13151b);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 -6px 30px rgba(0,0,0,.4);position:relative}
+#tbar::before{content:'';position:absolute;left:14px;right:14px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc),var(--acc2),transparent);opacity:.6}
+#tbar>.hwgrp{flex:none}
+#tbar #transport{display:flex;gap:6px}
+#tbar #transport .hwb{min-width:66px}
+#patDeck{display:flex;align-items:center;gap:6px}
+#patLcd{position:relative;min-width:150px;height:40px;padding:4px 10px;box-sizing:border-box;border-radius:6px;background:#04070b;border:1px solid #000;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent),inset 0 0 18px color-mix(in srgb,var(--acc) 12%,transparent);display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+#patNum{font:700 15px var(--mono);color:#fff;letter-spacing:.06em;text-shadow:0 0 10px var(--acc);line-height:1.1}
+#patInfo{font:500 9.5px var(--mono);color:var(--acc);letter-spacing:.06em;white-space:nowrap}
+#patProg{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.05)}
+#patProg u{display:block;height:100%;width:0;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+#patLcd.q #patNum{animation:blinkq .5s steps(2) infinite}
+#patLcd.rec{box-shadow:inset 0 0 0 1px #ff3b3b,inset 0 0 18px rgba(255,59,59,.25)}
+#patDeck #seqSlot #psPats{gap:4px}
+#patDeck #seqSlot .bkb{min-width:32px;padding:4px 0}
+#editGrp>div{display:flex;gap:6px}
+body.os .hwb.on .led{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+body.os .hwb.sq{min-width:38px}
+body.os .hwb:disabled{opacity:.4;cursor:default}
+
+/* ---------- KIT FORGE ---------- */
+.kfwrap{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,1.55fr);gap:12px}
+.kfrack,.kflib{--face1:#211c1a;--face2:#141113}
+.kfbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:thin;padding:2px 4px}
+.kfbanks{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.bkx{padding:5px 0;border-radius:7px;border:1px solid #000;background:linear-gradient(180deg,#2a2d35,#1c1e24);color:var(--silk);font:800 13px 'Archivo';cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.1;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 #000}
+.bkx small{font:600 8.5px var(--mono);color:var(--silk2)}
+.bkx.has{color:#fff}.bkx.has small{color:var(--acc)}
+.bkx.on{box-shadow:inset 0 0 0 1px var(--acc),0 0 14px color-mix(in srgb,var(--acc) 40%,transparent),0 2px 0 #000;color:#fff}
+.kfslots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ks{position:relative;aspect-ratio:1;border-radius:10px;border:1px solid #000;cursor:pointer;color:#fff;text-align:left;padding:7px;display:flex;flex-direction:column;justify-content:space-between;
+ background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--pc) 45%,transparent),transparent 65%),linear-gradient(180deg,#33363e,#26282f);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--pc) 40%,transparent),0 2px 0 #000;user-select:none;-webkit-user-select:none;touch-action:none}
+.ks.emp{background:repeating-linear-gradient(135deg,rgba(255,255,255,.03) 0 6px,transparent 6px 12px),#1a1c21;box-shadow:inset 0 0 0 1px #33363f,0 2px 0 #000;color:#6d7380}
+.ks .kn{font:700 9.5px var(--mono);color:#aab1bd}.ks .knm{font:700 11px 'Archivo';line-height:1.15;word-break:break-word}
+.ks.arm{box-shadow:inset 0 0 0 2px var(--acc),0 0 22px color-mix(in srgb,var(--acc) 55%,transparent),0 2px 0 #000;animation:pulse 1.2s ease-out infinite}
+.ks.over{outline:3px solid #fff;outline-offset:2px}
+.ks.land{background:var(--acc);color:#000;transition:background .5s}
+.ks.press,.kc.press{transform:translateY(1px);filter:brightness(1.2)}
+.kfact{display:flex;flex-wrap:wrap;gap:6px}
+.kfsave{border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
+.kfsrow{display:flex;gap:6px;margin:6px 0}
+.kfsrow input{flex:1;min-width:0;background:#06080c;border:1px solid #000;border-radius:6px;color:#fff;padding:8px 10px;font:500 13px 'Archivo';box-shadow:inset 0 0 0 1px #2b2f39}
+#kfList{display:flex;flex-wrap:wrap;gap:6px}#kfList em{font:500 12px 'Archivo';color:#7d8697}
+.kchip{display:inline-flex;border-radius:7px;overflow:hidden;border:1px solid #000;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.kchip button{background:#1b1d23;color:#e8ecf2;border:0;padding:6px 10px;font:600 12px 'Archivo';cursor:pointer}.kchip .kdel{color:#ff7a86;padding:6px 8px;border-left:1px solid #000}
+.kchip .kload:hover{background:color-mix(in srgb,var(--acc) 25%,#1b1d23)}
+.kfnav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.kflcd{flex:1;min-width:150px;height:40px;padding:4px 12px;box-sizing:border-box;border-radius:6px;background:#04070b;border:1px solid #000;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent),inset 0 0 18px color-mix(in srgb,var(--acc) 12%,transparent);display:flex;flex-direction:column;justify-content:center}
+.kflcd b{font:700 14px var(--mono);color:#fff;text-shadow:0 0 10px var(--acc)}.kflcd span{font:500 9.5px var(--mono);color:var(--acc)}
+#kfPer{background:#0b0d12;color:#fff;border:1px solid #000;border-radius:6px;padding:8px;font:600 11px var(--mono)}
+.kffilt{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 11px;border-radius:999px;border:1px solid #000;background:#1b1d23;color:var(--silk);font:700 10.5px var(--mono);letter-spacing:.08em;cursor:pointer;box-shadow:inset 0 0 0 1px #30343e}
+.chip.on{color:#000;background:var(--acc);box-shadow:0 0 12px color-mix(in srgb,var(--acc) 50%,transparent)}
+.kfcuts{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:7px;align-content:start}
+.kfcuts[data-per="64"]{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+.kc{position:relative;border-radius:8px;border:1px solid #000;background:linear-gradient(180deg,#22252c,#17191f);color:#e9edf2;cursor:grab;padding:5px 6px 6px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;gap:1px 6px;text-align:left;
+ box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 35%,transparent),0 2px 0 #000;user-select:none;-webkit-user-select:none;touch-action:none}
+.kc canvas{grid-column:1/-1;width:100%;height:30px;border-radius:4px;background:#07090d}
+.kc b{font:700 11px var(--mono)}.kc span{font:600 9px var(--mono);color:var(--pc);align-self:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kc em{grid-column:1/-1;font:500 9px var(--mono);font-style:normal;color:#7f8898}
+.kc.aud{box-shadow:inset 0 0 0 2px var(--acc),0 0 14px color-mix(in srgb,var(--acc) 40%,transparent)}
+.kc.held{background:var(--acc);color:#000}.kc.held span,.kc.held em{color:#000}
+.kfhint{margin:0;font:500 12px 'Archivo';color:#8d96a6}
+.dragghost{position:fixed;left:0;top:0;z-index:9500;width:96px;pointer-events:none;padding:5px;border-radius:8px;background:color-mix(in srgb,var(--acc) 85%,#000);color:#000;font:700 11px var(--mono);box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 24px var(--acc);display:flex;flex-direction:column}
+.dragghost canvas{width:100%;height:24px}
+.empty{color:#7e8797;font:500 13px 'Archivo';padding:16px}
+
+/* ---------- KEY TOWER ---------- */
+#osTower{--face1:#1d1828;--face2:#110e19}
+.twtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;flex:none}
+.twmidi,.twrec{font:500 11.5px var(--mono);color:#8a93a3}.twrec b{color:var(--acc)}
+.twrec{margin-left:auto}
+.tiers{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.tier{flex:1;min-height:110px;display:grid;grid-template-columns:152px minmax(0,1fr) 132px;gap:10px;padding:8px;border-radius:12px;background:linear-gradient(180deg,#15121f,#0c0a13);box-shadow:inset 0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.05)}
+.tier.muted .twkb{filter:grayscale(.8) brightness(.55)}
+.twl,.twr{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:0}
+.tn{font:900 11px 'Archivo';font-stretch:125%;letter-spacing:.14em;color:var(--acc)}
+.tlcd{font:600 10.5px var(--mono);color:#fff;background:#04060a;border-radius:5px;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent);text-shadow:0 0 8px color-mix(in srgb,var(--acc) 60%,transparent)}
+.trow{display:flex;align-items:center;gap:6px}.trow .hwb{min-width:34px;padding:6px 0}
+.tlab{flex:1;text-align:center;font:700 10.5px var(--mono);color:var(--silk)}
+.twr .hwb{padding:5px 8px;font-size:9.5px}
+.tvol{display:flex;flex-direction:column;font:700 9.5px var(--mono);color:var(--silk2);gap:2px}
+.tvol input{width:100%;accent-color:var(--acc)}
+.twkb{--bw:calc(100% / var(--wn) * .62);position:relative;display:flex;min-width:0;border-radius:6px;overflow:hidden;background:#000;padding:0 0 2px;box-shadow:inset 0 3px 0 color-mix(in srgb,var(--acc) 60%,#000),0 0 18px color-mix(in srgb,var(--acc) 15%,transparent);touch-action:none;user-select:none;-webkit-user-select:none}
+.twkb .tww{flex:1;position:relative;margin:0 1px 0 0;border:0;border-radius:0 0 5px 5px;cursor:pointer;background:linear-gradient(180deg,#d9d5cb,#f4f1ea 30%,#fffdf7);box-shadow:inset 0 -6px 0 #cfc9bb,inset 0 0 0 1px rgba(0,0,0,.25);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 8px;color:#5a5646}
+.twkb .tww.ins{background:linear-gradient(180deg,#d9d5cb,#f4f1ea 30%,color-mix(in srgb,var(--acc) 14%,#fffdf7))}
+.twkb .tww span{font:700 9.5px var(--mono);color:#6b6656}
+.twkb .twb{position:absolute;top:0;width:var(--bw);height:60%;z-index:2;border:0;border-radius:0 0 4px 4px;cursor:pointer;background:linear-gradient(180deg,#0d0d10,#26262c 85%,#3a3a42);box-shadow:inset 0 -4px 0 #000,0 3px 4px rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
+.twkb .twb.ins{box-shadow:inset 0 -4px 0 #000,inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent),0 3px 4px rgba(0,0,0,.5)}
+.twkb kbd{font:700 9px var(--mono);color:#8b8576;background:none;border:0;padding:0;box-shadow:none}.twkb .twb kbd{color:#9aa0ad}
+.twkb .off{opacity:.38}
+.twkb .tww.on{background:linear-gradient(180deg,var(--acc),color-mix(in srgb,var(--acc) 60%,#fff));box-shadow:inset 0 -2px 0 rgba(0,0,0,.3),0 0 24px var(--acc)}
+.twkb .twb.on{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 60%,#000),var(--acc));box-shadow:0 0 22px var(--acc)}
+
+/* ---------- LAUNCH CONSOLE ---------- */
+#osLaunch{--face1:#25171b;--face2:#140c10}
+.lcbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.clips{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px}
+.clip{position:relative;border-radius:12px;border:1px solid #000;padding:10px 12px 14px;text-align:left;cursor:pointer;color:#9aa3b2;display:flex;flex-direction:column;gap:4px;min-height:96px;
+ background:linear-gradient(180deg,#24262e,#16181e);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 3px 0 #000}
+.clip b{font:900 22px 'Archivo';font-stretch:125%;color:#d6dbe3}.clip span{font:600 10px var(--mono)}
+.clip canvas{flex:1;width:100%;min-height:30px;border-radius:6px;background:#07080c}
+.clip kbd{position:absolute;right:10px;top:10px;font:700 9px var(--mono);color:#69707e;background:none;border:1px solid #333743;border-radius:4px;padding:1px 4px}
+.clip .cbar{position:absolute;left:12px;right:12px;bottom:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.05)}.clip .cbar u{display:block;height:100%;width:0;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.clip.has{color:#d9dee6;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent),0 3px 0 #000}
+.clip.cur{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--acc) 70%,transparent),0 3px 0 #000}
+.clip.play{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 35%,#24262e),#16181e);box-shadow:inset 0 0 0 2px var(--acc),0 0 28px color-mix(in srgb,var(--acc) 45%,transparent),0 3px 0 #000}.clip.play b{color:#fff;text-shadow:0 0 12px var(--acc)}
+.clip.q{animation:blinkq .45s steps(2) infinite;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #000}
+.lcrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:none}
+.lchint{font:500 11.5px 'Archivo';color:#8a93a3;flex:1;min-width:220px}
+.lchint kbd{font:600 10px var(--mono)}
+
+/* ---------- STUDIO MANUAL ---------- */
+#osGuide{--face1:#152020;--face2:#0c1313}
+.gbody{flex:1;min-height:0;display:grid;grid-template-columns:1.2fr 1fr;gap:16px;overflow:hidden}
+.gcol{min-height:0;overflow-y:auto;scrollbar-width:thin;padding:2px 6px 10px 2px}
+.gcol h2{font:900 24px 'Archivo';font-stretch:125%;margin:0 0 6px;color:#fff}
+.gcol h3{font:800 12px var(--mono);letter-spacing:.12em;color:var(--acc);margin:18px 0 8px}
+.gstart p{color:#aeb6c4;font:500 14px/1.55 'Archivo';max-width:62ch}
+.gbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hwb.big{padding:12px 16px!important;font-size:11.5px!important}
+.gmap{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.gnode{display:flex;flex-direction:column;align-items:flex-start;padding:8px 10px;border-radius:9px;border:1px solid #000;background:linear-gradient(180deg,#1f222a,#15171d);cursor:pointer;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent),0 0 12px color-mix(in srgb,var(--c) 18%,transparent);text-align:left}
+.gnode b{font:800 10.5px 'Archivo';font-stretch:115%;letter-spacing:.06em;color:#fff}.gnode span{font:500 10px var(--mono);color:var(--c)}
+.garr{color:#56606f;font-style:normal}
+.glessons{list-style:none;padding:0;margin:0;display:grid;gap:7px;counter-reset:l}
+.glessons li{counter-increment:l}
+.glesson{width:100%;display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto auto;gap:0 10px;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid #000;background:linear-gradient(180deg,#1d2026,#14161b);cursor:pointer;color:#dfe4ea;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.glesson::before{content:counter(l);grid-row:1/4;align-self:center;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 13px var(--mono);color:#000;background:var(--acc);box-shadow:0 0 12px color-mix(in srgb,var(--acc) 50%,transparent)}
+.glesson b{font:800 14px 'Archivo'}.glesson span{font:500 12.5px 'Archivo';color:#98a1b0}.glesson em{font:500 10px var(--mono);color:var(--acc);font-style:normal;margin-top:2px}
+.glesson:hover{box-shadow:inset 0 0 0 1px var(--acc)}
+#gFind{width:100%;box-sizing:border-box;background:#06080c;border:1px solid #000;border-radius:8px;color:#fff;padding:10px 12px;font:500 14px 'Archivo';box-shadow:inset 0 0 0 1px #2b2f39;margin-bottom:8px}
+#gBook h4{font:800 11px var(--mono);letter-spacing:.12em;color:var(--silk2);margin:14px 0 6px}
+.bk1{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.bk1 b{font:800 12.5px 'Archivo';color:#fff}.bk1 p{grid-column:1;margin:0;font:500 12.5px/1.45 'Archivo';color:#a1aab8}
+.bk1 .show{grid-column:2;grid-row:1/3;align-self:center;font:700 9.5px var(--mono);letter-spacing:.08em;padding:6px 8px;border-radius:6px;border:1px solid #000;background:#1d2027;color:var(--acc);cursor:pointer;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+
+/* ---------- coach, ghost hand, explain, welcome, toast ---------- */
+#coach{position:fixed;inset:0;z-index:9000;pointer-events:none}
+#spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(2,3,7,.7),0 0 0 2px var(--acc),0 0 34px var(--acc);transition:left .35s,top .35s,width .35s,height .35s;pointer-events:none}
+#ccard{position:fixed;pointer-events:auto;box-sizing:border-box;padding:14px 16px 12px;border-radius:14px;border:1px solid #000;background:linear-gradient(180deg,#1d2029,#12141a);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent),0 20px 50px rgba(0,0,0,.7),0 0 30px color-mix(in srgb,var(--acc) 25%,transparent);transition:left .3s,top .3s}
+.cbar{height:3px;border-radius:2px;background:rgba(255,255,255,.08);margin-bottom:10px;overflow:hidden}#cprog{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .3s}
+#cstep{font:600 10px var(--mono);letter-spacing:.1em;color:var(--acc)}
+#ctitle{margin:4px 0 6px;font:900 17px 'Archivo';font-stretch:115%;color:#fff}
+#ctext{margin:0 0 12px;font:500 13.5px/1.55 'Archivo';color:#c3cad6}
+.cbtn{display:flex;gap:6px;justify-content:flex-end}
+.cbtn button{padding:8px 12px;border-radius:8px;border:1px solid #000;background:#22252d;color:#e4e8ee;font:700 11px var(--mono);cursor:pointer}
+.cbtn button.p{background:var(--acc);color:#000;box-shadow:0 0 14px color-mix(in srgb,var(--acc) 50%,transparent)}
+.cbtn button:disabled{opacity:.35}
+#cexit{margin-right:auto}
+#ghost{position:fixed;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid #fff;background:color-mix(in srgb,var(--acc) 40%,transparent);box-shadow:0 0 18px var(--acc);opacity:0;transition:transform .6s cubic-bezier(.3,.7,.2,1),opacity .3s;pointer-events:none;z-index:9001}
+#ghost.on{opacity:1}#ghost i{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--acc);opacity:0}
+#ghost.tap i{animation:tapr .45s ease-out}
+@keyframes tapr{from{opacity:1;transform:scale(.6)}to{opacity:0;transform:scale(2.6)}}
+body.explain [data-help],body.explain .knob,body.explain #scrFoot .sk{cursor:help;outline:1px dashed color-mix(in srgb,var(--acc) 55%,transparent);outline-offset:1px}
+body.explain #osExplain{animation:breathe 1.2s ease-in-out infinite}
+#xbub{position:fixed;z-index:9200;box-sizing:border-box;padding:12px 14px;border-radius:12px;background:#12151b;border:1px solid #000;box-shadow:inset 0 0 0 1px var(--acc),0 14px 40px rgba(0,0,0,.7),0 0 24px color-mix(in srgb,var(--acc) 30%,transparent)}
+#xbub b{font:900 14px 'Archivo';color:#fff;display:block}#xbub p{margin:5px 0 8px;font:500 13px/1.5 'Archivo';color:#c6cdd8}#xbub small{font:500 10px var(--mono);color:#7a8494}
+#welcome{position:fixed;inset:0;z-index:9300;display:grid;place-items:center;background:rgba(2,3,6,.78);backdrop-filter:blur(6px)}
+.wcard{width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;border-radius:16px;border:1px solid #000;padding:10px 16px 18px;background:linear-gradient(180deg,#1d2029,#11131a);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent),0 30px 80px rgba(0,0,0,.8),0 0 60px color-mix(in srgb,var(--acc) 20%,transparent)}
+.wbody h2{font:900 28px 'Archivo';font-stretch:125%;margin:6px 0;color:#fff;text-shadow:0 0 24px color-mix(in srgb,var(--acc) 50%,transparent)}
+.wbody p{color:#b4bcc9;font:500 14.5px/1.55 'Archivo'}.wbody small{display:block;margin-top:12px;color:#7d8696;font:500 11px var(--mono)}
+.wbody .gnode{cursor:default}
+body.os #gToast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:8000;max-width:min(680px,calc(100vw - 24px))}
+
+/* ---------- smaller screens ---------- */
+@media (max-height:820px) and (min-width:901px){body.os #deck .knob .kcap{width:38px;height:38px}body.os #deck #padsSlot{min-height:210px}#vu{width:96px;height:38px}}
+@media (max-width:1180px) and (min-width:901px){#unitDesc{display:none}.kfwrap{grid-template-columns:1fr 1.2fr}.tier{grid-template-columns:128px minmax(0,1fr) 110px}}
+@media (max-width:900px){
+ body.os #device{height:auto;min-height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto;grid-template-areas:"top" "rail" "stage" "bar";padding:8px 8px 0;gap:8px}
+ #rail{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px;border-radius:12px;border:1px solid #000;position:sticky;top:0;z-index:50}
+ #rail::after{left:0;right:0;top:auto;bottom:0;width:auto;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc));background-size:300% 100%;animation:liquid 10s linear infinite}
+ #rail .brand,#rail .rsp{display:none}
+ #rail .rb{flex:none;min-width:62px}
+ body.os #hwTop{flex-wrap:wrap;gap:8px}
+ body.os #hwTop .logo{display:none}
+ body.os #oled{flex:1 1 100%;order:-1}
+ #vu{width:84px;height:34px}
+ #stage,body.os.deck #stage{grid-template-columns:minmax(0,1fr);grid-template-areas:"sub" "main" "deck"}
+ #stage>.unit{min-height:70vh}
+ body.os #deck #padsSlot{max-height:none}
+ #unitDesc,#subBar #unitModel{display:none}
+ #subBar{flex-wrap:wrap}#subTabs{overflow-x:auto;max-width:100%}
+ #tbar{position:sticky;bottom:0;z-index:60;border-radius:12px 12px 0 0;margin:0 -8px;gap:10px}
+ .kfwrap{grid-template-columns:1fr}
+ .tier{grid-template-columns:1fr;grid-template-rows:auto 150px auto}
+ .twl{flex-direction:row;flex-wrap:wrap;align-items:center}.twl .tlcd{flex:1}
+ .twr{flex-direction:row;flex-wrap:wrap}
+ .clips{grid-template-columns:repeat(2,1fr);grid-template-rows:none}
+ .gbody{grid-template-columns:1fr;overflow:visible}.gcol{overflow:visible}
+ body.os #gToast{bottom:120px}
+}
+@media (prefers-reduced-motion:reduce){#rail::after,.plate::after{animation:none}#spot,#ccard,#ghost{transition:none}}
+/* fixes over the old body layout */
+body.os #hwTop .logo{display:none}
+body.os #device #tbar #transport{display:grid;grid-template-columns:repeat(6,auto);gap:6px}
+body.os #device #tbar #transport .hwb{width:auto;min-width:64px;height:44px}
+body.os #tbar .hwb{height:44px}
+body.os #gToast{top:auto!important;bottom:96px!important;position:fixed!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(92vw,620px)!important;z-index:8000}
+body.os #dataGrp{padding:6px 4px 0}
+@media (max-width:900px){body.os #device #tbar #transport{grid-template-columns:repeat(6,auto)}}
+/* the tower: room for three tiers */
+#twTiers{overflow:hidden}
+.tier{min-height:0}
+.twl,.twr{overflow:hidden}
+.twr{gap:4px}.twr .hwb{height:auto!important;min-height:0;padding:5px 8px!important}
+.twkb .tww,.twkb .twb{opacity:1;min-width:0}
+#kfSlots .ks.arm{outline:2px solid var(--acc);outline-offset:2px}
+.kfsave .hwl{position:static;display:block;margin-bottom:2px}
+.kfsrow .hwb{flex:none;min-width:96px}
+#kfPer{width:auto}
+body.os #tbar{gap:10px}
+body.os #device #tbar #transport .hwb{min-width:56px;padding:0 8px 5px;font-size:9.5px}
+#tbar #patDeck .hwb{font-size:9.5px}
+body.os .hwl{background:#191b22;border-radius:3px}
+body.os #tbar .hwl,body.os #hwTop .hwl{background:#1a1c23}
+.twr{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;align-content:center;gap:5px}
+.twr .tvol{grid-column:1/-1}
+.twr .hwb{font-size:9px!important;padding:6px 4px!important;justify-content:center}
+.twkb kbd{min-width:0!important;height:auto!important;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;line-height:1.2;font:700 10px var(--mono)!important;color:#5d5848}
+.twkb .twb kbd{color:#a3a9b6}
+#patLcd{min-width:128px}
+#patDeck #seqSlot .bkb{min-width:30px}
+body.os #tbar{padding:8px 10px;gap:8px}
+body.os #device #tbar #transport{gap:5px}
+body.os #deck #psBanks{grid-template-columns:repeat(8,minmax(0,1fr))}
+body.os #deck .bkb{padding:5px 0}
+@media (min-width:901px){body.os #deck #knobGrp{padding-top:10px}}
+#stage.focusing>.unit.focus{grid-area:2/1/3/-1!important}
+#stage.focusing>#deck.focus #padsSlot{max-height:none;width:auto;height:min(100%,640px)}
+
+</style>
 </head><body>
 <div id="device">
  <header id="hwTop">
@@ -2043,7 +2399,7 @@ function targetAt(el){let t;if(!el||!el.closest)return null;
  return null}
 const tName=T=>T.kind==='pad'?'pad '+BL[T.b]+String(T.j+1).padStart(2,'0'):T.kind==='piano'?'the Piano':'the '+(LAYERS.find(l=>l.id===T.id)||{}).name+' layer';
 const oneCol=()=>innerWidth<1100;
-function startPick(T){PICK=T;PICK.cand=null;if($('gPickGo'))$('gPickGo').hidden=true;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choosing a sound for '+tName(T)+'. Tap sounds to hear them, then press the yellow button — or hold one for ½ second to load it straight away.';
+function startPick(T){if(T.kind==='pad'&&window.OS&&OS.pick){OS.pick(T.b,T.j);return}PICK=T;PICK.cand=null;if($('gPickGo'))$('gPickGo').hidden=true;let go=lastSrcTab||'A';if(T.kind==='layer'&&go==='P')go='A';$('gPick').hidden=false;$('gPickT').textContent='🎯 Choosing a sound for '+tName(T)+'. Tap sounds to hear them, then press the yellow button — or hold one for ½ second to load it straight away.';
  if(T.kind==='pad'&&PS.init&&!$('tS').hidden&&$('tS').classList.contains('perf'))perf(false);
  (window.goPage?goPage(({A:'chop',P:'live',E:'parts',G:'groups'})[go]||'chop'):tab(go));try{renderPads()}catch(e){}if(oneCol())setTimeout(()=>$('screenWrap')&&$('screenWrap').scrollIntoView({behavior:'smooth',block:'start'}),60);setTimeout(()=>{const el=go==='A'?$('pads'):go==='P'?$('pg'):go==='G'?$('glist'):go==='E'?$('eparts'):go==='D'?$('zk'):null;if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},120)}
 function endPick(){PICK=null;$('gPick').hidden=true;try{renderPads()}catch(e){}}
@@ -2336,6 +2692,44 @@ hookEngine();
 window.DBC_HW={prog:p=>setProg(p),page:d=>chopPage(d),overdub:hwOverdub,playStart:hwPlayStart,copy:hwCopy,tc:hwTC,info:hwInfo,master:hwMaster,
  set:(k,v)=>{HW[k]=v;if(k==='shift')SHIFT=v;if(k==='full')PS.vel=false;try{renderPads()}catch(e){}},clearMutes:()=>{HW.mutes.clear();try{renderPads()}catch(e){}}};
 
+
+/* ================= OS API: the separate units (Kit Forge, Key Tower, Pattern Deck, Launch) talk to the studio here ================= */
+function osPad(src){if(!src)return null;ensurePS();if(src.k==='slice')return chopPad(src.ci);return PS.banks[src.b]&&PS.banks[src.b][src.j]||null}
+const KITKEY=()=>'bcrps:kits:'+(PS.main||'');
+window.DBC_OS={
+ ready:()=>{try{return!!(slices&&slices.length)}catch(e){return false}},
+ nSlices:()=>{try{return slices.length}catch(e){return 0}},
+ slice:ci=>{try{const s=slices[ci];if(!s)return null;return{ci,kind:s.kind||'',name:'#'+(ci+1)+(s.kind?' '+s.kind.toUpperCase():''),s:s.s,e:s.e,dur:(s.e-s.s)/sr,tonal:s.clar>.6,midi:s.clar>.6?s.midi:null,col:KCOL[s.kind]||'#7d8b98'}}catch(e){return null}},
+ kit:b=>{ensurePS();return PS.banks[b].map(p=>p?{name:p.name,col:p.col,role:p.role,mode:p.mode,midi:p.midi}:null)},
+ bank:()=>PS.bank,setBank:b=>{ensurePS();setBank(b)},
+ hear:src=>{ensurePS();if(!ac)return false;resume();const p=osPad(src);if(p)audition(p);return!!p},
+ put:(ci,b,j)=>{const p=osPad({k:'slice',ci});if(!p)return false;pushUndo();const q=deep(p);delete q.ci;delete q.chop;q.why='Picked by hand in Kit Forge (slice #'+(ci+1)+')';PS.banks[b][j]=q;if(PS.prog==='chop')setProg('kit',true);dirty();renderAll();return true},
+ putPad:(fb,fj,b,j)=>{ensurePS();const p=PS.banks[fb][fj];if(!p)return false;pushUndo();PS.banks[b][j]=deep(p);dirty();renderAll();return true},
+ clear:(b,j)=>{ensurePS();if(!PS.banks[b][j])return;pushUndo();PS.banks[b][j]=null;dirty();renderAll()},
+ clearBank:b=>{ensurePS();pushUndo();PS.banks[b]=emptyBank();dirty();renderAll()},
+ swap:(b1,j1,b2,j2)=>{ensurePS();pushUndo();const t=PS.banks[b1][j1];PS.banks[b1][j1]=PS.banks[b2][j2];PS.banks[b2][j2]=t;dirty();renderAll()},
+ kits:()=>Object.keys(LS.get(KITKEY())||{}),
+ saveKit:(name,b)=>{ensurePS();const all=LS.get(KITKEY())||{};all[name]=deep(PS.banks[b]);return LS.set(KITKEY(),all)},
+ loadKit:(name,b)=>{ensurePS();const k=(LS.get(KITKEY())||{})[name];if(!k)return false;pushUndo();PS.banks[b]=deep(k);setProg('kit',true);setBank(b);dirty();renderAll();return true},
+ delKit:name=>{const all=LS.get(KITKEY())||{};delete all[name];LS.set(KITKEY(),all)},
+ prog:()=>PS.prog,setProg:p=>{ensurePS();setProg(p,true)},
+ pats:()=>{ensurePS();return PS.pats.map((p,i)=>({i,bars:p.bars,hits:p.ev.length,ev:p.ev.map(e=>({t:e.t,b:e.b,p:e.p,ci:e.ci,pg:e.pg}))}))},
+ pat:()=>{ensurePS();return curPat()},queued:()=>TR.next,playing:()=>!!TR.playing,rec:()=>!!TR.rec,
+ pos:()=>{if(!TR.playing||!TR.seg)return 0;const nb=beatNow()-TR.seg.start;return Math.max(0,(nb%TR.seg.len)/TR.seg.len)},
+ selPat:i=>{ensurePS();selPat(clamp(i,0,7));renderPats()},
+ dupPat:()=>{ensurePS();const c=curPat();let t=PS.pats.findIndex((p,i)=>i>c&&!p.ev.length);if(t<0)t=PS.pats.findIndex(p=>!p.ev.length);if(t<0)return-1;pushUndo();PS.pats[t]=deep(cleanPats()[c]);dirty();selPat(t);renderPats();return t},
+ clearPat:()=>{ensurePS();const c=curPat();if(!PS.pats[c].ev.length)return false;pushUndo();PS.pats[c].ev=[];dirty();renderAll();return true},
+ undo:()=>{ensurePS();undo()},
+ root:()=>PS.root,scale:()=>PS.scale,scaleSteps:()=>SCALES[PS.scale]||SCALES.min,
+ midiOf:src=>{const p=osPad(src);return p&&p.midi!==undefined?Math.round(p.midi):null},
+ noteOn:(src,m,vel,hold)=>{ensurePS();if(!ac)return null;resume();const p0=osPad(src);if(!p0)return null;
+  const pm=p0.midi!==undefined?Math.round(p0.midi):48+PS.root,st=clamp(m-pm,-36,36),p=hold?{...p0,mode:'one'}:{...p0,mode:'gate'};
+  const v=voice(ac,busFor(p),p,ac.currentTime,vel,st,0,null);const ev=src.k==='slice'?recEv(0,0,vel,st,src.ci):recEv(src.b,src.j,vel,st);return{v,ev,p,b0:beatNow()}},
+ noteOff:h=>{if(!h)return;if(h.v&&h.p.mode==='gate')vStop(h.v,ac.currentTime,.05);if(h.ev)h.ev.d=+Math.max(.0625,beatNow()-h.b0).toFixed(3)},
+ save:()=>{const b=$('psSv');if(b)b.click()},
+ level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
+let OSAN=null,OSBUF=null;
+
 window.DBC={ensure:()=>{ensurePS();mainFresh()},camelot,keyText,autoSetup,cam:()=>{try{return PL&&PL.sl?camelot(PL.root,PL.scale):''}catch(e){return''}}};
 
 /* ---------- init + tab hook ---------- */
@@ -2376,13 +2770,14 @@ const PAGES={
  keys:{t:'D',title:'KEYS',d:'Any sound on a piano, locked to the song’s key.'},
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
- song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'}};
+ song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
+ kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
 const loaded=()=>!$('app').hidden;
 /* pads, keys and transport keys work everywhere except where the computer keyboard plays something else */
-window.psKeysOK=()=>loaded()&&cur!=='keys'&&cur!=='live';
+window.psKeysOK=()=>loaded()&&cur!=='keys'&&cur!=='live'&&cur!=='tower'&&cur!=='guide'&&!document.body.classList.contains('coach');
 
 /* ---- studio sub-pages made from the existing cards ---- */
 function buildSubs(){const S=$('tS');const mk=n=>{const d=document.createElement('div');d.className='sub';d.dataset.sub=n;d.hidden=true;return d};
@@ -2398,16 +2793,16 @@ function ensureHead(pane,p){let h=pane.querySelector(':scope > .phead');if(!h){h
 
 /* ---- modes ---- */
 function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
- if(p!=='start'&&!loaded()){p='start';note('Load a song first. Every mode opens up after that.')}
+ if(p!=='start'&&p!=='guide'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
+ const prev=cur;
  routing=true;try{
-  $('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start');
-  const P=PAGES[p];
+  const P=PAGES[p];$('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start'||!!P.os);
   if(P.t==='S'){if($('tS').hidden)engineTab('S');showSub(P.sub);$('psHead').innerHTML=headFor(p)}
   else if(P.t){engineTab(P.t);const pane=$('t'+P.t);if(pane)ensureHead(pane,p)}
  }finally{routing=false}
  cur=p;softKeys(p);$$('a[data-page],button[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
- if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0}
-window.goPage=goPage;
+ if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0;if(window.OS)OS.page(p,prev)}
+window.goPage=goPage;window.curPage=()=>cur;
 window.tab=function(t){engineTab(t);if(routing)return;
  if(t==='S'){if(!PAGES[cur]||PAGES[cur].t!=='S')goPage('pads');else goPage(cur,{keepScroll:true})}else if(T2P[t])goPage(T2P[t])};
 function note(t){const st=$('st');if(st)st.textContent=t}
@@ -2540,6 +2935,544 @@ function init(){buildSubs();dnd();knobs();mountHW();jog();hwKeys();
  new MutationObserver(status).observe($('app'),{attributes:true,attributeFilter:['hidden']});
  setInterval(status,1000);status();
  const want=location.hash.slice(1);goPage(PAGES[want]&&loaded()?want:'start')}
+init();
+})();
+
+</script>
+<script>
+/* BC-16 STUDIO OS
+   The machine is a rack of studio gear. The side rail switches units; each unit is its own piece of equipment.
+   Two strips never change: the meter bridge on top (song, save, output, take record, help) and the
+   transport bar on the bottom (record, play, stop, patterns, undo, back). Pads, banks and Q-link knobs
+   sit in the PAD MATRIX unit, which docks beside the units that need it.
+   This file only rearranges and adds; the engine (engine.js) and studio (studio.js) keep their element ids. */
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const el=(tag,props,html)=>{const e=document.createElement(tag);if(props)for(const[k,v]of Object.entries(props)){if(k==='class')e.className=v;else if(k.startsWith('data-'))e.setAttribute(k,v);else e[k]=v}if(html!=null)e.innerHTML=html;return e};
+const API=()=>window.DBC_OS,ready=()=>!!(API()&&API().ready()&&!$('app').hidden);
+const LSg=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},LSs=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const BL='ABCDEFGH',NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],nn=m=>NN[((m%12)+12)%12]+(Math.floor(m/12)-1);
+const say=t=>{const s=$('st');if(s)s.textContent=t};
+const go=p=>window.goPage&&goPage(p);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= the units ================= */
+const I={
+ home:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/><path d="M8 15h8"/>',
+ chop:'<path d="M2 12h3l2-7 3 14 3-10 2 6 2-3h5"/><path d="M12 3v2M12 19v2"/>',
+ kit:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/>',
+ pads:'<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>',
+ seq:'<rect x="2" y="9" width="3.5" height="6" rx="1"/><rect x="7.5" y="9" width="3.5" height="6" rx="1"/><rect x="13" y="9" width="3.5" height="6" rx="1"/><rect x="18.5" y="9" width="3.5" height="6" rx="1"/><path d="M2 5h20"/>',
+ keys:'<rect x="2" y="4" width="20" height="16" rx="1.5"/><path d="M6.5 4v10M11 4v10M15.5 4v10M2 9h20"/>',
+ song:'<path d="M3 6h7M12 6h9M3 12h4M9 12h12M3 18h11M16 18h5"/>',
+ live:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><path d="M6 5.5l3 1.5-3 1.5z"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+ lab:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>',
+ brain:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>',
+ guide:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3"/><path d="M20 4v14h-7"/>'};
+const GROUPS=[
+ {id:'home',l:'DECK',pages:['start']},{id:'chop',l:'CHOP',pages:['chop']},{id:'kit',l:'KITS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},
+ {id:'seq',l:'SEQ',pages:['sequence']},{id:'keys',l:'KEYS',pages:['tower','keys','live']},{id:'song',l:'SONG',pages:['song','arrange']},
+ {id:'live',l:'LIVE',pages:['launch','dj']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},{id:'brain',l:'BRAIN',pages:['brain']},{id:'guide',l:'GUIDE',pages:['guide']}];
+const UNITS={
+ start:{g:'home',n:'TAPE DECK',m:'TD-1',c:'#29e3ff',c2:'#7a5cff',d:'Load a song. Tempo, key and every hit are found for you.'},
+ chop:{g:'chop',n:'SAMPLER',m:'CS-1',c:'#29e3ff',c2:'#00ffa3',d:'Set how the song is cut. The PAD MATRIX plays the cuts in order.'},
+ kit:{g:'kit',n:'KIT FORGE',m:'KF-2',c:'#ff8a1f',c2:'#ff2e6e',d:'Build your own kits: pick a slot, hold a cut, it lands.'},
+ pads:{g:'pads',n:'DRUM MACHINE',m:'PM-16',c:'#ff3df2',c2:'#7a5cff',d:'Play and program the pads. Switch CHOP / KIT program.'},
+ sequence:{g:'seq',n:'STEP SEQUENCER',m:'SQ-8',c:'#b6ff3b',c2:'#29e3ff',d:'Draw hits on the grid of the current pattern.'},
+ tower:{g:'keys',n:'KEY TOWER',m:'KT-3',c:'#9b6bff',c2:'#ff3df2',d:'Three stacked keyboards, each with its own sound and octave.'},
+ keys:{g:'keys',n:'PIANO',m:'KP-1',c:'#9b6bff',c2:'#29e3ff',d:'One sound across a piano, locked to the key.'},
+ live:{g:'keys',n:'LAYER RIG',m:'LR-4',c:'#9b6bff',c2:'#ff8a1f',d:'Drum pads plus lead, chord and bass layers.'},
+ song:{g:'song',n:'SONG ARRANGER',m:'SA-8',c:'#ffd23e',c2:'#ff8a1f',d:'Put patterns in order and export the song.'},
+ arrange:{g:'song',n:'AUTO PRODUCER',m:'AP-1',c:'#ffd23e',c2:'#ff3df2',d:'A new arrangement of the whole song, built for you.'},
+ launch:{g:'live',n:'LAUNCH CONSOLE',m:'LC-8',c:'#ff315c',c2:'#ff8a1f',d:'All 8 patterns on one console. Tap to launch at the end of the bar loop.'},
+ dj:{g:'live',n:'DJ MIXER',m:'DX-2',c:'#ff315c',c2:'#29e3ff',d:'Hot cues, loops, rolls, kills and filter.'},
+ sounds:{g:'lab',n:'SOUND BROWSER',m:'SB-1',c:'#3d8bff',c2:'#29e3ff',d:'Every slice, take and added file.'},
+ parts:{g:'lab',n:'STEM SPLITTER',m:'SS-4',c:'#3d8bff',c2:'#b6ff3b',d:'Split a stretch into drums, bass, vocals and melody.'},
+ groups:{g:'lab',n:'SOUND SORTER',m:'GS-1',c:'#3d8bff',c2:'#ff3df2',d:'Slices that sound alike, gathered into groups.'},
+ brain:{g:'brain',n:'BEAT BRAIN',m:'BB-9',c:'#ff6ad5',c2:'#7a5cff',d:'Presets, variations, full songs and smart kits.'},
+ guide:{g:'guide',n:'STUDIO MANUAL',m:'OS',c:'#5effc8',c2:'#29e3ff',d:'Lessons, the button book and a demo that plays itself.'}};
+const WITH_DECK=new Set(['chop','pads','sequence','launch','dj','sounds']);
+
+/* ================= build the rack ================= */
+function plate(name,model,id,extra){return '<div class="plate"'+(id?' data-panel="'+id+'"':'')+'><i class="pled"></i><b class="pn">'+name+'</b><span class="pm">'+model+'</span>'+(extra||'')+'<span class="vent"></span><span class="zm"><button class="zb" data-z="-1" title="Zoom out" aria-label="Zoom out">−</button><button class="zb" data-z="0" title="Fill the stage with this unit" aria-label="Focus this unit">⤢</button><button class="zb" data-z="1" title="Zoom in" aria-label="Zoom in">+</button></span></div>'}
+function build(){
+ document.body.classList.add('os');
+ const dev=$('device'),top=$('hwTop');
+ /* rail */
+ const rail=el('nav',{id:'rail','aria-label':'Studio units'});
+ rail.innerHTML='<div class="brand" aria-hidden="true"><b>BC</b><span>16</span></div>'+GROUPS.map((g,i)=>'<button class="rb" data-grp="'+g.id+'" data-help="rail-'+g.id+'" title="'+g.l+(i<10?' (Alt+'+((i+1)%10)+')':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+I[g.id]+'</svg><span>'+g.l+'</span><i class="rled"></i></button>').join('')+'<div class="rsp"></div><button class="rb sm" id="osExplain" data-help="osExplain" title="Explain mode (?)"><b>?</b><span>EXPLAIN</span><i class="rled"></i></button>';
+ dev.prepend(rail);
+ rail.addEventListener('click',e=>{const b=e.target.closest('.rb[data-grp]');if(!b)return;const g=GROUPS.find(x=>x.id===b.dataset.grp);const last=LSg('bc16:last:'+g.id,g.pages[0]);go(g.pages.includes(last)?last:g.pages[0])});
+ /* meter bridge */
+ const ol=$('oled');ol.insertAdjacentHTML('beforeend','<span id="osLine" aria-live="polite"></span>');
+ const vu=el('div',{id:'vuGrp',class:'hwgrp'},'<span class="hwl">OUTPUT</span><div id="vu" data-help="vu"><canvas id="vuC" width="236" height="92"></canvas></div>');
+ const save=el('div',{id:'saveGrp',class:'hwgrp'},'<span class="hwl">SETUP</span><button class="hwb" id="osSave" data-help="osSave"><i class="led"></i>SAVE</button>');
+ top.insertBefore(vu,$('loadGrp'));$('loadGrp').after(save);
+ $('loadGrp').querySelector('.hwl').textContent='SONG';
+ /* stage */
+ const stage=el('main',{id:'stage'});
+ const sub=el('div',{id:'subBar'},'<div id="unitTag"><i></i><b id="unitName"></b><span id="unitModel"></span><em id="unitDesc"></em></div><div id="subTabs" role="tablist"></div>');
+ stage.append(sub);
+ const sw=$('screenWrap');sw.insertAdjacentHTML('afterbegin',plate('SAMPLER','CS-1','screen'));sw.classList.add('unit');stage.append(sw);
+ const deck=el('section',{id:'deck',class:'unit'});deck.innerHTML=plate('PAD MATRIX','PM-16','deck','<button id="deckProg" class="pchip" data-help="scrProg">CHOP</button>');
+ ['knobGrp','bankGrp','padsSlot','fnGrp','dataGrp'].forEach(id=>{const x=$(id);if(x)deck.append(x)});stage.append(deck);
+ stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide());
+ /* transport bar */
+ const bar=el('footer',{id:'tbar'});
+ const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (−)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (=)"><i class="led"></i>▶</button></div>');
+ pat.querySelector('#patDeck').append($('seqSlot'));
+ pat.querySelector('#patDeck').insertAdjacentHTML('beforeend','<button class="hwb" id="osPatDup" data-help="osPatDup"><i class="led"></i>COPY ▶</button><button class="hwb" id="osPatClr" data-help="osPatClr"><i class="led"></i>CLEAR</button>');
+ const ed=el('div',{id:'editGrp',class:'hwgrp'},'<span class="hwl">EDIT</span><div><button class="hwb" id="osUndo" data-help="osUndo"><i class="led"></i>UNDO</button><button class="hwb" id="osBack" data-help="osBack" title="Back to the last unit (`)"><i class="led"></i>◀ BACK</button></div>');
+ bar.append($('trGrp'),pat,ed);
+ dev.append(stage,bar);
+ ['ctlL','ctlR'].forEach(id=>{const x=$(id);if(x)x.hidden=true});
+ const gt=$('gToast');if(gt)document.body.append(gt);
+ /* coach / explain layers */
+ document.body.insertAdjacentHTML('beforeend','<div id="coach" hidden><div id="spot"></div><div id="ccard" role="dialog" aria-live="polite"><div class="cbar"><i id="cprog"></i></div><small id="cstep"></small><h3 id="ctitle"></h3><p id="ctext"></p><div class="cbtn"><button id="cprev">◀ Back</button><button id="cexit">Exit</button><button id="cnext" class="p">Next ▶</button></div></div><div id="ghost"><i></i></div></div><div id="xbub" hidden><b></b><p></p><small>Explain mode is on: buttons explain themselves instead of acting. Press ? or Esc to turn it off.</small></div>');
+ /* status line mirror */
+ const st=$('st');const mirror=()=>{$('osLine').textContent=st.textContent};new MutationObserver(mirror).observe(st,{childList:true,characterData:true,subtree:true});mirror();
+ /* wiring */
+ $('osSave').onclick=()=>{if(!ready()){say('Load a song first.');return}API().save();say('Setup saved: pads, kits, patterns and song order for '+fnameSafe()+'.')};
+ $('osPatPrev').onclick=()=>patStep(-1);$('osPatNext').onclick=()=>patStep(1);
+ $('osPatDup').onclick=()=>{if(!need())return;const t=API().dupPat();say(t<0?'All 8 patterns have hits. Clear one first.':'Copied into P'+(t+1)+' and switched to it. Change it to make a variation.')};
+ $('osPatClr').onclick=()=>{if(!need())return;const P=API().pat();if(!API().pats()[P].hits){say('P'+(P+1)+' is already empty.');return}if(!confirm('Clear every hit in pattern P'+(P+1)+'? UNDO brings it back.'))return;API().clearPat();say('Cleared P'+(P+1)+'. Press UNDO to bring it back.')};
+ $('osUndo').onclick=()=>{if(need())API().undo()};
+ $('osBack').onclick=back;
+ $('deckProg').onclick=()=>{const b=$('scrProg');if(b)b.click()};
+ stage.addEventListener('click',e=>{const z=e.target.closest('.zb');if(!z)return;const u=z.closest('.unit');zoom(u,+z.dataset.z)});
+ stage.addEventListener('dblclick',e=>{const p=e.target.closest('.plate');if(p&&!e.target.closest('button'))zoom(p.closest('.unit'),0)});
+ $('osExplain').onclick=()=>explain(!document.body.classList.contains('explain'));
+}
+const fnameSafe=()=>{try{return fname}catch(e){return'this song'}};
+function need(){if(!ready()){say('Load a song first: press LOAD on the meter bridge, or try the demo beat on the TAPE DECK.');return false}if(window.DBC)DBC.ensure();return true}
+
+/* ================= zoom and focus ================= */
+function zoomKey(u){return'bc16:zoom:'+document.body.dataset.pg+':'+u.id}
+function zoom(u,d){if(!u)return;if(d===0){const on=!u.classList.contains('focus');$$('#stage .unit.focus').forEach(x=>x.classList.remove('focus'));u.classList.toggle('focus',on);document.getElementById('stage').classList.toggle('focusing',on);say(on?'Focused on '+u.querySelector('.pn').textContent+'. Press ⤢ again to bring the other units back.':'All units back on the stage.');return}
+ let z=LSg(zoomKey(u),1);z=Math.round(Math.max(.6,Math.min(1.6,z+d*.1))*10)/10;LSs(zoomKey(u),z);applyZoom(u);say(u.querySelector('.pn').textContent+' zoom '+Math.round(z*100)+'%')}
+function applyZoom(u){const z=LSg(zoomKey(u),1),b=u.querySelector(':scope > :not(.plate)')?u:null;u.style.setProperty('--uz',z);u.classList.toggle('zoomed',z!==1)}
+
+/* ================= pages ================= */
+let curP='start',hist=[];
+function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x=>x.pages.includes(p))||GROUPS[0];
+ if(prev&&prev!==p&&!backing){hist.push(prev);if(hist.length>30)hist.shift()}backing=false;
+ LSs('bc16:last:'+g.id,p);
+ const B=document.body;B.dataset.pg=p;B.dataset.grp=g.id;B.style.setProperty('--acc',U.c);B.style.setProperty('--acc2',U.c2);B.classList.toggle('deck',WITH_DECK.has(p));
+ $$('#rail .rb[data-grp]').forEach(b=>b.classList.toggle('on',b.dataset.grp===g.id));
+ $('unitName').textContent=U.n;$('unitModel').textContent=U.m;$('unitDesc').textContent=U.d;
+ const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
+ const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
+ $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');
+ if(p==='kit')kitRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ $('osBack').disabled=!hist.length;
+ if(coach&&coach.mode==='tour')setTimeout(coachPlace,80)}
+let backing=false;
+function back(){const p=hist.pop();if(!p){say('Nothing to go back to yet.');return}backing=true;go(p)}
+
+/* ================= pattern deck ================= */
+function patStep(d){if(!need())return;const A=API(),q=A.queued(),c=q!=null?q:A.pat();A.selPat((c+d+8)%8);const n=(c+d+8)%8;say(A.playing()?'P'+(n+1)+' plays when the current pattern finishes. Press again to keep stepping.':'Now on pattern P'+(n+1)+'.')}
+function patSync(){const A=API();if(!A||!ready()){$('patNum').textContent='P--';$('patInfo').textContent='NO SONG';return}
+ let P,ps;try{P=A.pat();ps=A.pats()}catch(e){return}const q=A.queued(),info=ps[P];
+ $('patNum').textContent='P'+String(P+1).padStart(2,'0')+(q!=null?' → P'+String(q+1).padStart(2,'0'):'');
+ $('patInfo').textContent=info.bars+' BAR'+(info.bars>1?'S':'')+' · '+info.hits+' HITS'+(A.rec()?' · REC':'');
+ $('patProg').firstChild.style.width=(A.playing()?A.pos()*100:0)+'%';$('patLcd').classList.toggle('q',q!=null);$('patLcd').classList.toggle('rec',A.rec());
+ if(curP==='launch')launchSync(ps,P,q)}
+
+/* ================= VU meter ================= */
+let vuL=0,vuPk=0,vuPkT=0;
+function vuDraw(){const c=$('vuC');if(!c)return;const x=c.getContext('2d'),W=c.width,H=c.height;let lv=[0,0];try{if(API())lv=API().level()}catch(e){}
+ const db=20*Math.log10(Math.max(1e-5,lv[0]*1.414)),f=Math.max(0,Math.min(1,(db+30)/33));vuL+=(f-vuL)*(f>vuL?.35:.08);
+ const pk=lv[1];if(pk>.97){vuPk=1;vuPkT=performance.now()}else if(performance.now()-vuPkT>900)vuPk=0;
+ x.clearRect(0,0,W,H);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f3e6c1');g.addColorStop(1,'#d8c79a');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const cx=W/2,cy=H*1.55,R=H*1.28;x.lineWidth=2;
+ for(let i=0;i<=10;i++){const a=-Math.PI/2+(-0.62+1.24*i/10),red=i>=8;x.strokeStyle=red?'#c3262e':'#2a2620';const r0=R-(i%2?8:13);x.beginPath();x.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);x.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);x.stroke()}
+ x.strokeStyle='#c3262e';x.lineWidth=4;x.beginPath();x.arc(cx,cy,R+2,-Math.PI/2+.62*.6,-Math.PI/2+.62);x.stroke();
+ x.fillStyle='#2a2620';x.font='600 13px "Martian Mono",monospace';x.textAlign='center';x.fillText('VU',cx,H*.78);
+ const a=-Math.PI/2-0.66+1.32*vuL;x.strokeStyle='#111';x.lineWidth=2.2;x.beginPath();x.moveTo(cx+Math.cos(a)*(R*.42),cy+Math.sin(a)*(R*.42));x.lineTo(cx+Math.cos(a)*(R+4),cy+Math.sin(a)*(R+4));x.stroke();
+ $('vu').classList.toggle('pk',!!vuPk)}
+
+/* ================= KIT FORGE ================= */
+const KF={bank:0,armed:0,page:0,per:16,filt:'all',list:null,key:''};
+function buildKit(){const u=el('section',{id:'osKit',class:'unit'});
+ u.innerHTML='<div class="kfwrap"><div class="kfrack" id="kfRack">'+plate('KIT RACK','KR-16','kfRack')+
+ '<div class="kfbody"><div class="kfbanks" id="kfBanks" data-help="kfBanks"></div><div class="kfslots" id="kfSlots" data-help="kfSlots"></div>'+
+ '<div class="kfact"><button class="hwb" id="kfClr" data-help="kfClr"><i class="led"></i>CLEAR SLOT</button><button class="hwb" id="kfClrB" data-help="kfClrB"><i class="led"></i>CLEAR BANK</button><button class="hwb" id="kfPads" data-help="kfPads"><i class="led"></i>PLAY ON PADS ▶</button></div>'+
+ '<div class="kfsave" data-help="kfSave"><span class="hwl">MY KITS</span><div class="kfsrow"><input id="kfName" placeholder="Kit name, e.g. Flint knock" maxlength="32"><button class="hwb" id="kfSv"><i class="led"></i>SAVE KIT</button></div><div id="kfList"></div></div></div></div>'+
+ '<div class="kflib" id="kfLib">'+plate('CUT LIBRARY','CL-640','kfLib')+
+ '<div class="kfbody"><div class="kfnav"><button class="hwb sq" id="kfFirst" title="First page"><i class="led"></i>⏮</button><button class="hwb sq" id="kfPrev" data-help="kfPrev" title="Previous page (PgUp)"><i class="led"></i>◀</button><div class="kflcd" id="kfLcd" data-help="kfLcd"><b></b><span></span></div><button class="hwb sq" id="kfNext" data-help="kfPrev" title="Next page (PgDn)"><i class="led"></i>▶</button><button class="hwb sq" id="kfLast" title="Last page"><i class="led"></i>⏭</button><select id="kfPer" title="Cuts per page" data-help="kfPer"><option value="16">16 / page</option><option value="32">32 / page</option><option value="64">64 / page</option></select></div>'+
+ '<div class="kffilt" id="kfFilt" data-help="kfFilt"></div><div class="kfcuts" id="kfCuts" data-help="kfCuts"></div><p class="kfhint" id="kfHint">Tap a cut to hear it. Hold it, or drag it, to drop it into the lit slot.</p></div></div></div>';
+ return u}
+function kitList(){const A=API();const n=A.nSlices(),key=n+'|'+KF.filt+'|'+fnameSafe();if(KF.list&&KF.key===key)return KF.list;const L=[];for(let i=0;i<n;i++){const s=A.slice(i);if(!s)continue;if(KF.filt==='all'||(KF.filt==='tone'?(s.kind==='tone'||s.tonal):s.kind===KF.filt))L.push(i)}KF.list=L;KF.key=key;KF.page=Math.min(KF.page,Math.max(0,Math.ceil(L.length/KF.per)-1));return L}
+function kitWire(){
+ $('kfFilt').innerHTML=[['all','ALL'],['kick','KICK'],['snare','SNARE'],['hat','HAT'],['tone','TONE']].map(([f,t])=>'<button class="chip" data-f="'+f+'">'+t+'</button>').join('');
+ $('kfFilt').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;KF.filt=b.dataset.f;KF.page=0;KF.list=null;kitRender()};
+ $('kfPer').onchange=e=>{KF.per=+e.target.value;KF.page=0;kitRender()};
+ const pg=d=>{const L=kitList(),N=Math.max(1,Math.ceil(L.length/KF.per));KF.page=d==='f'?0:d==='l'?N-1:Math.max(0,Math.min(N-1,KF.page+d));kitRender()};
+ $('kfPrev').onclick=()=>pg(-1);$('kfNext').onclick=()=>pg(1);$('kfFirst').onclick=()=>pg('f');$('kfLast').onclick=()=>pg('l');KF.pg=pg;
+ $('kfBanks').onclick=e=>{const b=e.target.closest('button');if(!b)return;KF.bank=+b.dataset.b;API().setBank(KF.bank);kitArmNext(true);kitRender()};
+ $('kfClr').onclick=()=>{if(!need())return;API().clear(KF.bank,KF.armed);kitRender();say('Cleared slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. UNDO brings it back.')};
+ $('kfClrB').onclick=()=>{if(!need())return;if(!confirm('Clear all 16 slots in kit bank '+BL[KF.bank]+'? UNDO brings them back.'))return;API().clearBank(KF.bank);KF.armed=0;kitRender()};
+ $('kfPads').onclick=()=>{if(!need())return;API().setProg('kit');API().setBank(KF.bank);go('pads');say('The PAD MATRIX now plays kit bank '+BL[KF.bank]+' (KIT program).')};
+ $('kfSv').onclick=()=>{if(!need())return;const n=$('kfName').value.trim()||('Kit '+BL[KF.bank]+' '+new Date().toLocaleDateString());if(!API().kit(KF.bank).some(Boolean)){say('Bank '+BL[KF.bank]+' is empty. Load some slots first.');return}API().saveKit(n,KF.bank);$('kfName').value='';kitRender();say('Saved “'+n+'”. Tap it under MY KITS to load it into any bank.')};
+ $('kfList').onclick=e=>{const x=e.target.closest('.kdel'),b=e.target.closest('.kload');if(x){if(confirm('Delete the saved kit “'+x.dataset.n+'”?')){API().delKit(x.dataset.n);kitRender()}return}if(b){if(!need())return;API().loadKit(b.dataset.n,KF.bank);kitRender();say('Loaded “'+b.dataset.n+'” into bank '+BL[KF.bank]+'.')}};
+ /* slots: tap = choose (and hear); the lit slot is where the next cut lands */
+ holdable($('kfSlots'),'.ks',(t)=>{KF.armed=+t.dataset.j;API().hear({k:'kit',b:KF.bank,j:KF.armed});kitRender()},(t)=>{KF.armed=+t.dataset.j;kitRender();say('Slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+' is lit. Now hold a cut in the CUT LIBRARY.')});
+ /* cuts: tap = hear, hold = drop into the lit slot, drag = drop on any slot */
+ holdable($('kfCuts'),'.kc',(t)=>{API().hear({k:'slice',ci:+t.dataset.ci});$$('#kfCuts .kc.aud').forEach(x=>x.classList.remove('aud'));t.classList.add('aud')},(t)=>kitDrop(+t.dataset.ci,KF.armed),{drag:(t,slot)=>kitDrop(+t.dataset.ci,+slot.dataset.j),target:'#kfSlots .ks'});
+}
+function kitDrop(ci,j){if(!need())return;if(!API().put(ci,KF.bank,j))return;const s=API().slice(ci);const was=j;say('Cut '+s.name+' → slot '+BL[KF.bank]+String(j+1).padStart(2,'0')+'.'+(pickFrom?' Press ◀ BACK to return to the pads, or keep filling.':''));KF.armed=j;kitArmNext(false);kitRender();const sl=$('kfSlots').querySelector('[data-j="'+was+'"]');if(sl){sl.classList.add('land');setTimeout(()=>sl.classList.remove('land'),700)}}
+function kitArmNext(fromStart){const K=API().kit(KF.bank);const order=[...Array(16).keys()];const start=fromStart?0:KF.armed+1;for(let k=0;k<16;k++){const j=(start+k)%16;if(!K[j]){KF.armed=j;return}}}
+let pickFrom=null;
+function pick(b,j){pickFrom={b,j};KF.bank=b;KF.armed=j;go('kit');say('Choosing a sound for pad '+BL[b]+String(j+1).padStart(2,'0')+'. Page through the CUT LIBRARY, tap to hear, hold the one you want.')}
+function kitRender(){if(!ready()){$('kfSlots').innerHTML='<p class="empty">Load a song to forge kits from its cuts.</p>';$('kfCuts').textContent='';return}
+ const A=API(),K=A.kit(KF.bank);
+ $('kfBanks').innerHTML=BL.split('').map((L,b)=>{const n=A.kit(b).filter(Boolean).length;return'<button class="bkx'+(b===KF.bank?' on':'')+(n?' has':'')+'" data-b="'+b+'">'+L+'<small>'+n+'/16</small></button>'}).join('');
+ $('kfSlots').innerHTML=[12,13,14,15,8,9,10,11,4,5,6,7,0,1,2,3].map(j=>{const p=K[j];return'<button class="ks'+(p?'':' emp')+(j===KF.armed?' arm':'')+'" data-j="'+j+'" style="--pc:'+(p?p.col:'#555')+'"><span class="kn">'+BL[KF.bank]+String(j+1).padStart(2,'0')+'</span><span class="knm">'+(p?esc(p.name):'EMPTY')+'</span></button>'}).join('');
+ const L=kitList(),N=Math.max(1,Math.ceil(L.length/KF.per)),from=KF.page*KF.per,ids=L.slice(from,from+KF.per);
+ $('kfLcd').querySelector('b').textContent=L.length?'CUTS '+(from+1)+'–'+Math.min(L.length,from+KF.per):'NO CUTS';$('kfLcd').querySelector('span').textContent='PAGE '+(KF.page+1)+'/'+N+' · '+L.length+' '+(KF.filt==='all'?'TOTAL':KF.filt.toUpperCase());
+ $('kfPrev').disabled=$('kfFirst').disabled=KF.page<=0;$('kfNext').disabled=$('kfLast').disabled=KF.page>=N-1;
+ $$('#kfFilt .chip').forEach(b=>b.classList.toggle('on',b.dataset.f===KF.filt));
+ const bpm=+($('bpm')||{}).value||90;$('kfCuts').dataset.per=KF.per;
+ $('kfCuts').innerHTML=ids.map(ci=>{const s=A.slice(ci),bt=s.dur*bpm/60;return'<button class="kc" data-ci="'+ci+'" style="--pc:'+s.col+'"><canvas width="120" height="40"></canvas><b>#'+(ci+1)+'</b><span>'+(s.kind||'cut').toUpperCase()+(s.tonal&&s.midi!=null?' · '+nn(Math.round(s.midi)):'')+'</span><em>'+(bt<1?bt.toFixed(2):bt.toFixed(1))+' BT</em></button>'}).join('')||'<p class="empty">No cuts match this filter.</p>';
+ $$('#kfCuts .kc').forEach(c=>wave(c.querySelector('canvas'),A.slice(+c.dataset.ci)));
+ const ks=A.kits();$('kfList').innerHTML=ks.length?ks.map(n=>'<span class="kchip"><button class="kload" data-n="'+esc(n)+'">'+esc(n)+'</button><button class="kdel" data-n="'+esc(n)+'" aria-label="Delete '+esc(n)+'">×</button></span>').join(''):'<em>No saved kits for this song yet. Build a bank, name it, press SAVE KIT.</em>';
+ $('kfHint').textContent='Lit slot: '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. Tap a cut to hear it. Hold it (½ s) or drag it onto a slot to drop it in. The next empty slot lights up by itself.'}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+function wave(cv,s){if(!cv||!s)return;try{const d=chs[0],x=cv.getContext('2d'),W=cv.width,H=cv.height,len=s.e-s.s,st=Math.max(1,Math.floor(len/W));x.clearRect(0,0,W,H);x.fillStyle=s.col;x.globalAlpha=.9;
+ let mx=0;for(let i=s.s;i<s.e;i+=st)mx=Math.max(mx,Math.abs(d[i]||0));const k=mx>0?(H/2-2)/mx:1;
+ for(let px=0;px<W;px++){let lo=0,hi=0;const a=s.s+Math.floor(px*len/W),b=Math.min(s.e,a+Math.ceil(len/W));for(let i=a;i<b;i+=Math.max(1,Math.floor((b-a)/24))){const v=d[i]||0;if(v<lo)lo=v;if(v>hi)hi=v}x.fillRect(px,H/2-hi*k,1,Math.max(1,(hi-lo)*k))}}catch(e){}}
+/* tap / hold / drag on grid children */
+function holdable(root,sel,tap,hold,dd){let T=null;
+ root.addEventListener('pointerdown',e=>{const t=e.target.closest(sel);if(!t||e.button>0)return;if(document.body.classList.contains('explain'))return;e.preventDefault();
+  T={t,x:e.clientX,y:e.clientY,held:false,drag:null,id:e.pointerId};t.classList.add('press');
+  T.tm=setTimeout(()=>{if(!T||T.drag)return;T.held=true;t.classList.remove('press');t.classList.add('held');setTimeout(()=>t.classList.remove('held'),500);hold(t)},450)});
+ addEventListener('pointermove',e=>{if(!T||e.pointerId!==T.id||T.held||!dd)return;const dx=e.clientX-T.x,dy=e.clientY-T.y;
+  if(!T.drag&&Math.hypot(dx,dy)>10){clearTimeout(T.tm);T.drag=el('div',{class:'dragghost'},T.t.innerHTML);document.body.append(T.drag);T.t.classList.remove('press')}
+  if(T.drag){T.drag.style.transform='translate('+(e.clientX-40)+'px,'+(e.clientY-30)+'px)';$$(dd.target).forEach(s=>s.classList.remove('over'));const o=document.elementFromPoint(e.clientX,e.clientY);const s=o&&o.closest(dd.target);if(s)s.classList.add('over')}});
+ const end=e=>{if(!T||e.pointerId!==T.id)return;clearTimeout(T.tm);T.t.classList.remove('press');
+  if(T.drag){T.drag.remove();$$(dd.target).forEach(s=>s.classList.remove('over'));const o=document.elementFromPoint(e.clientX,e.clientY),s=o&&o.closest(dd.target);if(s&&e.type==='pointerup')dd.drag(T.t,s)}
+  else if(!T.held&&e.type==='pointerup')tap(T.t);T=null};
+ addEventListener('pointerup',end);addEventListener('pointercancel',end);
+ root.addEventListener('contextmenu',e=>{if(e.target.closest(sel))e.preventDefault()});
+ root.addEventListener('keydown',e=>{const t=e.target.closest(sel);if(!t)return;if(e.key==='Enter'&&e.shiftKey){e.preventDefault();hold(t)}else if(e.key===' '||e.key==='Enter'){e.preventDefault();tap(t)}})}
+
+/* ================= KEY TOWER ================= */
+const TW={tiers:[{oct:2,i:0,vol:.9,hold:false,mute:false,stack:false},{oct:3,i:1,vol:.85,hold:false,mute:false,stack:false},{oct:4,i:2,vol:.85,hold:false,mute:false,stack:false}],lock:true,labels:true,midi:0,list:[],key:'',built:'',ons:new Map()};
+const ZROW='zsxdcvgbhnjm,l.;/',QROW='q2w3er5t6y7ui9o0p';
+function buildTower(){const u=el('section',{id:'osTower',class:'unit'});
+ u.innerHTML=plate('KEY TOWER','KT-3','osTower','<span class="pchip ro" id="twKey" data-help="twKey">KEY —</span>')+
+ '<div class="twtop"><button class="hwb" id="twLock" data-help="twLock"><i class="led"></i>SCALE LOCK</button><button class="hwb" id="twLab" data-help="twLab"><i class="led"></i>KEY LABELS</button><span class="twmidi" id="twMidi" data-help="twMidi">MIDI: not connected</span><span class="twrec" data-help="twRec">Press <b>REC</b> then <b>PLAY</b> in the transport bar to record the keys into the pattern.</span></div>'+
+ '<div class="tiers" id="twTiers"></div>';
+ return u}
+function towerList(){const A=API();const key=A.nSlices()+'|'+fnameSafe()+'|'+BL.split('').map((_,b)=>A.kit(b).filter(Boolean).length).join(',');if(TW.key===key)return TW.list;
+ const L=[];for(let b=0;b<8;b++)A.kit(b).forEach((p,j)=>{if(p)L.push({src:{k:'kit',b,j},name:'KIT '+BL[b]+String(j+1).padStart(2,'0')+' '+p.name,tonal:p.midi!=null})});
+ const T=[],O=[];for(let i=0;i<A.nSlices();i++){const s=A.slice(i);if(!s)continue;(s.tonal?T:O).push({src:{k:'slice',ci:i},name:'CUT #'+(i+1)+' '+(s.kind||'').toUpperCase()+(s.tonal&&s.midi!=null?' ('+nn(Math.round(s.midi))+')':''),tonal:s.tonal,midi:s.midi})}
+ const full=[...T,...L.filter(x=>x.tonal),...L.filter(x=>!x.tonal),...O.filter(x=>x.name.includes('TONE')),...O.filter(x=>!x.name.includes('TONE'))];
+ if(TW.key.split('|')[1]!==fnameSafe()){const lo=[...T].sort((a,b)=>(a.midi||60)-(b.midi||60));TW.tiers[0].i=Math.max(0,full.indexOf(lo[0]||full[0]));TW.tiers[1].i=Math.min(full.length-1,Math.max(0,full.indexOf(T[Math.floor(T.length/2)]||full[1])));TW.tiers[2].i=Math.min(full.length-1,Math.max(0,full.indexOf(T[T.length-1]||full[2])))}
+ TW.list=full;TW.key=key;return full}
+function towerRender(){const box=$('twTiers');if(!ready()){box.innerHTML='<p class="empty">Load a song: its tonal cuts and your kit pads become the tower’s sounds.</p>';return}
+ const A=API(),L=towerList(),root=A.root(),steps=A.scaleSteps();$('twKey').textContent='KEY '+NN[root]+' '+(A.scale()||'').toUpperCase();
+ $('twLock').classList.toggle('on',TW.lock);$('twLab').classList.toggle('on',TW.labels);
+ const w=box.clientWidth||1100,octs=Math.max(1,Math.min(4,Math.floor((w-340)/(7*40)))),sig=octs+'|'+TW.labels+'|'+TW.lock+'|'+root+'|'+A.scale()+'|'+TW.tiers.map(t=>t.oct+':'+t.i+':'+t.hold+':'+t.mute+':'+t.stack).join(',')+'|'+L.length+'|'+TW.midi;
+ if(TW.built===sig)return;TW.built=sig;
+ box.innerHTML=[2,1,0].map(ti=>{const T=TW.tiers[ti],s=L[T.i],map=ti===0?ZROW:ti===1?QROW:'';
+  let keys='',blk='',wi=0;const base=12*(T.oct+1),n=octs*12+1,wcount=octs*7+1;
+  for(let k=0;k<n;k++){const m=base+k,pc=k%12,isB=[1,3,6,8,10].includes(pc),inS=steps.includes((((m-root)%12)+12)%12),lab=TW.labels&&map[k]?map[k].toUpperCase():'',dim=TW.lock&&!inS?' off':'';
+   if(!isB){keys+='<button class="tww'+dim+(inS?' ins':'')+'" data-m="'+m+'" tabindex="-1"><span>'+(pc===0?nn(m):'')+'</span><kbd>'+lab+'</kbd></button>';wi++}
+   else blk+='<button class="twb'+dim+(inS?' ins':'')+'" data-m="'+m+'" tabindex="-1" style="left:calc('+(wi/wcount*100)+'% - var(--bw)/2)"><kbd>'+lab+'</kbd></button>'}
+  return'<div class="tier'+(T.mute?' muted':'')+'" data-t="'+ti+'" style="--wn:'+wcount+'">'+
+   '<div class="twl" data-help="twLeft"><b class="tn">TIER '+(ti+1)+'</b><div class="tlcd" title="'+esc(s?s.name:'')+'">'+esc(s?s.name:'NO SOUND')+'</div><div class="trow"><button class="hwb sq" data-a="s-"><i class="led"></i>◀</button><span class="tlab">SOUND</span><button class="hwb sq" data-a="s+"><i class="led"></i>▶</button></div><div class="trow"><button class="hwb sq" data-a="o-"><i class="led"></i>−</button><span class="tlab">C'+T.oct+'</span><button class="hwb sq" data-a="o+"><i class="led"></i>+</button></div></div>'+
+   '<div class="twkb" data-t="'+ti+'">'+keys+blk+'</div>'+
+   '<div class="twr" data-help="twRight"><label class="tvol">VOL<input type="range" min="0" max="1" step=".01" value="'+T.vol+'" data-a="vol"></label><button class="hwb'+(T.hold?' on':'')+'" data-a="hold"><i class="led"></i>HOLD</button><button class="hwb'+(T.stack?' on':'')+'" data-a="stack"><i class="led"></i>STACK</button><button class="hwb'+(T.mute?' on':'')+'" data-a="mute"><i class="led"></i>MUTE</button><button class="hwb'+(TW.midi===ti?' on':'')+'" data-a="midi"><i class="led"></i>MIDI IN</button></div></div>'}).join('')}
+function towerWire(){const box=$('twTiers');
+ $('twLock').onclick=()=>{TW.lock=!TW.lock;towerRender();say(TW.lock?'Scale lock on: only notes in the song’s key light up and play.':'Scale lock off: every key plays.')};
+ $('twLab').onclick=()=>{TW.labels=!TW.labels;towerRender()};
+ box.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.tagName==='INPUT')return;const ti=+b.closest('.tier').dataset.t,T=TW.tiers[ti],a=b.dataset.a,L=TW.list;
+  if(a==='s-'||a==='s+'){T.i=(T.i+(a==='s+'?1:-1)+L.length)%L.length;API().hear(L[T.i].src);say('Tier '+(ti+1)+' plays '+L[T.i].name+'.')}
+  else if(a==='o-'||a==='o+')T.oct=Math.max(0,Math.min(7,T.oct+(a==='o+'?1:-1)));
+  else if(a==='hold'){T.hold=!T.hold;say(T.hold?'Tier '+(ti+1)+' HOLD: notes ring out the whole cut.':'Tier '+(ti+1)+': notes stop when you let go.')}
+  else if(a==='stack'){T.stack=!T.stack;say(T.stack?'Tier '+(ti+1)+' is stacked: play any stacked tier and all of them sound together.':'Tier '+(ti+1)+' unstacked.')}
+  else if(a==='mute')T.mute=!T.mute;else if(a==='midi'){TW.midi=ti;midiInit();say('MIDI keyboard plays tier '+(ti+1)+'.')}
+  towerRender()});
+ box.addEventListener('input',e=>{if(e.target.dataset.a==='vol')TW.tiers[+e.target.closest('.tier').dataset.t].vol=+e.target.value});
+ /* touch / mouse with glide */
+ const P=new Map();
+ const keyAt=(x,y)=>{const o=document.elementFromPoint(x,y);return o&&o.closest('#twTiers .twkb .tww,#twTiers .twkb .twb')};
+ const velOf=(k,y)=>{const r=k.getBoundingClientRect();return Math.max(.35,Math.min(1,.4+.6*(y-r.top)/r.height))};
+ box.addEventListener('pointerdown',e=>{const k=e.target.closest('.twkb .tww,.twkb .twb');if(!k||document.body.classList.contains('explain'))return;e.preventDefault();try{k.releasePointerCapture(e.pointerId)}catch(er){}const id='p'+e.pointerId;P.set(e.pointerId,k);tOn(id,k,velOf(k,e.clientY))});
+ addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const k=keyAt(e.clientX,e.clientY),o=P.get(e.pointerId);if(k&&k!==o){const id='p'+e.pointerId;tOff(id);P.set(e.pointerId,k);tOn(id,k,velOf(k,e.clientY))}});
+ const up=e=>{if(!P.has(e.pointerId))return;tOff('p'+e.pointerId);P.delete(e.pointerId)};addEventListener('pointerup',up);addEventListener('pointercancel',up);
+ /* computer keys: tier 1 on Z row, tier 2 on Q row */
+ addEventListener('keydown',e=>{if(curP!=='tower'||e.repeat||e.metaKey||e.ctrlKey||e.altKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();let ti=-1,o=ZROW.indexOf(k);if(o>=0)ti=0;else{o=QROW.indexOf(k);if(o>=0)ti=1}if(ti<0)return;e.preventDefault();
+  const m=12*(TW.tiers[ti].oct+1)+o,kb=$$('#twTiers .twkb[data-t="'+ti+'"] [data-m="'+m+'"]')[0];if(kb)tOn('k'+k,kb,.85)});
+ addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(TW.ons.has('k'+k))tOff('k'+k)})}
+function tOn(id,k,vel){if(!need())return;if(k.classList.contains('off'))return;tOff(id);const ti=+k.closest('.twkb').dataset.t,m=+k.dataset.m;tNote(id,ti,m,vel,k)}
+function tNote(id,ti,m,vel,k){const T=TW.tiers[ti],hs=[],ks=[];const tiers=T.stack?TW.tiers.map((x,i)=>i).filter(i=>i===ti||TW.tiers[i].stack):[ti];
+ tiers.forEach(i=>{const X=TW.tiers[i];if(X.mute)return;const s=TW.list[X.i];if(!s)return;const mm=m+12*(X.oct-T.oct);const h=API().noteOn(s.src,mm,vel*X.vol,X.hold);if(h)hs.push(h);const kk=i===ti?k:$$('#twTiers .twkb[data-t="'+i+'"] [data-m="'+mm+'"]')[0];if(kk){kk.classList.add('on');ks.push(kk)}});
+ TW.ons.set(id,{hs,ks})}
+function tOff(id){const o=TW.ons.get(id);if(!o)return;o.hs.forEach(h=>API().noteOff(h));o.ks.forEach(k=>k.classList.remove('on'));TW.ons.delete(id)}
+let MIDI=null;
+function midiInit(){if(MIDI!==null||!navigator.requestMIDIAccess){if(!navigator.requestMIDIAccess)$('twMidi').textContent='MIDI: this browser has no Web MIDI';return}MIDI=false;
+ navigator.requestMIDIAccess().then(acc=>{MIDI=acc;const hook=()=>{let n=0;acc.inputs.forEach(inp=>{n++;inp.onmidimessage=ev=>{const[st,d1,d2]=ev.data,c=st&0xf0;if(c===0x90&&d2>0){const ti=TW.midi,kb=$$('#twTiers .twkb[data-t="'+ti+'"] [data-m="'+d1+'"]')[0];if(!ready())return;tOff('m'+d1);tNote('m'+d1,ti,d1,d2/127,kb||document.createElement('i'))}else if(c===0x80||(c===0x90&&d2===0))tOff('m'+d1)}});$('twMidi').textContent=n?'MIDI: '+n+' input'+(n>1?'s':'')+' → tier '+(TW.midi+1):'MIDI: no keyboard found'};hook();acc.onstatechange=hook}).catch(()=>{$('twMidi').textContent='MIDI: permission refused'})}
+
+/* ================= LAUNCH CONSOLE ================= */
+function buildLaunch(){const u=el('section',{id:'osLaunch',class:'unit'});
+ u.innerHTML=plate('LAUNCH CONSOLE','LC-8','osLaunch')+'<div class="lcbody"><div class="clips" id="lcClips" data-help="lcClips"></div>'+
+ '<div class="lcrow"><button class="hwb" id="lcPlay" data-help="lcPlay"><i class="led"></i>▶ PLAY / ■ STOP</button><button class="hwb" id="lcSong" data-help="lcSong"><i class="led"></i>+ ADD TO SONG</button><button class="hwb" id="lcPads" data-help="scrProg"><i class="led"></i>PADS: CHOP</button><span class="lchint">Tap a pattern to play it. While playing, it starts when the current one finishes (it blinks while it waits). Keys <kbd>F1</kbd>–<kbd>F8</kbd> or <kbd>Shift</kbd>+<kbd>1</kbd>–<kbd>8</kbd> launch too.</span></div></div>';
+ return u}
+function launchWire(){$('lcClips').onclick=e=>{const c=e.target.closest('.clip');if(!c||!need())return;launch(+c.dataset.i)};
+ $('lcPlay').onclick=()=>{if(!need())return;(API().playing()?$('psStop'):$('psPlay')).click()};
+ $('lcSong').onclick=()=>{if(!need())return;const b=$('psSongAdd');if(b){b.click();say('Added P'+(API().pat()+1)+' to the song order. See it on SONG → SONG ARRANGER.')}};
+ $('lcPads').onclick=()=>{const b=$('scrProg');if(b)b.click()}}
+function launch(i){const A=API();A.selPat(i);if(!A.playing()){$('psPlay').click();say('Playing P'+(i+1)+'.')}else say('P'+(i+1)+' is queued: it starts when the current pattern finishes.')}
+function launchRender(){if(!ready()){$('lcClips').innerHTML='<p class="empty">Load a song to launch its patterns.</p>';return}const A=API();
+ $('lcClips').innerHTML=A.pats().map(p=>'<button class="clip'+(p.hits?' has':'')+'" data-i="'+p.i+'"><b>P'+(p.i+1)+'</b><span>'+p.bars+' BAR'+(p.bars>1?'S':'')+' · '+p.hits+' HITS</span><canvas width="200" height="56"></canvas><i class="cbar"><u></u></i><kbd>F'+(p.i+1)+'</kbd></button>').join('');
+ LC_SIG='';launchSync(A.pats(),A.pat(),A.queued())}
+let LC_SIG='';
+function launchSync(ps,P,q){const A=API(),sig=ps.map(p=>p.hits+'/'+p.bars).join(',');if(sig!==LC_SIG){LC_SIG=sig;$$('#lcClips .clip').forEach((c,i)=>{const p=ps[i];c.classList.toggle('has',!!p.hits);c.querySelector('span').textContent=p.bars+' BAR'+(p.bars>1?'S':'')+' · '+p.hits+' HITS';const cv=c.querySelector('canvas'),x=cv.getContext('2d');x.clearRect(0,0,200,56);
+  p.ev.forEach(e=>{const r=e.pg==='chop'?(e.ci%16):e.p;x.fillStyle=getComputedStyle(document.body).getPropertyValue('--acc')||'#f35';x.globalAlpha=.85;x.fillRect(e.t/(p.bars*4)*196+2,2+r*3.3,3,3)})})}
+ $$('#lcClips .clip').forEach((c,i)=>{const pl=A.playing()&&i===P;c.classList.toggle('play',pl);c.classList.toggle('q',q===i);c.classList.toggle('cur',!A.playing()&&i===P);c.querySelector('.cbar u').style.width=(pl?A.pos()*100:0)+'%'});
+ const lp=$('lcPads');try{lp.lastChild.textContent='PADS: '+(A.prog()==='chop'?'CHOP':'KIT')}catch(e){}}
+
+/* ================= HELP: every control explains itself ================= */
+const H={
+ /* rail */
+ 'rail-home':['TAPE DECK','Where a session starts: load a song (or the demo beat) and see its tempo, key, slice count and bars.','Rail'],
+ 'rail-chop':['SAMPLER','Sets how the song is cut. SHORTEST and LONGEST decide slice length; the PAD MATRIX plays the cuts in order (CHOP program).','Rail'],
+ 'rail-kit':['KIT FORGE','Build your own kits by hand: light a slot on the left, find a cut on the right, hold it. Save kits by name.','Rail'],
+ 'rail-pads':['DRUM MACHINE','The pads, full size, with the pad editor: play, arrange, edit, tune and clear pads.','Rail'],
+ 'rail-seq':['STEP SEQUENCER','Draw or erase hits on the grid of the current pattern.','Rail'],
+ 'rail-keys':['KEYS','KEY TOWER (three stacked keyboards), PIANO and LAYER RIG. Every keyboard can record into the pattern.','Rail'],
+ 'rail-song':['SONG','SONG ARRANGER puts patterns in order and exports; AUTO PRODUCER builds a new arrangement of the song.','Rail'],
+ 'rail-live':['LIVE','LAUNCH CONSOLE shows all 8 patterns to launch, DJ MIXER has cues, loops, rolls and kills.','Rail'],
+ 'rail-lab':['LAB','SOUND BROWSER, STEM SPLITTER and SOUND SORTER: dig through every slice, split stems, group similar sounds.','Rail'],
+ 'rail-brain':['BEAT BRAIN','Presets, numbered variations, full-song writing and smart sound packs built from your own slices.','Rail'],
+ 'rail-guide':['STUDIO MANUAL','Lessons, the studio map, the button book and a demo that plays itself.','Rail'],
+ osExplain:['EXPLAIN','Turns explain mode on and off. While it is on, pressing any control tells you what it does instead of doing it. Keyboard: ?','Rail'],
+ /* meter bridge */
+ hwLoad:['LOAD','Opens a song from your device (WAV, MP3, M4A, FLAC, OGG). You can also drop a file anywhere on the machine. Each song keeps its own pads, kits and patterns.','Meter bridge'],
+ osSave:['SAVE','Saves this setup: pads, kit banks, patterns and song order, under the song’s name. It also saves by itself as you work.','Meter bridge'],
+ vu:['OUTPUT VU','The analog meter shows the master output. The rim turns red when the signal peaks near clipping: turn MASTER down a little.','Meter bridge'],
+ hwMasterIn:['MASTER','Master volume for everything the machine plays.','Meter bridge'],
+ gRec:['TAKE REC','Records everything you hear, from any unit, into a take (audio). Press again to stop; takes appear on SONG → SONG ARRANGER for export.','Meter bridge'],
+ /* transport */
+ psRec:['REC','Arms recording into the current pattern. Then press PLAY (count-in on) and play pads or keys; every hit lands in the pattern.','Transport'],
+ hwOvd:['OVERDUB','Starts playing and recording on top of what is already in the pattern.','Transport'],
+ psStop:['STOP','Stops playback and recording.','Transport'],
+ psPlay:['PLAY','Plays the current pattern on a loop (or the song order when song mode is on).','Transport'],
+ hwPst:['PLAY START','Plays from the very start: pattern 1 or the first entry of the song order.','Transport'],
+ psTap:['TAP TEMPO','Tap 4 times in time to set the tempo.','Transport'],
+ osPatPrev:['PATTERN ◀','Steps back one pattern. While playing, the new pattern waits until the current one finishes. Keyboard: −','Transport'],
+ osPatNext:['PATTERN ▶','Steps forward one pattern (P1–P8). While playing it queues. Keyboard: =','Transport'],
+ patLcd:['PATTERN DISPLAY','Shows the pattern playing, the one queued (→), its length, number of hits and a progress line.','Transport'],
+ psPats:['P1–P8','Jump straight to any of the 8 patterns. A lit button has hits in it. Keyboard: Z X C V B N M ,','Transport'],
+ osPatDup:['COPY ▶','Copies the current pattern into the next empty one and jumps there, so you can build a variation without losing the original.','Transport'],
+ osPatClr:['CLEAR','Removes every hit from the current pattern (asks first). UNDO brings it back.','Transport'],
+ osUndo:['UNDO','Takes back the last change: a recording, a cleared pattern, a pad you loaded. Up to 50 steps.','Transport'],
+ osBack:['◀ BACK','Returns to the unit you were on before, like a back button. Keyboard: `','Transport'],
+ /* pad matrix */
+ scrProg:['CHOP / KIT program','CHOP: the pads play the song’s cuts in order (A01 = cut 1). KIT: the pads play the kits you built in KIT FORGE or got from Beat Brain.','Pad matrix'],
+ psBanks:['PAD BANKS A–H','Eight banks of 16 pads. In CHOP they hold cuts 1–128 (◀/▶ SLICES on the SAMPLER pages through more). Keyboard: 1–8','Pad matrix'],
+ psGrid:['PADS','Play with mouse, touch or keys A S D F … Hold an empty pad (KIT program) to choose a sound for it: you go to KIT FORGE with that slot lit.','Pad matrix'],
+ psBpm:['TEMPO knob','Tempo of the sequencer. Drag up/down, scroll, or double-click to reset.','Pad matrix'],psSw:['SWING knob','Pushes every other 16th late for groove.','Pad matrix'],psFk:['FILTER knob','Left = low-pass (darker), right = high-pass (thinner). Centre is off.','Pad matrix'],djPump:['PUMP knob','Sidechain pump: the music ducks on every kick.','Pad matrix'],
+ nrB:['NOTE REPEAT','While held on, pads retrigger at the rate shown next to it. SHIFT does the same while held.','Pad matrix'],
+ psKeys:['16 LEVELS','Turns the 16 pads into 16 notes of the last pad you played, in the song’s key.','Pad matrix'],psChd:['CHORD','With 16 LEVELS on, each pad plays a chord.','Pad matrix'],psUndo:['UNDO','Same as UNDO in the transport bar.','Pad matrix'],
+ hwShift:['SHIFT','Second function: pads note-repeat; with PAD MUTE, unmutes everything; with SHORTEST/LONGEST, steps back.','Pad matrix'],
+ hwErase:['ERASE','While lit, pressing a pad erases that pad’s hits from the current pattern.','Pad matrix'],hwCopy:['COPY','Copies the current pattern to the next empty one.','Pad matrix'],
+ hwTC:['TC (timing correct)','Steps the quantize grid: off, 1/4 … 1/32. New hits snap to it.','Pad matrix'],hwFull:['FULL LEVEL','Every hit plays at full velocity.','Pad matrix'],hwMute:['PAD MUTE','While lit, pads mute and unmute instead of playing.','Pad matrix'],
+ jog:['DATA wheel','Changes whichever value you touched last on the screen. − and + step it one at a time.','Pad matrix'],
+ /* kit forge */
+ kfBanks:['KIT BANKS','Which of the 8 kit banks you are building. The number shows how many slots are filled.','Kit Forge'],
+ kfSlots:['SLOTS','Tap a slot to light it (and hear it). The lit slot is where the next cut lands. After each drop the next empty slot lights up.','Kit Forge'],
+ kfClr:['CLEAR SLOT','Empties the lit slot.','Kit Forge'],kfClrB:['CLEAR BANK','Empties all 16 slots of this bank (asks first).','Kit Forge'],kfPads:['PLAY ON PADS','Switches the pads to the KIT program on this bank and opens the DRUM MACHINE.','Kit Forge'],
+ kfSave:['MY KITS','Name the bank and SAVE KIT. Tap a saved kit to load it into the current bank; × deletes it.','Kit Forge'],
+ kfPrev:['PAGE ◀ ▶','Flip pages of cuts. ⏮ ⏭ jump to the first and last page. Keyboard: Page Up / Page Down.','Kit Forge'],kfLcd:['CUT DISPLAY','Which cuts are on screen and how many there are.','Kit Forge'],kfPer:['CUTS PER PAGE','16, 32 or 64 cuts on each page.','Kit Forge'],
+ kfFilt:['FILTER','Show only kicks, snares, hats or tonal cuts.','Kit Forge'],kfCuts:['CUTS','Tap to hear. Hold ½ second to drop into the lit slot, or drag onto any slot. BT = length in beats.','Kit Forge'],
+ /* key tower */
+ twKey:['KEY','The song’s key, found when it loaded. Scale lock uses it.','Key Tower'],twLock:['SCALE LOCK','Only notes in the song’s key play and light up, so you cannot hit a wrong note.','Key Tower'],twLab:['KEY LABELS','Shows which computer key plays each note: Z row = tier 1, Q row = tier 2.','Key Tower'],
+ twMidi:['MIDI','Plug in a MIDI keyboard; it plays the tier whose MIDI IN is lit.','Key Tower'],twRec:['RECORD KEYS','Arm REC and press PLAY: notes from any tier record into the current pattern, with length and pitch.','Key Tower'],
+ twLeft:['TIER SOUND + OCTAVE','◀ ▶ picks the sound (tonal cuts first, then your kit pads, then every cut). − + moves the tier an octave.','Key Tower'],
+ twRight:['TIER CONTROLS','VOL sets the tier’s level. HOLD lets notes ring. STACK: stacked tiers play together. MUTE silences it. MIDI IN routes a MIDI keyboard here.','Key Tower'],
+ /* launch */
+ lcClips:['PATTERN CLIPS','All 8 patterns at once. Tap to play; while playing, a tapped clip waits (blinking) and starts when the current one finishes.','Launch Console'],
+ lcPlay:['PLAY / STOP','Starts or stops the transport.','Launch Console'],lcSong:['+ ADD TO SONG','Adds the current pattern to the end of the song order.','Launch Console']};
+const SOFTH={SHORTEST:'Cuts shorter than this are merged into the next. Tap to step: 1/32 … 2 bars. With SHIFT on it steps back.',LONGEST:'Cuts longer than this are split. Tap to step: ½ beat … 4 bars, or never.',PADS:'Switches the pads between CHOP (cuts in order) and KIT (your kits).','◀ SLICES':'Previous 128 cuts on the pad banks.','SLICES ▶':'Next 128 cuts on the pad banks.'};
+function helpFor(t){let e=t.closest('[data-help]');if(e)return H[e.dataset.help]?[...H[e.dataset.help],e]:null;
+ const k=t.closest('.knob');if(k&&H[k.dataset.for])return[...H[k.dataset.for],k];
+ for(let x=t;x&&x!==document.body;x=x.parentElement){if(x.id&&H[x.id])return[...H[x.id],x]}
+ const sk=t.closest('#scrFoot .sk');if(sk){const n=(sk.dataset.t||sk.textContent).trim();return[n,SOFTH[n]||'Soft key: does the job written on it for the unit on screen. The keys change with the unit, like an MPC’s F-keys.','Soft keys',sk]}
+ const rb=t.closest('.zb');if(rb)return['ZOOM','− and + scale this unit; ⤢ makes it fill the stage (double-click its nameplate does the same).','Any unit',rb];
+ const u=t.closest('.unit,#subBar');if(u){const U=UNITS[curP];return[U.n,U.d,'Unit',u]}return null}
+function explain(on){document.body.classList.toggle('explain',on);$('osExplain').classList.toggle('on',on);$('xbub').hidden=true;say(on?'Explain mode: press any control to learn what it does. Press ? or Esc to leave.':'Explain mode off.')}
+function explainWire(){document.addEventListener('click',e=>{if(!document.body.classList.contains('explain'))return;if(e.target.closest('#osExplain,#xbub,#coach'))return;const h=helpFor(e.target);if(!h)return;e.preventDefault();e.stopPropagation();showBub(h)},true);
+ ['pointerdown','mousedown','touchstart'].forEach(ev=>document.addEventListener(ev,e=>{if(document.body.classList.contains('explain')&&!e.target.closest('#osExplain,#xbub,#coach,#rail .rb[data-grp]')&&helpFor(e.target)){e.stopPropagation()}},true))}
+function showBub([t,d,g,elx]){const b=$('xbub');b.querySelector('b').textContent=t;b.querySelector('p').textContent=d;b.hidden=false;const r=elx.getBoundingClientRect(),bw=Math.min(340,innerWidth-20);b.style.width=bw+'px';
+ let x=Math.min(innerWidth-bw-10,Math.max(10,r.left+r.width/2-bw/2)),y=r.bottom+10;if(y+150>innerHeight)y=Math.max(10,r.top-160);b.style.left=x+'px';b.style.top=y+'px'}
+
+/* ================= STUDIO MANUAL: map, lessons, button book, demo ================= */
+const FLOW=[['start','Load'],['chop','Cut'],['kit','Build kits'],['pads','Play'],['sequence','Program'],['tower','Add keys'],['launch','Perform'],['song','Arrange + export']];
+const LESSONS=[
+ {id:'tour',t:'Tour of the studio',d:'Two minutes: the rail, the meter bridge, the transport bar and how the units connect.',steps:[
+  {p:'start',s:'#rail',t:'The rail: your studio rack',x:'Each button on the rail opens one piece of gear. Go top to bottom and you follow the way a beat gets made: load, chop, build kits, play, program, keys, arrange, perform.'},
+  {p:'start',s:'#hwTop',t:'The meter bridge (always on top)',x:'Song name, tempo and key on the display, the analog OUTPUT meter, SAVE for your whole setup, MASTER volume and TAKE REC. It never changes between units.'},
+  {p:'start',s:'#tbar',t:'The transport bar (always on the bottom)',x:'REC, PLAY, STOP and the pattern deck: ◀ ▶ step through patterns P1–P8, COPY ▶ makes a variation, CLEAR wipes the pattern, UNDO takes back a mistake and ◀ BACK returns to the last unit.'},
+  {p:'start',s:'#subBar',t:'Unit name and sub-units',x:'This strip tells you which unit you are on and what it is for. Some rail buttons hold more than one unit (KEYS has KEY TOWER, PIANO and LAYER RIG): their tabs show up here.'},
+  {p:'start',s:'#screenWrap .zm',t:'Zoom any unit',x:'Every unit has − ⤢ + on its nameplate. − and + make it smaller or bigger; ⤢ makes it fill the stage. Double-click a nameplate for the same.'},
+  {p:'start',s:'#osExplain',t:'Explain mode',x:'Lost? Press ? (or this button). Then press any control and it tells you what it does instead of doing it. Press ? again to go back to work.'},
+  {p:'start',s:'#drop',t:'Load a song',x:'Press LOAD (top right) or drop a file here. Tempo, key and every hit are found for you. No song yet? Load the demo beat to follow the other lessons.'}]},
+ {id:'chop',t:'Chop a song',d:'Set the slice length and page through the cuts on the pads.',need:1,steps:[
+  {p:'chop',s:'#rail .rb[data-grp="chop"]',t:'Open the SAMPLER',x:'CHOP on the rail. The screen shows the waveform with every cut; the PAD MATRIX on the right plays the cuts in order.'},
+  {p:'chop',s:'#c1',t:'The waveform',x:'Each line is a cut. Tap the waveform to add or remove a cut by hand.'},
+  {p:'chop',s:'#scrFoot .sk[data-cyc="minl"]',t:'SHORTEST',x:'Cuts shorter than this get merged. Tap it to step through 1/32 note up to 2 bars. Longer = fewer, bigger chops.'},
+  {p:'chop',s:'#scrFoot .sk[data-cyc="maxl"]',t:'LONGEST',x:'Cuts longer than this get split. Set it to 1 bar or 2 bars for loop-size chops; the pads change straight away.'},
+  {p:'chop',s:'#padsSlot',t:'Pads follow your cuts',x:'A01 is cut 1, A16 is cut 16, B01 is cut 17 … H16 is cut 128. Every change to the cuts re-chops the pads.'},
+  {p:'chop',s:'#banksSlot',t:'Flip through the cuts',x:'Banks A–H hold 128 cuts; the small number is the first cut on each bank. More than 128? ◀ SLICES and SLICES ▶ on the soft keys page through.'}]},
+ {id:'kit',t:'Build your own kit',d:'Hand-pick cuts into 16 slots, then save the kit.',need:1,steps:[
+  {p:'kit',s:'#kfBanks',t:'Pick a kit bank',x:'Eight kit banks, A–H. The number shows how many slots are filled.'},
+  {p:'kit',s:'#kfSlots',t:'Light a slot',x:'Tap the slot you want to fill. It glows. (Holding an empty pad on the DRUM MACHINE brings you here with that slot already lit.)'},
+  {p:'kit',s:'#kfLib .kfnav',t:'Page through the cuts',x:'◀ ▶ flip pages, ⏮ ⏭ jump to the ends, and you can show 16, 32 or 64 cuts at a time. Page Up / Page Down work too.'},
+  {p:'kit',s:'#kfFilt',t:'Filter',x:'Only kicks, only snares, only hats, or only tonal cuts.'},
+  {p:'kit',s:'#kfCuts',t:'Hear, then hold',x:'Tap a cut to hear it. Hold it for half a second (or drag it onto a slot) and it lands in the lit slot. The next empty slot lights up, so you can keep going.'},
+  {p:'kit',s:'.kfsave',t:'Save the kit',x:'Name it and press SAVE KIT. Saved kits load into any bank with one tap.'},
+  {p:'kit',s:'#kfPads',t:'Play it',x:'PLAY ON PADS switches the pads to the KIT program on this bank and opens the DRUM MACHINE.'}]},
+ {id:'beat',t:'Record a beat',d:'Play pads into a pattern, fix mistakes, keep the good take.',need:1,steps:[
+  {p:'pads',s:'#deckProg',t:'Choose what the pads play',x:'CHOP = the song’s cuts in order. KIT = your kits. Tap to switch.'},
+  {p:'pads',s:'#patDeck',t:'Pick a pattern',x:'◀ ▶ or P1–P8 choose the pattern you are recording into.'},
+  {p:'pads',s:'#psRec',t:'Arm REC',x:'Press REC, then PLAY. You get a count-in, then everything you play lands in the pattern.'},
+  {p:'pads',s:'#padsSlot',t:'Play the pads',x:'Mouse, touch, or keys A S D F G H J K and Q W E R T Y U I. Hits snap to the TC grid.'},
+  {p:'pads',s:'#psStop',t:'Stop',x:'STOP ends the take. PLAY again to hear it loop.'},
+  {p:'pads',s:'#osUndo',t:'Not right? UNDO',x:'UNDO takes back the whole take. ERASE + a pad removes just that pad’s hits.'},
+  {p:'pads',s:'#hwErase',t:'ERASE',x:'Light ERASE, then press a pad to wipe only that sound from the pattern.'}]},
+ {id:'pat',t:'Build and flip patterns',d:'Variations, jumping back and forth, the step grid.',need:1,steps:[
+  {p:'sequence',s:'#psSeqCard',t:'The step grid',x:'Rows are pads, columns are 16th notes. Click a cell to add or remove a hit.'},
+  {p:'sequence',s:'#osPatDup',t:'COPY ▶ for variations',x:'Copies this pattern into the next empty one and jumps there. Change the copy: drop a kick, add a roll. The original stays safe.'},
+  {p:'sequence',s:'#osPatPrev',t:'Flip back and forth',x:'◀ ▶ (or − and = on the keyboard) step between patterns. While playing, the next one waits until the current one finishes, so it always lands on time.'},
+  {p:'sequence',s:'#patLcd',t:'The display',x:'Shows the pattern playing, the one waiting (→ P03), length, hits and a progress line.'}]},
+ {id:'keys',t:'Play the Key Tower',d:'Three keyboards, each its own sound and octave, stacked or apart.',need:1,steps:[
+  {p:'tower',s:'#twTiers .tier:last-child .tl',t:'Tier sound and octave',x:'Each tier picks its own sound (◀ ▶) and octave (− +). Tier 1 is bass, tier 2 the middle, tier 3 the top: or anything you like.'},
+  {p:'tower',s:'#twTiers .tier:last-child .twkb',t:'Play',x:'Click, touch or glide across the keys. Lower on the key = louder. Tier 1 is on the Z row of your keyboard, tier 2 on the Q row.'},
+  {p:'tower',s:'#twTiers .tier:last-child .tr',t:'HOLD, STACK, MUTE, MIDI',x:'HOLD lets notes ring. STACK two or three tiers and they play together from any of them: instant layered sounds. MIDI IN sends your MIDI keyboard to this tier.'},
+  {p:'tower',s:'#twLock',t:'Scale lock',x:'On: only the song’s key plays, so every note fits.'},
+  {p:'tower',s:'#psRec',t:'Record the keys',x:'REC + PLAY and play the tower: the notes go into the current pattern, then build the next with COPY ▶.'}]},
+ {id:'song',t:'Arrange and export',d:'Patterns in order, then WAV, MP3, MIDI or stems.',need:1,steps:[
+  {p:'song',s:'#psSongCard',t:'Song order',x:'Add patterns in the order they play. Song mode plays the list instead of one pattern.'},
+  {p:'launch',s:'#lcSong',t:'Add from the console',x:'On the LAUNCH CONSOLE, + ADD TO SONG adds the current pattern to the end of the order.'},
+  {p:'song',s:'#psSaveCard',t:'Save and export',x:'Export the song as WAV or MIDI, and save the whole setup.'},
+  {p:'song',s:'#hwRecSlot',t:'TAKE REC',x:'Or record what you play, live, as audio from any unit.'}]},
+ {id:'live',t:'Go live',d:'All patterns on one console, pads beside them, FX on the knobs.',need:1,steps:[
+  {p:'launch',s:'#lcClips',t:'The clips',x:'Every pattern at once. Tap one to play it; tap another while playing and it waits, blinking, until the current one ends. F1–F8 launch too.'},
+  {p:'launch',s:'#padsSlot',t:'Pads beside the clips',x:'Play over the top: the pads sit right there.'},
+  {p:'launch',s:'#knobs',t:'Knobs',x:'FILTER sweeps, PUMP ducks the music on the kick, SWING changes the groove live.'},
+  {p:'dj',s:'#subTabs',t:'DJ MIXER',x:'The second tab: hot cues, loops, rolls, kills and the filter.'}]}];
+function buildGuide(){const u=el('section',{id:'osGuide',class:'unit'});
+ u.innerHTML=plate('STUDIO MANUAL','OS','osGuide')+'<div class="gbody"><div class="gcol"><div class="gstart"><h2>Start here</h2><p>The BC-16 is a rack of studio gear. The <b>rail</b> on the left switches units; the <b>meter bridge</b> on top and the <b>transport bar</b> on the bottom never change.</p><div class="gbtns"><button class="hwb big" id="gTour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" id="gDemo"><i class="led"></i>▶ WATCH THE DEMO</button><button class="hwb big" id="gExp"><i class="led"></i>? EXPLAIN MODE</button></div></div>'+
+ '<h3>Studio map: how the units link</h3><div class="gmap" id="gMap"></div><h3>Lessons</h3><ol class="glessons" id="gLessons"></ol></div>'+
+ '<div class="gcol"><h3>Button book</h3><input id="gFind" placeholder="Find a button: record, pattern, kit, octave…" aria-label="Find a button"><div id="gBook"></div></div></div>';
+ return u}
+function guideRender(){
+ $('gMap').innerHTML=FLOW.map(([p,v],i)=>'<button class="gnode" data-p="'+p+'" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></button>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('');
+ $('gLessons').innerHTML=LESSONS.map(L=>'<li><button class="glesson" data-l="'+L.id+'"><b>'+L.t+'</b><span>'+L.d+'</span><em>'+L.steps.length+' steps'+(L.need?' · needs a song':'')+'</em></button></li>').join('');
+ bookRender()}
+function bookRender(){const q=($('gFind').value||'').toLowerCase().trim(),G={};
+ for(const[k,[t,d,g]]of Object.entries(H)){if(q&&!(t+' '+d+' '+g).toLowerCase().includes(q))continue;(G[g]=G[g]||[]).push([k,t,d])}
+ $('gBook').innerHTML=Object.entries(G).map(([g,a])=>'<section><h4>'+g+'</h4>'+a.map(([k,t,d])=>'<div class="bk1"><b>'+t+'</b><p>'+d+'</p><button class="show" data-k="'+k+'">SHOW ME</button></div>').join('')+'</section>').join('')||'<p class="empty">Nothing matches “'+esc(q)+'”.</p>'}
+const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch'};
+function guideWire(){$('gTour').onclick=()=>coachStart('tour');$('gDemo').onclick=demoStart;$('gExp').onclick=()=>{explain(true);go(hist[hist.length-1]||'start')};
+ $('gMap').onclick=e=>{const n=e.target.closest('.gnode');if(n)go(n.dataset.p)};
+ $('gLessons').onclick=e=>{const b=e.target.closest('.glesson');if(b)coachStart(b.dataset.l)};
+ $('gFind').oninput=bookRender;
+ $('gBook').onclick=e=>{const b=e.target.closest('.show');if(!b)return;const k=b.dataset.k,g=H[k][2];let sel=k.startsWith('rail-')?'#rail .rb[data-grp="'+k.slice(5)+'"]':'[data-help="'+k+'"],#'+k+',.knob[data-for="'+k+'"]';
+  const p=SHOWP[g]||'start';if(p!=='start'&&p!=='guide'&&!ready()&&!/^(Meter|Transport|Rail)/.test(g)){say('Load a song first to see that unit.');return}
+  coach={mode:'tour',L:{t:'Button book',steps:[{p:ready()||p==='start'?p:'start',s:sel,t:H[k][0],x:H[k][1]}]},i:0};document.body.classList.add('coach');$('coach').hidden=false;coachShow()}}
+
+/* ----- coach: spotlight tours ----- */
+let coach=null;
+function coachStart(id){const L=LESSONS.find(x=>x.id===id);if(!L)return;if(L.need&&!ready()){coach={mode:'tour',L:{t:L.t,steps:[{p:'start',s:'#drop',t:'Load a song first',x:'This lesson uses a song. Press LOAD on the meter bridge or load the demo beat, wait for “Pads are ready”, then start the lesson again from GUIDE.'}]},i:0}}else coach={mode:'tour',L,i:0};
+ document.body.classList.add('coach');$('coach').hidden=false;$('cnext').hidden=false;$('cprev').hidden=false;coachShow()}
+function coachShow(){const S=coach.L.steps[coach.i];if(S.p&&curP!==S.p&&(ready()||S.p==='start'||S.p==='guide'))go(S.p);
+ $('cstep').textContent=coach.L.t+' · step '+(coach.i+1)+' of '+coach.L.steps.length;$('ctitle').textContent=S.t;$('ctext').textContent=S.x;
+ $('cprog').style.width=((coach.i+1)/coach.L.steps.length*100)+'%';$('cprev').disabled=coach.i===0;$('cnext').textContent=coach.i===coach.L.steps.length-1?'Done ✓':'Next ▶';
+ setTimeout(coachPlace,60);setTimeout(coachPlace,400)}
+function target(sel){if(sel&&typeof sel!=='string')return sel;let c0;try{c0=$$(sel)}catch(e){return null}const c=c0.filter(e=>e.offsetParent||e.getClientRects().length);return c[0]||null}
+function coachPlace(){if(!coach)return;const S=coach.L.steps[coach.i]||coach.cur;if(!S)return;const t=S.s?target(S.s):null,sp=$('spot'),cd=$('ccard');
+ if(t){t.scrollIntoView({block:'nearest',inline:'nearest'});const r=t.getBoundingClientRect(),pad=8;Object.assign(sp.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px',opacity:1})}
+ else Object.assign(sp.style,{left:'50%',top:'45%',width:'0px',height:'0px',opacity:1});
+ const cw=Math.min(380,innerWidth-24);cd.style.width=cw+'px';const ch=cd.offsetHeight||190;let x,y;
+ if(t){const r=t.getBoundingClientRect();const roomR=innerWidth-r.right,roomL=r.left,roomB=innerHeight-r.bottom;
+  if(roomB>ch+24){y=r.bottom+18;x=r.left+r.width/2-cw/2}else if(r.top>ch+24){y=r.top-ch-18;x=r.left+r.width/2-cw/2}else if(roomR>cw+24){x=r.right+18;y=r.top+r.height/2-ch/2}else if(roomL>cw+24){x=r.left-cw-18;y=r.top+r.height/2-ch/2}else{x=innerWidth/2-cw/2;y=innerHeight-ch-24}}
+ else{x=innerWidth/2-cw/2;y=innerHeight/2-ch/2}
+ cd.style.left=Math.max(12,Math.min(innerWidth-cw-12,x))+'px';cd.style.top=Math.max(12,Math.min(innerHeight-ch-12,y))+'px'}
+function coachEnd(){if(coach&&coach.mode==='demo')demoStop();coach=null;document.body.classList.remove('coach');$('coach').hidden=true;$('ghost').classList.remove('on')}
+function coachWire(){$('cnext').onclick=()=>{if(!coach)return;if(coach.mode==='demo'){demoPause();return}if(coach.i<coach.L.steps.length-1){coach.i++;coachShow()}else{const id=coach.L.id;coachEnd();LSs('bc16:done:'+id,1);say('Lesson done. Open GUIDE on the rail for the next one.')}};
+ $('cprev').onclick=()=>{if(!coach)return;if(coach.mode==='demo'){coachEnd();return}if(coach.i>0){coach.i--;coachShow()}};$('cexit').onclick=coachEnd;
+ addEventListener('resize',()=>{if(coach)coachPlace();if(curP==='tower'){TW.built='';towerRender()}});
+ addEventListener('keydown',e=>{if(!coach)return;if(e.key==='Escape'){e.preventDefault();coachEnd()}else if(coach.mode==='tour'&&(e.key==='ArrowRight'||e.key==='Enter')){e.preventDefault();e.stopPropagation();$('cnext').click()}else if(coach.mode==='tour'&&e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();$('cprev').click()}},true)}
+
+/* ----- the demo: a tour that drives the machine itself, with a ghost hand ----- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let DEMO=null;
+async function ghostTo(sel,click){const t=typeof sel==='string'?target(sel):sel,g=$('ghost');if(!t)return null;t.scrollIntoView({block:'nearest'});const r=t.getBoundingClientRect();g.classList.add('on');g.style.transform='translate('+(r.left+r.width/2)+'px,'+(r.top+r.height/2)+'px)';await sleep(reduced?150:650);if(click){g.classList.add('tap');setTimeout(()=>g.classList.remove('tap'),300)}return t}
+async function demoStep(sel,title,text,act,wait){if(!DEMO||DEMO.stop)throw 0;while(DEMO.paused&&!DEMO.stop)await sleep(150);if(DEMO.stop)throw 0;
+ coach.cur={s:sel,t:title,x:text};$('ctitle').textContent=title;$('ctext').textContent=text;DEMO.n++;$('cstep').textContent='Demo · '+DEMO.n+' of '+DEMO.total;$('cprog').style.width=(DEMO.n/DEMO.total*100)+'%';
+ coachPlace();const t=await ghostTo(sel,!!act);coachPlace();if(act&&t)await act(t);await sleep(wait||2600);coachPlace()}
+async function demoStart(){coach={mode:'demo',L:{t:'Demo',steps:[]},i:0};DEMO={n:0,total:18,paused:false,stop:false};document.body.classList.add('coach');$('coach').hidden=false;$('cnext').textContent='❚❚ Pause';$('cprev').textContent='■ Stop';$('cprev').disabled=false;
+ const A=()=>API(),click=sel=>t=>{(typeof sel==='string'?target(sel):t).click()};
+ try{
+  if(!ready()){go('start');await demoStep('#demo','Loading the demo beat','The demo needs a song, so the demo beat is loading. Tempo, key and every hit are being found.',async t=>{const d=$('demo');if(d&&!d.hidden)d.click()},500);
+   const t0=Date.now();while(!ready()&&Date.now()-t0<240000&&!DEMO.stop){await sleep(500)}await sleep(1500);if(!ready())throw 0}
+  go('start');await demoStep('#rail','The rail','Every unit of the studio sits on this rail, in the order you make a beat. Watch: we go top to bottom.',null,2800);
+  await demoStep('#oled','The song display','Name, tempo, key and how many cuts were found. Messages scroll on the last line.',null,2600);
+  await demoStep('#rail .rb[data-grp="chop"]','SAMPLER','CHOP on the rail opens the sampler: the waveform with every cut.',click('#rail .rb[data-grp="chop"]'),2400);
+  await demoStep('#padsSlot','Pads follow the cuts','A01 plays cut 1, A02 cut 2 … listen.',async()=>{for(let i=0;i<6;i++){A().hear({k:'slice',ci:i});const p=$$('#psGrid .pp')[[12,13,14,15,8,9][i]];if(p){p.classList.add('on');setTimeout(()=>p.classList.remove('on'),180)}await sleep(330)}},1200);
+  await demoStep('#scrFoot .sk[data-cyc="maxl"]','LONGEST','This decides how long a cut can get. Bigger = loop-size chops. (We leave it as is.)',null,2600);
+  await demoStep('#rail .rb[data-grp="kit"]','KIT FORGE','Now we build a kit by hand.',click('#rail .rb[data-grp="kit"]'),1800);
+  let bank=0;for(let b=7;b>=0;b--){if(!A().kit(b).some(Boolean))bank=b}KF.bank=bank;KF.armed=0;kitRender();
+  await demoStep('#kfSlots .ks[data-j="0"]','Light a slot','Tap a slot: it glows. That is where the next cut goes.',async t=>{KF.armed=0;kitRender()},1800);
+  const ks=$$('#kfCuts .kc');const pickC=ks.find(c=>/KICK/.test(c.textContent))||ks[0];
+  await demoStep(pickC,'Hear, then hold','Tap a cut to hear it; hold it for half a second to drop it in.',async t=>{A().hear({k:'slice',ci:+t.dataset.ci});await sleep(700);t.classList.add('held');await sleep(400);kitDrop(+t.dataset.ci,KF.armed);DEMO.put=(DEMO.put||0)+1},2000);
+  const sn=$$('#kfCuts .kc').find(c=>/SNARE/.test(c.textContent));if(sn)await demoStep(sn,'Keep going','The next empty slot lit up by itself, so the next hold fills it.',async t=>{A().hear({k:'slice',ci:+t.dataset.ci});await sleep(600);kitDrop(+t.dataset.ci,KF.armed);DEMO.put++},2000);
+  await demoStep('.kfsave','Save it','Name the kit and SAVE KIT. Saved kits load into any bank with one tap.',null,2400);
+  await demoStep('#tbar','The transport bar','Always at the bottom: REC, PLAY, STOP, the pattern deck, UNDO and BACK.',null,2600);
+  await demoStep('#osPatNext','Flip patterns','◀ ▶ step through P1–P8. COPY ▶ makes a variation in the next empty pattern.',null,2600);
+  await demoStep('#rail .rb[data-grp="keys"]','KEY TOWER','Three stacked keyboards, each its own sound and octave.',click('#rail .rb[data-grp="keys"]'),1600);
+  if(curP!=='tower')go('tower');await sleep(300);
+  const tier=$$('#twTiers .tier')[1];if(tier)await demoStep(tier.querySelector('.twkb'),'Play a line','Glide or tap the keys. Scale lock keeps every note in the song’s key.',async()=>{const ins=$$('.twkb .tww.ins:not(.off),.twkb .twb.ins:not(.off)',tier).slice(2,9);for(const k of [0,2,4,3,1,2,0])if(ins[k]){tOn('demo',ins[k],.8);await sleep(260);tOff('demo')}},1200);
+  await demoStep('#rail .rb[data-grp="live"]','LAUNCH CONSOLE','All 8 patterns on one console, pads beside them for playing live.',click('#rail .rb[data-grp="live"]'),2200);
+  await demoStep('#osExplain','Stuck? Explain mode','Press ? and then any control: it tells you what it does. GUIDE has lessons for every unit.',null,3200);
+  await demoStep('#rail .rb[data-grp="guide"]','That is the studio','Open GUIDE for the step-by-step lessons. The kit slots the demo filled can be taken back with UNDO.',click('#rail .rb[data-grp="guide"]'),2600);
+ }catch(e){if(e)console.warn('demo stopped:',e)}
+ coachEnd()}
+function demoPause(){if(!DEMO)return;DEMO.paused=!DEMO.paused;$('cnext').textContent=DEMO.paused?'▶ Resume':'❚❚ Pause'}
+function demoStop(){if(DEMO)DEMO.stop=true;tOff('demo');$('cprev').textContent='◀ Back';$('cnext').textContent='Next ▶';DEMO=null}
+
+/* ================= first run ================= */
+function welcome(){if(LSg('bc16:welcomed',0))return;const w=el('div',{id:'welcome',role:'dialog','aria-label':'Welcome'});
+ w.innerHTML='<div class="wcard"><div class="plate"><i class="pled"></i><b class="pn">BC-16 STUDIO</b><span class="pm">FIRST POWER-ON</span><span class="vent"></span></div><div class="wbody"><h2>Welcome to the studio</h2><p>Every page is its own piece of gear. You move through them on the rail, left to right in this map:</p><div class="gmap">'+FLOW.map(([p,v],i)=>'<span class="gnode" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></span>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('')+'</div><p>Record, play, stop, patterns, undo and back are always on the bottom bar. Pick how you want to start:</p><div class="gbtns"><button class="hwb big" data-w="tour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" data-w="demo"><i class="led"></i>▶ WATCH THE DEMO</button><button class="hwb big" data-w="skip"><i class="led"></i>JUST LET ME IN</button></div><small>You can come back to all of this any time from GUIDE on the rail.</small></div></div>';
+ document.body.append(w);w.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;LSs('bc16:welcomed',1);w.remove();if(b.dataset.w==='tour')coachStart('tour');else if(b.dataset.w==='demo')demoStart()}}
+
+/* ================= keys ================= */
+function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELECT|TEXTAREA/.test(tg.tagName)||e.metaKey||e.ctrlKey)return;
+ if(e.altKey&&/^Digit\d$/.test(e.code)){const i=(+e.code.slice(5)+9)%10;const g=GROUPS[i];if(g){e.preventDefault();$('rail').querySelector('[data-grp="'+g.id+'"]').click()}return}
+ if(e.altKey)return;
+ if(e.key==='?'){e.preventDefault();explain(!document.body.classList.contains('explain'));return}
+ if(e.key==='Escape'&&document.body.classList.contains('explain')){explain(false);return}
+ if(e.key==='`'){e.preventDefault();back();return}
+ if(curP==='tower')return;
+ if(e.key==='-'||e.key==='='){e.preventDefault();patStep(e.key==='='?1:-1);return}
+ if(curP==='launch'&&ready()){let i=-1;if(/^F[1-8]$/.test(e.key))i=+e.key.slice(1)-1;else if(e.shiftKey&&/^Digit[1-8]$/.test(e.code))i=+e.code.slice(5)-1;if(i>=0){e.preventDefault();e.stopPropagation();launch(i);return}}
+ if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
+
+/* ================= boot ================= */
+function init(){build();kitWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
+ for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
+ const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
+ window.OS={page,pick};
+ page(window.curPage?curPage():'start');
+ setInterval(()=>{patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
+ const loop=()=>{vuDraw();requestAnimationFrame(loop)};requestAnimationFrame(loop);
+ let lastF='';setInterval(()=>{const f=fnameSafe();if(f!==lastF&&ready()){lastF=f;TW.key='';KF.list=null;if(curP==='kit')kitRender();if(curP==='tower'){TW.built='';towerRender()}if(curP==='launch')launchRender()}},800);
+ setTimeout(welcome,600)}
 init();
 })();
 

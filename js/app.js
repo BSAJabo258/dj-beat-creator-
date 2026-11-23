@@ -19,13 +19,14 @@ const PAGES={
  keys:{t:'D',title:'KEYS',d:'Any sound on a piano, locked to the song’s key.'},
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
- song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'}};
+ song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
+ kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
 const loaded=()=>!$('app').hidden;
 /* pads, keys and transport keys work everywhere except where the computer keyboard plays something else */
-window.psKeysOK=()=>loaded()&&cur!=='keys'&&cur!=='live';
+window.psKeysOK=()=>loaded()&&cur!=='keys'&&cur!=='live'&&cur!=='tower'&&cur!=='guide'&&!document.body.classList.contains('coach');
 
 /* ---- studio sub-pages made from the existing cards ---- */
 function buildSubs(){const S=$('tS');const mk=n=>{const d=document.createElement('div');d.className='sub';d.dataset.sub=n;d.hidden=true;return d};
@@ -41,16 +42,16 @@ function ensureHead(pane,p){let h=pane.querySelector(':scope > .phead');if(!h){h
 
 /* ---- modes ---- */
 function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
- if(p!=='start'&&!loaded()){p='start';note('Load a song first. Every mode opens up after that.')}
+ if(p!=='start'&&p!=='guide'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
+ const prev=cur;
  routing=true;try{
-  $('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start');
-  const P=PAGES[p];
+  const P=PAGES[p];$('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start'||!!P.os);
   if(P.t==='S'){if($('tS').hidden)engineTab('S');showSub(P.sub);$('psHead').innerHTML=headFor(p)}
   else if(P.t){engineTab(P.t);const pane=$('t'+P.t);if(pane)ensureHead(pane,p)}
  }finally{routing=false}
  cur=p;softKeys(p);$$('a[data-page],button[data-page]').forEach(a=>a.classList.toggle('on',a.dataset.page===p));$('scrMode').textContent=PAGES[p].title;document.body.classList.remove('modesopen');
- if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0}
-window.goPage=goPage;
+ if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);document.title=PAGES[p].title+' · DJ Beat Creator';if(!opts.keepScroll)$('scrBody').scrollTop=0;if(window.OS)OS.page(p,prev)}
+window.goPage=goPage;window.curPage=()=>cur;
 window.tab=function(t){engineTab(t);if(routing)return;
  if(t==='S'){if(!PAGES[cur]||PAGES[cur].t!=='S')goPage('pads');else goPage(cur,{keepScroll:true})}else if(T2P[t])goPage(T2P[t])};
 function note(t){const st=$('st');if(st)st.textContent=t}
