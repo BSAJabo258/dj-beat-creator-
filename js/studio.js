@@ -8,7 +8,7 @@ const PK='asdfghjkqwertyui',BK='12345678',PTK='zxcvbnm,',BL='ABCDEFGH';
 const COLS=['#e03131','#f76707','#f59f00','#2f9e44','#12b886','#1c7ed6','#4c6ef5','#ae3ec9','#d6336c','#868e96'];
 const RC={kick:'#e03131',snare:'#4c6ef5',hat:'#f59f00',open:'#fab005',perc:'#ae3ec9',stab:'#12b886',tone:'#12b886',chain:'#1c7ed6',loop:'#2f9e44',group:'#d6336c',long:'#868e96'};
 const KIND2ROLE={kick:'kick',snare:'snare',hat:'hat',tone:'tone'};
-const emptyBank=()=>Array(16).fill(null),NPAT=16;
+const emptyBank=()=>Array(16).fill(null),NPAT=16,AUTOK=['flt','pump','sw'];
 const PS={banks:Array.from({length:8},emptyBank),bank:0,pats:Array.from({length:NPAT},()=>({bars:2,ev:[]})),pat:0,follow:true,song:[],songMode:false,
  bpm:90,swing:0,q:.25,metro:true,countIn:true,mode:'play',keys:false,kp:null,chord:false,root:9,scale:'min',oct:0,sel:null,lastHit:null,swapSrc:null,
  armed:[],chain:false,layout:'g44',vel:false,srcs:{},cur:null,main:null,binF:'all',undo:[],init:false};
@@ -145,9 +145,25 @@ function adv(){const seg=TR.seg;let p;
  else if(PS.songMode&&PS.song.length){TR.songPos=(TR.songPos+1)%PS.song.length;p=PS.song[TR.songPos]}else p=seg.pat;
  TR.seg={pat:p,start:seg.start+seg.len,len:patLen(p),id:++TR.segId};TR.recSnap=false;TR.segChanged=true;if(p!==seg.pat)followPart(p,(TR.seg.start-beatNow())*bd()*1000)}
 function followPart(p,ms){const P=PS.pats[p];if(!PS.follow||!P||P.bank==null)return;setTimeout(()=>{try{if(P.prog&&P.prog!==PS.prog)setProg(P.prog,true);if(P.bank!==PS.bank)setBank(P.bank)}catch(e){}},Math.max(0,ms||0))}
+
+/* ================= AUTOMATION (DAW style): knob moves recorded into the pattern =================
+   Lanes per pattern: flt (filter -100..100), pump (0..100), sw (swing 0..100).
+   PS.autoMode: 'read' plays lanes back, 'write' records knob moves while the transport runs
+   (and replaces what was there under the moving knob), 'off' ignores lanes. */
+PS.autoMode='read';let AUTOW={};
+function autoRec(k,v){if(PS.autoMode!=='write'||!TR.playing||!TR.seg)return;const seg=TR.seg,P=PS.pats[seg.pat],nb=beatNow();let t=nb-seg.start;if(t<0)return;t=t%seg.len;
+ P.auto=P.auto||{};const L=P.auto[k]=P.auto[k]||[];const last=AUTOW[k];
+ if(last&&last.pat===seg.pat&&t>=last.t){for(let i=L.length-1;i>=0;i--)if(L[i].t>last.t+1e-6&&L[i].t<=t+1e-6)L.splice(i,1)}
+ for(let i=L.length-1;i>=0;i--)if(Math.abs(L[i].t-t)<1/16)L.splice(i,1);
+ L.push({t:+t.toFixed(4),v:+(+v).toFixed(2)});L.sort((x,y)=>x.t-y.t);AUTOW[k]={pat:seg.pat,t,at:performance.now()};seqDirty=true;dirty()}
+function autoApply(k,v){try{if(k==='flt'){$('psFk').value=v;filterKnob(v)}else if(k==='pump'){PUMP=v;if($('djPump')){$('djPump').value=v;$('djPumpV').textContent=Math.round(v)}}else if(k==='sw'){PS.swing=Math.round(v);$('psSw').value=PS.swing;$('psSwv').textContent=PS.swing}}catch(e){}}
+function autoPlay(P,seg,lo,b){if(PS.autoMode==='off'||!P.auto)return;for(const k of AUTOK){const L=P.auto[k];if(!L||!L.length)continue;
+  const w=AUTOW[k];if(PS.autoMode==='write'&&w&&performance.now()-w.at<350)continue;
+  for(const pt of L){const at=seg.start+pt.t;if(pt.t>=seg.len||at<lo-1e-9||at>=b-1e-9)continue;const when=TR.t0+at*bd();setTimeout(()=>{if(TR.playing&&PS.autoMode!=='off')autoApply(k,pt.v)},Math.max(0,(when-ac.currentTime)*1000))}}}
+
 function sched(a,b,seg){
  for(let k=Math.ceil(a-1e-9);k<b-1e-9;k++){if(k<0)click(TR.t0+k*bd(),((k%4)+4)%4===0);else if(PS.metro)click(TR.t0+k*bd(),((k-seg.start)%4+4)%4===0)}
- const lo=Math.max(a,seg.start);if(b<=lo)return;const P=PS.pats[seg.pat],sw=PS.swing/100/6;
+ const lo=Math.max(a,seg.start);if(b<=lo)return;const P=PS.pats[seg.pat],sw=PS.swing/100/6;autoPlay(P,seg,lo,b);
  for(const ev of P.ev){if(ev.t>=seg.len||ev._skip===seg.id)continue;const at=seg.start+ev.t;if(at<lo-1e-9||at>=b-1e-9)continue;
   const p=padOfEv(ev);if(!p||HW.mutes.has(evKey(ev))||(P.mute&&P.mute.includes(evKey(ev))))continue;const odd=Math.abs(((ev.t*4)%2)-1)<.02,when=TR.t0+(at+(odd?sw:0))*bd();
   let d=(ev.d||0)*bd();if(!d&&(p.mode==='loop'||p.mode==='latch'||p.mode==='cue'))d=(seg.len-ev.t)*bd();
@@ -165,7 +181,7 @@ function loop(){cancelAnimationFrame(raf);const f=()=>{if(!TR.playing)return;con
  if(seqDirty){seqDirty=false;seqDraw();renderPats()}raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)}
 
 /* ---------- undo / save ---------- */
-const cleanPats=()=>PS.pats.map(p=>{const o={bars:p.bars,ev:p.ev.map(({_skip,...e})=>e)};if(p.mute&&p.mute.length)o.mute=[...p.mute];if(p.bank!=null)o.bank=p.bank;if(p.prog)o.prog=p.prog;return o});
+const cleanPats=()=>PS.pats.map(p=>{const o={bars:p.bars,ev:p.ev.map(({_skip,...e})=>e)};if(p.mute&&p.mute.length)o.mute=[...p.mute];if(p.bank!=null)o.bank=p.bank;if(p.prog)o.prog=p.prog;if(p.auto&&AUTOK.some(k=>p.auto[k]&&p.auto[k].length))o.auto=JSON.parse(JSON.stringify(p.auto));return o});
 function pushUndo(){PS.undo.push(JSON.stringify({b:PS.banks,p:cleanPats(),s:PS.song}));if(PS.undo.length>50)PS.undo.shift()}
 function undo(){const u=PS.undo.pop();if(!u){msg('Nothing to undo.');return}const d=JSON.parse(u);PS.banks=d.b;PS.pats=d.p;PS.song=d.s||[];renderAll();dirty();msg('Undone.')}
 function ser(){const S=PS.srcs[PS.main]||{};return{v:1,app:'BeatChopperPadStudio',main:PS.main,mainLen:S.len,srcs:Object.keys(PS.srcs),
@@ -177,7 +193,7 @@ function applyProj(d,opt){if(!d||!Array.isArray(d.banks))throw new Error('That i
  const cur=PS.srcs[PS.main]||{};let remap=false;if(d.main&&d.main!==PS.main&&!(PS.srcs[d.main]&&PS.srcs[d.main].chs)&&d.mainLen&&d.mainLen===cur.len)remap=true;
  if(!opt.noChop&&d.chop&&(d.main===PS.main||remap)){$('mode').value=d.chop.mode;$('bpm').value=d.chop.bpm;$('sens').value=d.chop.sens;$('sv').textContent=d.chop.sens;$('minl').value=d.chop.minl;$('maxl').value=d.chop.maxl;manual=deep(d.chop.manual||{add:[],del:[]});rebuild();regMain()}
  PS.banks=Array.from({length:8},(_,i)=>{const B=(d.banks[i]||[]).slice(0,16);while(B.length<16)B.push(null);return B.map(p=>p&&p.seg?{...p,src:remap&&p.src===d.main?PS.main:p.src}:null)});
- PS.pats=Array.from({length:NPAT},(_,i)=>{const p=(d.pats||[])[i]||{bars:2,ev:[]};const o={bars:[1,2,4,8].includes(+p.bars)?+p.bars:2,ev:(p.ev||[]).filter(e=>e&&isFinite(e.t))};if(Array.isArray(p.mute))o.mute=p.mute.filter(x=>typeof x==='string');if(p.bank!=null)o.bank=clamp(+p.bank,0,7);if(p.prog)o.prog=p.prog==='kit'?'kit':'chop';return o});
+ PS.pats=Array.from({length:NPAT},(_,i)=>{const p=(d.pats||[])[i]||{bars:2,ev:[]};const o={bars:[1,2,4,8].includes(+p.bars)?+p.bars:2,ev:(p.ev||[]).filter(e=>e&&isFinite(e.t))};if(Array.isArray(p.mute))o.mute=p.mute.filter(x=>typeof x==='string');if(p.bank!=null)o.bank=clamp(+p.bank,0,7);if(p.prog)o.prog=p.prog==='kit'?'kit':'chop';if(p.auto&&typeof p.auto==='object'){o.auto={};for(const k of AUTOK)if(Array.isArray(p.auto[k]))o.auto[k]=p.auto[k].filter(x=>x&&isFinite(x.t)&&isFinite(x.v)).map(x=>({t:+x.t,v:+x.v}))}return o});
  PS.song=(d.song||[]).filter(x=>x>=0&&x<NPAT);if(Array.isArray(d.packs))PS.packs=d.packs;PS.songMode=!!d.songMode;if(d.bpm)PS.bpm=+d.bpm;PS.swing=+d.swing||0;if(d.q!==undefined)PS.q=+d.q;if(d.root!==undefined){PS.root=+d.root;PS.keySet=true}if(d.scale)PS.scale=d.scale;if(d.layout)PS.layout=d.layout;
  PS.pat=0;PS.sel=null;PS.kp=null;PS.keys=false;syncCtl();renderAll();dirty();
  const miss=new Set();PS.banks.forEach(B=>B.forEach(p=>{if(p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs))miss.add(p.src)}));
@@ -413,7 +429,7 @@ function buildStatic(){
  $('psRec').onclick=toggleRec;$('psPlay').onclick=()=>{if(!TR.playing)startT()};$('psStop').onclick=stopT;
  $('psBpm').onchange=e=>setBpm(e.target.value);$('psSyncB').onclick=()=>{setBpm(+songBpm().toFixed(1));msg('Tempo set to the song: '+PS.bpm+' BPM.')};
  $('psTap').onclick=()=>{const t=performance.now();taps=taps.filter(x=>t-x<2500);taps.push(t);if(taps.length>=3){const iv=(taps[taps.length-1]-taps[0])/(taps.length-1);setBpm(Math.round(600000/iv)/10)}};
- $('psQ').onchange=e=>{PS.q=+e.target.value;dirty()};$('psSw').oninput=e=>{PS.swing=+e.target.value;$('psSwv').textContent=PS.swing;dirty()};
+ $('psQ').onchange=e=>{PS.q=+e.target.value;dirty()};$('psSw').oninput=e=>{PS.swing=+e.target.value;$('psSwv').textContent=PS.swing;autoRec('sw',PS.swing);dirty()};
  $('psBars').onchange=e=>{pushUndo();PS.pats[PS.pat].bars=+e.target.value;seqDraw();renderPats();dirty()};
  $('psMet').onchange=e=>PS.metro=e.target.checked;$('psCi').onchange=e=>PS.countIn=e.target.checked;$('psVel').onchange=e=>PS.vel=e.target.checked;
  $('psKeys').onclick=toggleKeys;$('psChd').onclick=()=>{PS.chord=!PS.chord;renderAll()};
@@ -546,7 +562,7 @@ function printToggle(){if(!ac)return;outN();resume();const b=$('psPrint');
  msg('Printed '+(Lt.length/sr).toFixed(1)+' s as “'+nm+'”. It is in the slice bin as '+PS.srcs[nm].sl.length+' new slices: chop it again, or ⬇ save the WAV.')}
 function djInit(){const g=$('psFxB');FXL.forEach(([id,t,k])=>{const b=document.createElement('button');b.className='fx';b.dataset.id=id;b.innerHTML=t+'<small>'+k.toUpperCase()+'</small>';
   b.onpointerdown=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(x){}fxDown(id)};const u=()=>fxUp(id);b.onpointerup=u;b.onpointercancel=u;b.oncontextmenu=e=>e.preventDefault();g.appendChild(b)});
- $('psFk').oninput=e=>filterKnob(e.target.value);$('psFk0').onclick=()=>{$('psFk').value=0;filterKnob(0)};
+ $('psFk').oninput=e=>{filterKnob(e.target.value);autoRec('flt',+e.target.value)};$('psFk0').onclick=()=>{$('psFk').value=0;filterKnob(0)};
  $$('#psDJ .dk').forEach(b=>b.onclick=()=>kill(b.dataset.k));
  $('psDeckX').onclick=()=>{const t=ac.currentTime;for(const o of LATCH.values())vStop(o.v,t,.03);LATCH.clear();padEl.forEach(e=>e&&e.classList.remove('hold'));msg('Stopped loops and cues.')};
  $('psPrintDl').onclick=e=>busy(e.currentTarget,()=>{if(!lastPrint)throw new Error('Nothing printed yet.');return save(fname+'_print_'+printN+'.wav',new Blob([wav(lastPrint)],{type:'audio/wav'}))})}
@@ -849,7 +865,7 @@ function edgeInit(){
  tr.after(nrB,nrS);nrB.onclick=()=>{NR.on=!NR.on;nrB.classList.toggle('on',NR.on);msg(NR.on?'Note repeat on: hold a pad and it retriggers every '+nrS.selectedOptions[0].text+'. Holding Shift does the same without this switch.':'Note repeat off.')};nrS.onchange=()=>NR.rate=+nrS.value;
  // DJ: sidechain pump
  const dj=$('psDJ').querySelector('.tb');const pl=document.createElement('label');pl.className='ck';pl.innerHTML='Sidechain pump <input type="range" id="djPump" min="0" max="100" value="0" style="width:110px"><span id="djPumpV">0</span>%';dj.insertBefore(pl,$('psFk0').nextSibling);
- $('djPump').oninput=e=>{PUMP=+e.target.value;$('djPumpV').textContent=PUMP};
+ $('djPump').oninput=e=>{PUMP=+e.target.value;$('djPumpV').textContent=PUMP;autoRec('pump',PUMP)};
  // pad editor: envelope, filter, mono, lock, tune to key
  const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
  row.innerHTML='<label>Attack <span id="peAv"></span> ms<input type="range" id="peA" min="0" max="400"></label><label>Release <span id="peRv"></span> ms<input type="range" id="peRl" min="0" max="1500"></label><label>Filter <span id="peFv"></span><input type="range" id="peF" min="-100" max="100"></label>';
@@ -973,7 +989,7 @@ window.DBC_OS={
   pushUndo();if(!PS.song.length||PS.song[PS.song.length-1]!==c)PS.song.push(c);
   const P=PS.pats[c],cp=e=>{const{_skip,...x}=e;return{...x}},N={bars:P.bars,ev:[]};
   if(carry==='all')N.ev=P.ev.map(cp);else if(carry==='on')N.ev=P.ev.filter(e=>!(P.mute||[]).includes(evKey(e))).map(cp);
-  if(carry==='all'&&P.mute&&P.mute.length)N.mute=[...P.mute];
+  if(carry==='all'&&P.mute&&P.mute.length)N.mute=[...P.mute];if(carry!=='none'&&P.auto)N.auto=JSON.parse(JSON.stringify(P.auto));
   N.bank=P.bank!=null?P.bank:PS.bank;N.prog=P.prog||PS.prog;PS.pats[t]=N;PS.song.push(t);PS.songMode=false;dirty();renderSong();selPat(t);renderPats();return{from:c,to:t,part:PS.song.length}},
  chans:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];const m=new Map();P.ev.forEach(e=>{const k=evKey(e);if(!m.has(k)){const pd=padOfEv(e);m.set(k,{k,name:pd?pd.name:'missing pad',col:pd?pd.col:'#666',n:0,on:!(P.mute||[]).includes(k)})}m.get(k).n++});return[...m.values()]},
  chanToggle:(p,k)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.mute=P.mute||[];const i=P.mute.indexOf(k);if(i>=0)P.mute.splice(i,1);else P.mute.push(k);dirty();return i>=0},
@@ -982,6 +998,10 @@ window.DBC_OS={
  bars:(p,b)=>{ensurePS();const P=PS.pats[p==null?curPat():p];if(b==null)return P.bars;if(![1,2,4,8].includes(b))return P.bars;pushUndo();P.bars=b;if((p==null?curPat():p)===PS.pat)$('psBars').value=b;dirty();renderAll();return b},
  partPads:p=>{const P=PS.pats[p];return P?{bank:P.bank,prog:P.prog}:{}},
  setPartPads:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.bank=PS.bank;P.prog=PS.prog;dirty()},
+ autoMode:m=>{if(m)PS.autoMode=m;return PS.autoMode},
+ autoLanes:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];return P&&P.auto?JSON.parse(JSON.stringify(P.auto)):{}},
+ autoClear:(p,k)=>{ensurePS();const P=PS.pats[p==null?curPat():p];if(!P.auto)return;pushUndo();if(k)delete P.auto[k];else delete P.auto;dirty()},
+ autoSet:(p,k,pts)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.auto=P.auto||{};P.auto[k]=pts.map(x=>({t:+x.t,v:+x.v})).sort((a,b)=>a.t-b.t);dirty()},
  level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
 let OSAN=null,OSBUF=null;
 

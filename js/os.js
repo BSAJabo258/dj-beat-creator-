@@ -30,12 +30,13 @@ const I={
  lib:'<path d="M4 4v16M8 4v16M12 5l4 15M17 4h3v16h-3z"/>',
  guide:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3"/><path d="M20 4v14h-7"/>'};
 const GROUPS=[
- {id:'home',l:'DECK',pages:['start']},{id:'chop',l:'CHOP',pages:['chop']},{id:'kit',l:'KITS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},
+ {id:'home',l:'DECK',pages:['start']},{id:'chop',l:'CHOP',pages:['chop','slicer']},{id:'kit',l:'KITS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},
  {id:'seq',l:'SEQ',pages:['sequence']},{id:'keys',l:'KEYS',pages:['tower','keys','live']},{id:'song',l:'SONG',pages:['build','song','arrange']},
  {id:'live',l:'LIVE',pages:['launch','dj']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},{id:'brain',l:'BRAIN',pages:['brain']},{id:'lib',l:'LIBRARY',pages:['factory','store']},{id:'guide',l:'GUIDE',pages:['guide']}];
 const UNITS={
  start:{g:'home',n:'TAPE DECK',m:'TD-1',c:'#29e3ff',c2:'#7a5cff',d:'Load a song. Tempo, key and every hit are found for you.'},
  chop:{g:'chop',n:'SAMPLER',m:'CS-1',c:'#29e3ff',c2:'#00ffa3',d:'Set how the song is cut. The PAD MATRIX plays the cuts in order.'},
+ slicer:{g:'chop',n:'SLICE BRAIN',m:'SX-1',c:'#29e3ff',c2:'#ff3df2',d:'Which chop fits this song, what every cut is, and how good it is.'},
  kit:{g:'kit',n:'KIT FORGE',m:'KF-2',c:'#ff8a1f',c2:'#ff2e6e',d:'Build your own kits: pick a slot, hold a cut, it lands.'},
  pads:{g:'pads',n:'DRUM MACHINE',m:'PM-16',c:'#ff3df2',c2:'#7a5cff',d:'Play and program the pads. Switch CHOP / KIT program.'},
  sequence:{g:'seq',n:'STEP SEQUENCER',m:'SQ-8',c:'#b6ff3b',c2:'#29e3ff',d:'Draw hits on the grid of the current pattern.'},
@@ -79,8 +80,9 @@ function build(){
  const sw=$('screenWrap');sw.insertAdjacentHTML('afterbegin',plate('SAMPLER','CS-1','screen'));sw.classList.add('unit');stage.append(sw);
  const deck=el('section',{id:'deck',class:'unit'});deck.innerHTML=plate('PAD MATRIX','PM-16','deck','<button id="deckProg" class="pchip" data-help="scrProg">CHOP</button>');
  ['knobGrp','bankGrp','padsSlot','fnGrp','dataGrp'].forEach(id=>{const x=$(id);if(x)deck.append(x)});stage.append(deck);
+ const kg=deck.querySelector('#knobGrp');if(kg){kg.insertAdjacentHTML('beforeend','<div class="autoBar" data-help="autoBar"><span>AUTOMATION</span><div class="seg" id="autoSeg"><button data-m="off">OFF</button><button data-m="read">READ</button><button data-m="write">WRITE</button></div><button class="chip" id="autoClr">CLEAR</button><i id="autoDot"></i></div>');kg.querySelector('#autoSeg').onclick=e=>{const b=e.target.closest('[data-m]');if(!b||!need())return;API().autoMode(b.dataset.m);autoSync();say(b.dataset.m==='write'?'WRITE: press PLAY and move FILTER, PUMP or SWING. The moves record into the pattern as automation.':b.dataset.m==='read'?'READ: the pattern plays back its knob moves.':'Automation off: knobs stay where you leave them.')};kg.querySelector('#autoClr').onclick=()=>{if(!need())return;API().autoClear();say('Automation cleared from P'+(API().pat()+1)+'. UNDO brings it back.')}}
  const bs=deck.querySelector('#banksSlot');if(bs){bs.insertAdjacentHTML('beforebegin','<button class="hwb sq bstep" id="bankPrev" data-help="bankStep" title="Previous bank (←)"><i class="led"></i>◀</button>');bs.insertAdjacentHTML('afterend','<button class="hwb sq bstep" id="bankNext" data-help="bankStep" title="Next bank (→)"><i class="led"></i>▶</button>');bs.parentElement.classList.add('bankrow');deck.querySelector('#bankPrev').onclick=()=>{if(need()){const b=API().bankStep(-1);say('Pad bank '+BL[b]+'.')}};deck.querySelector('#bankNext').onclick=()=>{if(need()){const b=API().bankStep(1);say('Pad bank '+BL[b]+'.')}}}
- stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore());
+ stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore(),buildSlicer());
  /* transport bar */
  const bar=el('footer',{id:'tbar'});
  const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (−)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (=)"><i class="led"></i>▶</button></div>');
@@ -128,7 +130,7 @@ function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
  $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');$('focusExit').hidden=true;
- if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
  $('osBack').disabled=!hist.length;const pb=hist[hist.length-1];$('subBack').hidden=!pb;if(pb)$('subBack').querySelector('span').textContent=(UNITS[pb]||{n:'BACK'}).n;
  if(coach&&coach.mode==='tour')setTimeout(coachPlace,80)}
 let backing=false;
@@ -141,8 +143,9 @@ function patSync(){const A=API();if(!A||!ready()){$('patNum').textContent='P--';
  $('patNum').textContent='P'+String(P+1).padStart(2,'0')+(q!=null?' → P'+String(q+1).padStart(2,'0'):'');
  $('patInfo').textContent=info.bars+' BAR'+(info.bars>1?'S':'')+' · '+info.hits+' HITS'+(A.rec()?' · REC':'');
  $('patProg').firstChild.style.width=(A.playing()?A.pos()*100:0)+'%';$('patLcd').classList.toggle('q',q!=null);$('patLcd').classList.toggle('rec',A.rec());
- if(curP==='launch')launchSync(ps,P,q);if(curP==='build')buildSync();halfAuto(q!=null?q:P)}
+ if(curP==='launch')launchSync(ps,P,q);autoSync();if(curP==='build')buildSync();halfAuto(q!=null?q:P)}
 const PH={half:0,manual:null,t:0};
+function autoSync(){const A=API();if(!A||!$('autoSeg'))return;let m='read',n=0;try{m=A.autoMode();const L=A.autoLanes();n=Object.values(L).reduce((a,x)=>a+(x?x.length:0),0)}catch(e){}$$('#autoSeg [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===m));const d=$('autoDot');d.className=m==='write'&&A.playing()?'w':n?'h':'';d.title=n+' automation points in this pattern'}
 function halfAuto(c){const h=c>=8?1:0;if(PH.manual!=null&&Date.now()-PH.t<6000)return;PH.manual=null;if(h!==PH.half){PH.half=h;halfSync()}}
 function halfSync(){$$('#psPats .bkb').forEach((b,i)=>b.classList.toggle('ph',Math.floor(i/8)!==PH.half));$('osPatHalf').lastChild.textContent=PH.half?'1–8':'9–16'}
 
@@ -164,6 +167,7 @@ const KF={bank:0,armed:0,page:0,per:16,filt:'all',list:null,key:''};
 function buildKit(){const u=el('section',{id:'osKit',class:'unit'});
  u.innerHTML='<div class="kfwrap"><div class="kfrack" id="kfRack">'+plate('KIT RACK','KR-16','kfRack')+
  '<div class="kfbody"><div class="kfbanks" id="kfBanks" data-help="kfBanks"></div><div class="kfslots" id="kfSlots" data-help="kfSlots"></div>'+
+ '<div class="kfauto" data-help="kfAuto"><span class="hwl">AUTO-FILL</span><div class="kfsrow"><select id="kfHow"><option value="roles">MPC drum layout (kick, snare, hats, percs, tones)</option><option value="best">Best cuts, highest score first</option><option value="order">Cuts in order from this library page</option><option value="tonal">Best tonal stabs (for melodies)</option><option value="loops">Loops (2 beats and longer)</option></select><label class="sbchk"><input type="checkbox" id="kfRep"> replace</label><button class="hwb np" id="kfFill"><i class="led"></i>FILL</button></div><label class="sbchk"><input type="checkbox" id="kfRoles" checked> show MPC roles on empty slots</label></div><div class="kfsug" id="kfSug" data-help="kfSug"></div>'+
  '<div class="kfact"><button class="hwb np" id="kfDone" hidden><i class="led"></i>◀ DONE, BACK TO PADS</button><button class="hwb" id="kfClr" data-help="kfClr"><i class="led"></i>CLEAR SLOT</button><button class="hwb" id="kfClrB" data-help="kfClrB"><i class="led"></i>CLEAR BANK</button><button class="hwb" id="kfPads" data-help="kfPads"><i class="led"></i>PLAY ON PADS ▶</button></div>'+
  '<div class="kfsave" data-help="kfSave"><span class="hwl">MY KITS</span><div class="kfsrow"><input id="kfName" placeholder="Kit name, e.g. Flint knock" maxlength="32"><button class="hwb" id="kfSv"><i class="led"></i>SAVE KIT</button></div><div id="kfList"></div></div></div></div>'+
  '<div class="kflib" id="kfLib">'+plate('CUT LIBRARY','CL-640','kfLib')+
@@ -180,6 +184,8 @@ function kitWire(){
  $('kfBanks').onclick=e=>{const b=e.target.closest('button');if(!b)return;KF.bank=+b.dataset.b;API().setBank(KF.bank);kitArmNext(true);kitRender()};
  $('kfClr').onclick=()=>{if(!need())return;API().clear(KF.bank,KF.armed);kitRender();say('Cleared slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. UNDO brings it back.')};
  $('kfClrB').onclick=()=>{if(!need())return;if(!confirm('Clear all 16 slots in kit bank '+BL[KF.bank]+'? UNDO brings them back.'))return;API().clearBank(KF.bank);KF.armed=0;kitRender()};
+ KF.roles=true;$('kfRoles').onchange=e=>{KF.roles=e.target.checked;kitRender()};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
+ holdable($('kfSug'),'.kc',(t)=>API().hear({k:'slice',ci:+t.dataset.ci}),(t)=>kitDrop(+t.dataset.ci,KF.armed),{drag:(t,slot)=>kitDrop(+t.dataset.ci,+slot.dataset.j),target:'#kfSlots .ks'});
  $('kfDone').onclick=()=>{const f=pickFrom&&pickFrom.from;pickFrom=null;if(f)go(f);else back()};
  $('kfPads').onclick=()=>{if(!need())return;API().setProg('kit');API().setBank(KF.bank);go('pads');say('The PAD MATRIX now plays kit bank '+BL[KF.bank]+' (KIT program).')};
  $('kfSv').onclick=()=>{if(!need())return;const n=$('kfName').value.trim()||('Kit '+BL[KF.bank]+' '+new Date().toLocaleDateString());if(!API().kit(KF.bank).some(Boolean)){say('Bank '+BL[KF.bank]+' is empty. Load some slots first.');return}API().saveKit(n,KF.bank);$('kfName').value='';kitRender();say('Saved “'+n+'”. Tap it under MY KITS to load it into any bank.')};
@@ -196,7 +202,7 @@ function pick(b,j){pickFrom={b,j,from:curP};KF.bank=b;KF.armed=j;go('kit');say('
 function kitRender(){if(!ready()){$('kfSlots').innerHTML='<p class="empty">Load a song to forge kits from its cuts.</p>';$('kfCuts').textContent='';return}
  const A=API(),K=A.kit(KF.bank);
  $('kfBanks').innerHTML=BL.split('').map((L,b)=>{const n=A.kit(b).filter(Boolean).length;return'<button class="bkx'+(b===KF.bank?' on':'')+(n?' has':'')+'" data-b="'+b+'">'+L+'<small>'+n+'/16</small></button>'}).join('');
- $('kfSlots').innerHTML=[12,13,14,15,8,9,10,11,4,5,6,7,0,1,2,3].map(j=>{const p=K[j];return'<button class="ks'+(p?'':' emp')+(j===KF.armed?' arm':'')+'" data-j="'+j+'" style="--pc:'+(p?p.col:'#555')+'"><span class="kn">'+BL[KF.bank]+String(j+1).padStart(2,'0')+'</span><span class="knm">'+(p?esc(p.name):'EMPTY')+'</span></button>'}).join('');
+ $('kfSlots').innerHTML=[12,13,14,15,8,9,10,11,4,5,6,7,0,1,2,3].map(j=>{const p=K[j];return'<button class="ks'+(p?'':' emp')+(j===KF.armed?' arm':'')+'" data-j="'+j+'" style="--pc:'+(p?p.col:'#555')+'"><span class="kn">'+BL[KF.bank]+String(j+1).padStart(2,'0')+'</span><span class="knm">'+(p?esc(p.name):(KF.roles?ROLES[j][0]:'EMPTY'))+'</span></button>'}).join('');
  const L=kitList(),N=Math.max(1,Math.ceil(L.length/KF.per)),from=KF.page*KF.per,ids=L.slice(from,from+KF.per);
  $('kfLcd').querySelector('b').textContent=L.length?'CUTS '+(from+1)+'–'+Math.min(L.length,from+KF.per):'NO CUTS';$('kfLcd').querySelector('span').textContent='PAGE '+(KF.page+1)+'/'+N+' · '+L.length+' '+(KF.filt==='all'?'TOTAL':KF.filt.toUpperCase());
  $('kfPrev').disabled=$('kfFirst').disabled=KF.page<=0;$('kfNext').disabled=$('kfLast').disabled=KF.page>=N-1;
@@ -205,7 +211,7 @@ function kitRender(){if(!ready()){$('kfSlots').innerHTML='<p class="empty">Load 
  $('kfCuts').innerHTML=ids.map(ci=>{const s=A.slice(ci),bt=s.dur*bpm/60;return'<button class="kc" data-ci="'+ci+'" style="--pc:'+s.col+'"><canvas width="120" height="40"></canvas><b>#'+(ci+1)+'</b><span>'+(s.kind||'cut').toUpperCase()+(s.tonal&&s.midi!=null?' · '+nn(Math.round(s.midi)):'')+'</span><em>'+(bt<1?bt.toFixed(2):bt.toFixed(1))+' BT</em></button>'}).join('')||'<p class="empty">No cuts match this filter.</p>';
  $$('#kfCuts .kc').forEach(c=>wave(c.querySelector('canvas'),A.slice(+c.dataset.ci)));
  const ks=A.kits();$('kfList').innerHTML=ks.length?ks.map(n=>'<span class="kchip"><button class="kload" data-n="'+esc(n)+'">'+esc(n)+'</button><button class="kdel" data-n="'+esc(n)+'" aria-label="Delete '+esc(n)+'">×</button></span>').join(''):'<em>No saved kits for this song yet. Build a bank, name it, press SAVE KIT.</em>';
- $('kfDone').hidden=!pickFrom;$('kfHint').textContent='Lit slot: '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. Tap a cut to hear it. Hold it (½ s) or drag it onto a slot to drop it in. The next empty slot lights up by itself.'}
+ $('kfDone').hidden=!pickFrom;kitSuggest();$('kfHint').textContent='Lit slot: '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. Tap a cut to hear it. Hold it (½ s) or drag it onto a slot to drop it in. The next empty slot lights up by itself.'}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 function wave(cv,s){if(!cv||!s)return;try{const d=chs[0],x=cv.getContext('2d'),W=cv.width,H=cv.height,len=s.e-s.s,st=Math.max(1,Math.floor(len/W));x.clearRect(0,0,W,H);x.fillStyle=s.col;x.globalAlpha=.9;
  let mx=0;for(let i=s.s;i<s.e;i+=st)mx=Math.max(mx,Math.abs(d[i]||0));const k=mx>0?(H/2-2)/mx:1;
@@ -314,6 +320,7 @@ function buildBuilder(){const u=el('section',{id:'osBuild',class:'unit'});
  '<div class="sbchan" data-help="sbChan"><div class="sbh"><span class="hwl">CHANNELS IN THIS PART</span><span class="sbbars">LENGTH <select id="sbBars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></span><button class="chip" id="sbAllOn">ALL ON</button><button class="chip" id="sbAllOff">ALL OFF</button><button class="chip" id="sbPads">SET PADS = CURRENT BANK</button></div><div class="chans" id="sbChans"></div></div>'+
  '<div class="sbsong" data-help="sbSong"><div class="sbh"><span class="hwl">THE SONG, PART BY PART</span><button class="chip" id="sbAdd">+ ADD CURRENT PATTERN</button><button class="chip" id="sbClear">CLEAR ORDER</button></div><div class="parts" id="sbParts"></div>'+
  '<div class="sbedit" id="sbEdit"><span id="sbSelT">Tap a part to select it.</span><button class="hwb sq" data-e="l" title="Move earlier"><i class="led"></i>◀</button><button class="hwb sq" data-e="r" title="Move later"><i class="led"></i>▶</button><button class="hwb" data-e="d"><i class="led"></i>⧉ REPEAT</button><button class="hwb" data-e="x"><i class="led"></i>✕ REMOVE</button><button class="hwb" data-e="lp"><i class="led"></i>⟲ LOOP IT</button><button class="hwb" data-e="pf"><i class="led"></i>▶ PLAY FROM HERE</button></div>'+
+ '<div class="tlw" data-help="sbTL"><div class="sbh"><span class="hwl">ARRANGEMENT VIEW</span><span class="tlhint">Parts across, channels down. Tap a block to switch that channel in that part.</span></div><div class="tl" id="sbTL"></div></div>'+
  '<div class="sbplay"><button class="hwb big" id="sbSong" data-help="sbSongPlay"><i class="led"></i>▶ PLAY THE SONG</button><button class="hwb big" id="sbStop"><i class="led"></i>■ STOP</button><button class="hwb big" id="sbExport" data-help="sbExport"><i class="led"></i>EXPORT ▶</button></div></div></div>';
  return u}
 function nextPart(){if(!need())return;const r=API().nextPart(SB.carry);if(r.err){say(r.err);return}SB.sel=r.part-1;
@@ -333,6 +340,7 @@ function builderWire(){
  $('sbAdd').onclick=()=>{if(!need())return;API().songAdd();SB.sel=API().song().list.length-1;buildRender();say('Added P'+(API().pat()+1)+' as part '+(SB.sel+1)+'.')};
  $('sbClear').onclick=()=>{if(!need())return;if(!API().song().list.length)return;if(!confirm('Clear the song order? Your patterns stay; only the order is cleared. UNDO brings it back.'))return;API().songClear();SB.sel=-1;buildRender()};
  $('sbParts').onclick=e=>{const b=e.target.closest('.part');if(!b||!need())return;SB.sel=+b.dataset.i;const S=API().song();if(S.mode&&API().playing())API().jumpPart(SB.sel);buildRender()};
+ $('sbTL').onclick=e=>{const c=e.target.closest('.cell:not(.none)');if(c&&need()){const on=API().chanToggle(+c.dataset.pi,c.dataset.k);if(on)API().chanHear(c.dataset.k);TLSIG='';SB.sig='';buildSync();return}const h=e.target.closest('.hd[data-part]');if(h&&need()){SB.sel=+h.dataset.part;buildRender()}};
  $('sbParts').ondblclick=e=>{const b=e.target.closest('.part');if(!b||!need())return;API().jumpPart(+b.dataset.i)};
  $('sbEdit').onclick=e=>{const b=e.target.closest('[data-e]');if(!b||!need())return;const S=API().song(),i=SB.sel;if(i<0||i>=S.list.length){say('Tap a part in the song first.');return}const a=b.dataset.e;
   if(a==='l'||a==='r'){if(API().songMove(i,a==='l'?-1:1))SB.sel=i+(a==='l'?-1:1)}else if(a==='d'){API().songDup(i);SB.sel=i+1;say('Part '+(i+1)+' repeats: it now plays twice in a row.')}else if(a==='x'){API().songDel(i);SB.sel=Math.min(i,API().song().list.length-1);say('Removed part '+(i+1)+' from the order. The pattern itself is kept.')}
@@ -340,13 +348,30 @@ function builderWire(){
  $('sbSong').onclick=()=>{if(!need())return;if(!API().playSong(0)){say('The song has no parts yet. Loop a part and press NEXT PART, or + ADD CURRENT PATTERN.');return}say('Playing the whole song from the top.')};
  $('sbStop').onclick=()=>$('psStop').click();
  $('sbExport').onclick=()=>go('song')}
-function buildRender(){SB.sig='';buildSync()}
+
+/* DAW arrangement view */
+let TLSIG='';
+function tlRender(){const box=$('sbTL');if(!box)return;const A=API(),S=A.song(),pats=A.pats();if(!S.list.length){box.innerHTML='<p class="empty">Parts appear here as you build the song.</p>';TLSIG='';return}
+ const parts=S.list.map(pi=>({pi,bars:pats[pi].bars,ch:A.chans(pi),au:A.autoLanes(pi)}));
+ const sig=JSON.stringify(parts.map(p=>[p.pi,p.bars,p.ch.map(c=>c.k+(c.on?1:0)),Object.values(p.au).map(x=>x.length)]));if(sig===TLSIG)return;TLSIG=sig;
+ const rows=[],seen=new Map();parts.forEach(p=>p.ch.forEach(c=>{if(!seen.has(c.k)){seen.set(c.k,rows.length);rows.push({k:c.k,name:c.name,col:c.col})}}));
+ const W=p=>Math.max(64,p.bars*34),cols=parts.map(W).map(w=>w+'px').join(' ');
+ let h='<div class="tlg" style="grid-template-columns:150px '+cols+'"><div class="tlc hd">CHANNEL</div>'+parts.map((p,i)=>'<div class="tlc hd" data-part="'+i+'">'+(i+1)+' · P'+(p.pi+1)+'</div>').join('');
+ rows.forEach(r=>{h+='<div class="tlc nm" style="--pc:'+r.col+'" title="'+esc(r.name)+'">'+esc(r.name)+'</div>';parts.forEach((p,i)=>{const c=p.ch.find(x=>x.k===r.k);h+='<div class="tlc cell'+(c?(c.on?' on':' off'):' none')+'" style="--pc:'+r.col+'" data-pi="'+p.pi+'" data-k="'+esc(r.k)+'">'+(c?'<i style="width:'+Math.min(100,c.n*6)+'%"></i>':'')+'</div>'})});
+ [['flt','FILTER'],['pump','PUMP'],['sw','SWING']].forEach(([k,n])=>{h+='<div class="tlc nm au">'+n+' AUTO</div>';parts.forEach(p=>{h+='<div class="tlc acell"><canvas width="'+W(p)*2+'" height="40" data-k="'+k+'" data-bars="'+p.bars+'" data-pts="'+esc(JSON.stringify(p.au[k]||[]))+'"></canvas></div>'})});
+ h+='</div><i class="tlph" id="tlPh"></i>';box.innerHTML=h;
+ $$('#sbTL canvas').forEach(cv=>{const x=cv.getContext('2d'),W2=cv.width,H2=cv.height,pts=JSON.parse(cv.dataset.pts),len=+cv.dataset.bars*4,k=cv.dataset.k;x.strokeStyle=getComputedStyle(document.body).getPropertyValue('--acc')||'#fd3';x.lineWidth=2;
+  const yv=v=>k==='flt'?H2/2-(v/100)*(H2/2-3):H2-3-(v/100)*(H2-6);x.globalAlpha=.25;x.beginPath();x.moveTo(0,k==='flt'?H2/2:H2-3);x.lineTo(W2,k==='flt'?H2/2:H2-3);x.stroke();x.globalAlpha=1;
+  if(!pts.length)return;x.beginPath();x.moveTo(0,yv(pts[0].v));pts.forEach(p=>x.lineTo(p.t/len*W2,yv(p.v)));x.lineTo(W2,yv(pts[pts.length-1].v));x.stroke()})}
+function tlPlayhead(){const ph=$('tlPh'),A=API();if(!ph||!A)return;const S=A.song(),hd=$$('#sbTL .tlc.hd[data-part]');let i=S.mode&&A.playing()?S.pos:-1;if(i<0){const P=A.pat();i=SB.sel>=0&&S.list[SB.sel]===P?SB.sel:S.list.indexOf(P);if(!A.playing())i=-1}
+ if(i<0||!hd[i]){ph.style.display='none';return}const c=hd[i],g=c.parentElement.getBoundingClientRect(),r=c.getBoundingClientRect();ph.style.display='block';ph.style.left=(r.left-g.left+A.pos()*r.width+c.parentElement.offsetLeft)+'px';hd.forEach((x,j)=>x.classList.toggle('play',j===i))}
+function buildRender(){SB.sig='';TLSIG='';buildSync()}
 function buildSync(){if(!$('osBuild'))return;if(!ready()){$('sbParts').innerHTML='<p class="empty">Load a song to start building.</p>';return}
  const A=API(),S=A.song(),P=A.pat(),q=A.queued(),pats=A.pats(),pl=A.playing();
  const partOfP=S.mode&&S.pos>=0?S.pos:(SB.sel>=0&&S.list[SB.sel]===P?SB.sel:S.list.lastIndexOf(P));
  $('sbPart').textContent=(partOfP>=0?'PART '+(partOfP+1)+' OF '+S.list.length+' · ':'')+'P'+String(P+1).padStart(2,'0')+(q!=null?' → P'+String(q+1).padStart(2,'0'):'');
  $('sbInfo').textContent=pats[P].bars+' BAR'+(pats[P].bars>1?'S':'')+' · '+pats[P].hits+' HITS · '+(pl?(S.mode?'PLAYING THE SONG':'LOOPING THIS PART'):'STOPPED')+(A.rec()?' · RECORDING':'');
- $('sbProg').style.width=(pl?A.pos()*100:0)+'%';$('sbLcd').classList.toggle('rec',A.rec());$('sbRec').classList.toggle('on',A.rec());$('sbLoop').classList.toggle('on',pl&&!S.mode);$('sbSong').classList.toggle('on',pl&&S.mode);
+ $('sbProg').style.width=(pl?A.pos()*100:0)+'%';tlRender();tlPlayhead();$('sbLcd').classList.toggle('rec',A.rec());$('sbRec').classList.toggle('on',A.rec());$('sbLoop').classList.toggle('on',pl&&!S.mode);$('sbSong').classList.toggle('on',pl&&S.mode);
  const sig=JSON.stringify([S.list,S.pos,S.nextPos,SB.sel,P,q,SB.carry,S.follow,pats.map(p=>p.hits+'/'+p.bars),A.prog(),A.bank()]);if(sig===SB.sig)return;SB.sig=sig;
  $$('#sbCarry [data-c]').forEach(b=>b.classList.toggle('on',b.dataset.c===SB.carry));$('sbFollow').checked=!!S.follow;$('sbBars').value=String(pats[P].bars);
  const ch=A.chans();$('sbChans').innerHTML=ch.length?ch.map(c=>'<button class="ch'+(c.on?' on':'')+'" data-k="'+esc(c.k)+'" style="--pc:'+c.col+'"><i></i><b>'+esc(c.name)+'</b><small>'+c.n+' hit'+(c.n>1?'s':'')+'</small></button>').join(''):'<p class="empty">No hits in P'+(P+1)+' yet. Arm REC and play, or draw on the STEP SEQUENCER.</p>';
@@ -533,6 +558,74 @@ function storeWire(){
  $('ownExport').onclick=()=>{const L=PF.items.filter(x=>x.url&&!/^cat:/.test(x.id)).map(x=>({title:x.title,genre:gName(x.g),type:tName(x.t),tier:'pro',url:x.url,img:x.img||''}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({packs:L},null,1)],{type:'application/json'}));a.download='catalog.json';a.click();say('catalog.json has '+L.length+' packs. Set tier to "studio" on any you want STUDIO-only, host the audio and this file, then paste its link as the Catalog URL.')};
  storeCatalog()}
 
+/* ================= SLICE INTELLIGENCE: what every cut is, how good it is, and which chop fits the song ================= */
+let SI={ref:null,res:null};
+function sliceIntel(){let S;try{S=slices}catch(e){return null}if(!S||!S.length)return null;if(SI.ref===S&&SI.res)return SI.res;
+ const bpm=+$('bpm').value||90,beat=60/bpm,step=beat/4,ph=(()=>{try{return phase||0}catch(e){return 0}})(),d=y;
+ const out=S.map((s,i)=>{const len=(s.e-s.s)/sr,bt=len/beat,u=(s.t-ph)/step,off=Math.abs(u-Math.round(u)),grid=Math.max(0,1-2*off);
+  const a=Math.min(s.e,s.s+Math.floor(sr*.015));let pk=0;for(let k=s.s;k<a;k++){const v=Math.abs(d[k]);if(v>pk)pk=v}
+  const en=s.en||1e-4,punch=Math.max(0,Math.min(1,(pk/(en*1.4+1e-6)-1)/5));
+  const q=Math.max(8,Math.floor((s.e-s.s)/5));let h=0,tl=0;for(let k=s.s;k<s.s+q;k+=2)h+=d[k]*d[k];for(let k=s.e-q;k<s.e;k+=2)tl+=d[k]*d[k];const clean=Math.max(0,Math.min(1,1-Math.sqrt(tl/(h+1e-9))));
+  const kind=s.kind||'',clar=s.clar||0,tonal=clar>.6;
+  const score=kind==='tone'?.35*grid+.4*clar+.25*Math.min(1,bt/2):.35*punch+.3*clean+.35*grid;
+  return{i,kind,len,bt,grid,punch,clean,clar,tonal,score,en,v:[s.lo||0,s.hi||0,Math.min(1,(s.pk||0)/30),Math.min(1,bt/4),Math.min(1,en*4)]}});
+ for(let i=0;i<out.length;i++){if(out[i].dup!=null)continue;for(let j=i+1;j<out.length;j++){if(out[j].dup!=null||out[j].kind!==out[i].kind)continue;let dd=0;for(let k=0;k<5;k++)dd+=(out[i].v[k]-out[j].v[k])**2;if(dd<.0006)out[j].dup=i}}
+ const dur=(S[S.length-1].e-S[0].s)/sr,share={kick:0,snare:0,hat:0,tone:0};out.forEach(o=>{if(share[o.kind]!=null)share[o.kind]+=o.len});for(const k in share)share[k]/=dur||1;
+ const res={list:out,share,dups:out.filter(o=>o.dup!=null).length,grid:out.filter(o=>o.grid>.8).length/out.length,avg:out.reduce((a,o)=>a+o.bt,0)/out.length,beat};SI={ref:S,res};return res}
+const RECIPES=[
+ ['drums','DRUM HITS','One sound per pad: kicks, snares, hats, percs. For drum breaks and full songs you want to rebuild.',{mode:'smart',sens:65,minl:'0.25',maxl:'1'}],
+ ['flip','SOUL FLIP','Musical phrases cut on the hits, ½ to 1 bar. The classic chop-and-flip.',{mode:'smart',sens:40,minl:'1',maxl:'4'}],
+ ['stabs','STABS','Short chords and hits to play like an instrument.',{mode:'smart',sens:55,minl:'0.5',maxl:'2'}],
+ ['half','HALF-BAR','Every 2 beats, nudged onto the hits. Great for re-sequencing a loop.',{mode:'smart',sens:45,minl:'2',maxl:'2'}],
+ ['loops','BAR LOOPS','One bar per pad, on the bar lines. For looping whole sections.',{mode:'bar',sens:50,minl:'0.25',maxl:'0'}],
+ ['grid','16TH GRID','Even 16th slices for stutters, rolls and glitches.',{mode:'grid',sens:50,minl:'0.125',maxl:'0.5'}],
+ ['vocal','VOCAL CHOPS','Longer, softer cuts that keep words and syllables whole.',{mode:'smart',sens:35,minl:'0.5',maxl:'4'}]];
+function recipeApply(id){if(!need())return;const R=RECIPES.find(r=>r[0]===id),c=R[3];$('mode').value=c.mode;$('sens').value=c.sens;if($('sv'))$('sv').textContent=c.sens;$('minl').value=c.minl;$('maxl').value=c.maxl;try{rebuild()}catch(e){}SI.ref=null;LSs('bc16:recipe:'+fnameSafe(),id);say(R[1]+': '+slicesN()+' cuts. The pads now play them in order.');if(curP==='slicer')slicerRender()}
+const slicesN=()=>{try{return slices.length}catch(e){return 0}};
+function recommend(){const R=sliceIntel();if(!R)return null;const drum=R.share.kick+R.share.snare+R.share.hat,ton=R.share.tone;
+ if(drum>.55)return['drums','Most of this song is drum hits ('+Math.round(drum*100)+'%), so one hit per pad gives you a playable kit.'];
+ if(ton>.5)return['flip','Most of this song is tonal ('+Math.round(ton*100)+'%), so phrase chops on the hits will flip best.'];
+ return['stabs','The song mixes drums and music, so short stabs give you both hits and chords to play.']}
+function buildSlicer(){const u=el('section',{id:'osSlicer',class:'unit'});
+ u.innerHTML=plate('SLICE BRAIN','SX-1','osSlicer')+'<div class="sxbody"><div class="sxcol"><div class="sxrec" id="sxRec" data-help="sxRec"></div><span class="hwl">CHOP RECIPES</span><div class="recipes" id="sxRecipes" data-help="sxRecipes"></div><span class="hwl">CLEAN-UP</span><div class="kfact" data-help="sxClean"><button class="hwb" id="sxMerge"><i class="led"></i>MERGE WEAK CUTS</button><button class="hwb" id="sxReset"><i class="led"></i>UNDO MY CUT EDITS</button><button class="hwb np" id="sxKit"><i class="led"></i>BEST-OF KIT ▶</button></div></div>'+
+ '<div class="sxcol"><div class="sxsum" id="sxSum" data-help="sxSum"></div><div class="sbh"><span class="hwl">EVERY CUT, RANKED</span><div class="kffilt" id="sxFilt"></div><label class="sbchk"><input type="checkbox" id="sxDup" checked> hide repeats</label></div><div class="sxlist" id="sxList" data-help="sxList"></div></div></div>';
+ return u}
+let SX={filt:'all',sig:''};
+function slicerRender(){if(!ready()){$('sxList').innerHTML='<p class="empty">Load a song to analyze its cuts.</p>';return}const R=sliceIntel();if(!R)return;const rec=recommend(),cur=LSg('bc16:recipe:'+fnameSafe(),'');
+ $('sxRec').innerHTML='<b>RECOMMENDED: '+RECIPES.find(r=>r[0]===rec[0])[1]+'</b><span>'+rec[1]+'</span><button class="hwb np" data-r="'+rec[0]+'"><i class="led"></i>USE IT</button>';
+ $('sxRecipes').innerHTML=RECIPES.map(r=>'<button class="recipe'+(r[0]===cur?' on':'')+(r[0]===rec[0]?' rec':'')+'" data-r="'+r[0]+'"><b>'+r[1]+'</b><span>'+r[2]+'</span></button>').join('');
+ const pct=v=>Math.round(v*100)+'%';$('sxSum').innerHTML='<div><b>'+R.list.length+'</b><span>cuts</span></div><div><b>'+R.avg.toFixed(2)+'</b><span>beats each</span></div><div><b>'+pct(R.grid)+'</b><span>on the grid</span></div><div><b>'+R.dups+'</b><span>repeats</span></div><div class="mix"><i style="flex:'+R.share.kick+';background:#e03131" title="kick"></i><i style="flex:'+R.share.snare+';background:#4c6ef5" title="snare"></i><i style="flex:'+R.share.hat+';background:#f59f00" title="hat"></i><i style="flex:'+R.share.tone+';background:#12b886" title="tone"></i></div>';
+ $('sxFilt').innerHTML=[['all','ALL'],['kick','KICK'],['snare','SNARE'],['hat','HAT'],['tone','TONE']].map(([f,t])=>'<button class="chip'+(SX.filt===f?' on':'')+'" data-f="'+f+'">'+t+'</button>').join('');
+ const L=R.list.filter(o=>(SX.filt==='all'||o.kind===SX.filt)&&(!$('sxDup').checked||o.dup==null)).sort((a,b)=>b.score-a.score).slice(0,160),bar=v=>'<i class="mt"><u style="width:'+Math.round(v*100)+'%"></u></i>';
+ $('sxList').innerHTML='<div class="sxh"><span>CUT</span><span>LENGTH</span><span>ON GRID</span><span>PUNCH</span><span>CLEAN</span><span>SCORE</span><span></span></div>'+L.map(o=>'<div class="sxr" data-i="'+o.i+'" style="--pc:'+(KCOL[o.kind]||'#7d8b98')+'"><button class="sxp" data-a="hear">▶ #'+(o.i+1)+' <em>'+(o.kind||'cut').toUpperCase()+'</em>'+(o.dup!=null?'<small>like #'+(o.dup+1)+'</small>':'')+'</button><span>'+o.bt.toFixed(2)+' bt</span>'+bar(o.grid)+bar(o.punch)+bar(o.clean)+'<b>'+Math.round(o.score*100)+'</b><span class="sxa"><button data-a="kit" title="Put in the lit Kit Forge slot">→ KIT</button><button data-a="cut" title="Remove the cut before this slice (merge it into the one before)">✕ CUT</button></span></div>').join('')}
+const KCOL={kick:'#e03131',snare:'#4c6ef5',hat:'#f59f00',tone:'#12b886'};
+function slicerWire(){
+ const app=e=>{const b=e.target.closest('[data-r]');if(b)recipeApply(b.dataset.r)};$('sxRecipes').onclick=app;$('sxRec').onclick=app;
+ $('sxFilt').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;SX.filt=b.dataset.f;slicerRender()};$('sxDup').onchange=slicerRender;
+ $('sxList').onclick=e=>{const b=e.target.closest('[data-a]');if(!b||!need())return;const i=+b.closest('.sxr').dataset.i,a=b.dataset.a;
+  if(a==='hear')API().hear({k:'slice',ci:i});
+  else if(a==='kit'){if(API().put(i,KF.bank,KF.armed)){say('Cut #'+(i+1)+' → kit slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'.');kitArmNext(false)}}
+  else if(a==='cut'){if(i===0){say('The first cut cannot be removed.');return}try{manual.del.push(slices[i].t);rebuild()}catch(er){}SI.ref=null;slicerRender();say('Merged #'+(i+1)+' into #'+i+'. UNDO MY CUT EDITS puts it back.')}};
+ $('sxMerge').onclick=()=>{if(!need())return;const R=sliceIntel();let n=0;try{for(const o of R.list){if(o.i===0)continue;if(o.bt<.2&&o.score<.45&&o.kind!=='hat'){manual.del.push(slices[o.i].t);n++}}if(n)rebuild()}catch(e){}SI.ref=null;slicerRender();say(n?'Merged '+n+' weak, tiny cuts into their neighbours. UNDO MY CUT EDITS puts them back.':'No weak tiny cuts found.')};
+ $('sxReset').onclick=()=>{try{$('rst').click()}catch(e){}SI.ref=null;slicerRender();say('Your cut edits are cleared: the recipe’s cuts are back.')};
+ $('sxKit').onclick=()=>{if(!need())return;let b=[...Array(8).keys()].find(i=>!API().kit(i).some(Boolean));let rep=false;if(b==null){if(!confirm('All 8 kit banks have sounds. Rebuild bank '+BL[KF.bank]+' as a best-of kit? UNDO brings it back.'))return;b=KF.bank;rep=true}KF.bank=b;KF.armed=0;API().setBank(b);go('kit');autoFill('roles',rep)}}
+
+/* ================= KIT FORGE: MPC roles, auto-fill and suggestions ================= */
+const ROLES=[['KICK','kick','s'],['SNARE','snare','s'],['CLAP','snare','s2'],['KICK 2','kick','s2'],['HAT','hat','s'],['OPEN HAT','hat','l'],['HAT 2','hat','s2'],['PERC','snare','p'],['PERC 2','hat','p'],['SNARE 2','snare','s3'],['FX','tone','s'],['CRASH','hat','l2'],['TONE 1','tone','t'],['TONE 2','tone','t'],['TONE 3','tone','t'],['TONE 4','tone','t']];
+function roleCands(j,used){const R=sliceIntel();if(!R)return[];const [nm,kind,pref]=ROLES[j];let L=R.list.filter(o=>o.kind===kind&&o.dup==null&&!used.has(o.i));
+ if(pref[0]==='l')L=L.sort((a,b)=>(b.bt*.5+b.score)-(a.bt*.5+a.score));else if(pref==='t')L=L.filter(o=>o.tonal||o.kind==='tone').sort((a,b)=>b.score-a.score);else if(pref==='p')L=L.filter(o=>o.bt<.5).sort((a,b)=>(b.punch+b.clean)-(a.punch+a.clean));else L=L.filter(o=>o.bt<1.2).sort((a,b)=>b.score-a.score);
+ if(!L.length)L=R.list.filter(o=>o.kind===kind&&!used.has(o.i)).sort((a,b)=>b.score-a.score);const skip=pref==='s2'?1:pref==='s3'?2:pref==='l2'?1:0;return L.slice(skip)}
+function autoFill(how,replace){if(!need())return;const A=API(),K=A.kit(KF.bank),R=sliceIntel();if(!R)return;const used=new Set();let n=0;
+ const slots=[...Array(16).keys()].filter(j=>replace||!K[j]);if(!slots.length){say('Bank '+BL[KF.bank]+' is full. Tick REPLACE to rebuild it, or pick another bank.');return}
+ if(how==='roles'){for(const j of slots){const c=roleCands(j,used)[0];if(c){A.put(c.i,KF.bank,j);used.add(c.i);n++}}}
+ else{let L;if(how==='order'){const all=kitList();L=all.slice(KF.page*KF.per)}else if(how==='tonal')L=R.list.filter(o=>o.kind==='tone'||o.tonal).filter(o=>o.dup==null).sort((a,b)=>b.score-a.score).map(o=>o.i);
+  else if(how==='loops')L=R.list.filter(o=>o.bt>=1.8&&o.dup==null).sort((a,b)=>(b.grid+b.score)-(a.grid+a.score)).map(o=>o.i);else L=R.list.filter(o=>o.dup==null).sort((a,b)=>b.score-a.score).map(o=>o.i);
+  let k=0;for(const j of slots){const ci=L[k++];if(ci==null)break;A.put(ci,KF.bank,j);n++}}
+ kitArmNext(true);kitRender();say(n?'Filled '+n+' slot'+(n>1?'s':'')+' in bank '+BL[KF.bank]+' ('+({roles:'MPC drum layout',order:'cuts in order from this page',tonal:'best tonal stabs',loops:'loops',best:'best cuts'})[how]+'). Change any slot by lighting it and holding another cut; UNDO takes the fill back.':'Not enough matching cuts. Try another fill, or another chop recipe on SLICE BRAIN.')}
+function kitSuggest(){const box=$('kfSug');if(!box)return;if(!ready()){box.innerHTML='';return}const c=roleCands(KF.armed,new Set()).slice(0,8),A=API();
+ box.innerHTML='<span class="hwl">BEST FOR '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+(KF.roles?' · '+ROLES[KF.armed][0]:'')+'</span><div class="kfsg">'+c.map(o=>{const s=A.slice(o.i);return'<button class="kc" data-ci="'+o.i+'" style="--pc:'+s.col+'"><canvas width="120" height="40"></canvas><b>#'+(o.i+1)+'</b><span>'+Math.round(o.score*100)+'</span></button>'}).join('')+'</div>';
+ $$('#kfSug .kc').forEach(x=>wave(x.querySelector('canvas'),A.slice(+x.dataset.ci)))}
+
 /* ================= HELP: every control explains itself ================= */
 const H={
  /* rail */
@@ -623,6 +716,15 @@ const H={
  stLic:['LICENSE KEY','After buying you get a key by email. Paste it here to unlock your plan on this device.','Pack Store'],
  stFree:['FREE STARTER PACKS','Kits built from the demo beat, free. GET IT saves the kit under MY KITS in KIT FORGE.','Pack Store'],
  stCat:['PREMIUM CATALOG','Packs published by the store. Unlocked ones load, chop and save as kits in one press.','Pack Store'],
+ sxRec:['RECOMMENDED CHOP','Slice Brain listens to how much of the song is drums and how much is music, and picks the chop that will flip best. USE IT applies it.','Slice Brain'],
+ sxRecipes:['CHOP RECIPES','One press sets slice method, sensitivity, shortest and longest for a job: drum hits, soul flip, stabs, half-bar, bar loops, 16th grid, vocal chops. The pads re-chop at once.','Slice Brain'],
+ sxSum:['SONG READ-OUT','How many cuts, their average length, how many start on the 16th grid, how many repeat the same sound, and the mix of kick, snare, hat and tonal sound.','Slice Brain'],
+ sxList:['EVERY CUT, RANKED','Each cut scored on timing (on the grid), punch (a sharp start) and clean (a tail that does not bleed). ▶ hears it, → KIT puts it in the lit Kit Forge slot, ✕ CUT merges it into the cut before.','Slice Brain'],
+ sxClean:['CLEAN-UP','MERGE WEAK CUTS joins tiny, weak slices into their neighbours. UNDO MY CUT EDITS brings the recipe’s cuts back. BEST-OF KIT builds an MPC drum layout from the highest-scoring cuts.','Slice Brain'],
+ kfAuto:['AUTO-FILL','Fills the empty slots of this bank in one press: an MPC drum layout, the best cuts, cuts in order, tonal stabs, or loops. Tick replace to rebuild the whole bank. Then change any slot by hand.','Kit Forge'],
+ kfSug:['BEST FOR THIS SLOT','The highest-scoring cuts for the lit slot’s role. Tap to hear, hold or drag to drop in.','Kit Forge'],
+ autoBar:['AUTOMATION','Like a DAW. WRITE: press PLAY and move FILTER, PUMP or SWING; the moves record into the pattern. READ: the pattern plays its moves back every loop. OFF: ignore them. CLEAR wipes this pattern’s moves. The dot glows when the pattern has automation.','Pad matrix'],
+ sbTL:['ARRANGEMENT VIEW','The song like a DAW: parts across, channels down, automation lanes at the bottom. Tap a block to turn that channel on or off in that part. A pattern used twice changes in both places.','Song Builder'],
  lcPlay:['PLAY / STOP','Starts or stops the transport.','Launch Console'],lcSong:['+ ADD TO SONG','Adds the current pattern to the end of the song order.','Launch Console']};
 const SOFTH={SHORTEST:'Cuts shorter than this are merged into the next. Tap to step: 1/32 … 2 bars. With SHIFT on it steps back.',LONGEST:'Cuts longer than this are split. Tap to step: ½ beat … 4 bars, or never.',PADS:'Switches the pads between CHOP (cuts in order) and KIT (your kits).','◀ SLICES':'Previous 128 cuts on the pad banks.','SLICES ▶':'Next 128 cuts on the pad banks.'};
 function helpFor(t){let e=t.closest('[data-help]');if(e)return H[e.dataset.help]?[...H[e.dataset.help],e]:null;
@@ -705,7 +807,7 @@ function guideRender(){
 function bookRender(){const q=($('gFind').value||'').toLowerCase().trim(),G={};
  for(const[k,[t,d,g]]of Object.entries(H)){if(q&&!(t+' '+d+' '+g).toLowerCase().includes(q))continue;(G[g]=G[g]||[]).push([k,t,d])}
  $('gBook').innerHTML=Object.entries(G).map(([g,a])=>'<section><h4>'+g+'</h4>'+a.map(([k,t,d])=>'<div class="bk1"><b>'+t+'</b><p>'+d+'</p><button class="show" data-k="'+k+'">SHOW ME</button></div>').join('')+'</section>').join('')||'<p class="empty">Nothing matches “'+esc(q)+'”.</p>'}
-const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build','Pack Factory':'factory','Pack Store':'store'};
+const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build','Pack Factory':'factory','Pack Store':'store','Slice Brain':'slicer'};
 function guideWire(){$('gTour').onclick=()=>coachStart('tour');$('gChap').onclick=e=>{const b=e.target.closest('[data-c]');if(b)courseStart(STEPS.findIndex(s=>s.ci===+b.dataset.c))};$('gDemo').onclick=demoStart;$('gExp').onclick=()=>{explain(true);go(hist[hist.length-1]||'start')};
  $('gMap').onclick=e=>{const n=e.target.closest('.gnode');if(n)go(n.dataset.p)};
  $('gLessons').onclick=e=>{const b=e.target.closest('.glesson');if(b)coachStart(b.dataset.l)};
@@ -796,6 +898,8 @@ const CH=[
   ['chop','#scrFoot .sk[data-cyc="maxl"]','Longest slice','Longest splits any slice that runs longer than this. For drum hits use a beat. For loop chops, choose one bar or two bars. Watch the pads change as soon as you tap it.',{z:2.4,need:1}],
   ['chop','#padsSlot','The pads follow your cuts','On the right is the pad matrix. In the chop program, pad A one plays slice one, A two plays slice two, all the way to H sixteen, which is slice one hundred and twenty eight. Listen.',{z:1.6,need:1,act:async(t,tok)=>hearSl(6,tok)}],
   ['chop','#banksSlot','Flip through the cuts','Banks A to H hold one hundred and twenty eight slices. The small number on each bank is its first slice. If the song has more slices, the slices arrow keys at the bottom of the screen move to the next page.',{z:2,need:1}],
+  ['slicer','#sxRec','Slice Brain picks the chop','Next to the sampler is the slice brain tab. It listens to the song, tells you which chop will flip best and why, and one press applies it. The chop recipes set everything for a job: drum hits, soul flip, stabs, half bar, bar loops, sixteenth grid, or vocal chops.',{z:1.6,need:1,act:async(t,tok)=>{go('slicer');await cw(500,tok)}}],
+  ['slicer','#sxList','Every cut, ranked','Every cut gets a score for timing, punch and how clean its tail is. Play any cut, send it straight to a kit slot, or remove a cut you do not want. Best of kit builds a full drum kit from the top scores.',{z:1.5,need:1}],
   ['chop','#pads','Every slice as a button','Below the waveform, every slice also has a numbered button. Tap one to hear it. Hold one for half a second and it goes straight onto the next empty pad.',{z:1.6,need:1}]]],
  ['Build your own kit',[
   ['kit','#rail .rb[data-grp="kit"]','Open Kit Forge','Now press Kits on the rail. This is Kit Forge, where you build your own drum kits by hand from the cuts.',{z:2.4,need:1,act:async(t,tok)=>railTo('kit',tok)}],
@@ -805,6 +909,7 @@ const CH=[
   ['kit','#kfFilt','Filter','Use the filter to show only kicks, only snares, only hats, or only tonal sounds. This makes finding the right sound much faster.',{z:2.2,need:1}],
   ['kit','#kfCuts','Hear, then hold','Tap a cut to hear it. When you find the one you want, hold it down for half a second. It drops into the glowing slot. Watch.',{z:1.5,need:1,act:async(t,tok)=>{const c=$$('#kfCuts .kc').find(x=>/KICK/.test(x.textContent))||$$('#kfCuts .kc')[0];if(!c)return;await ghostTo(c,true);API().hear({k:'slice',ci:+c.dataset.ci});await cw(900,tok);c.classList.add('held');await cw(400,tok);kitDrop(+c.dataset.ci,KF.armed)}}],
   ['kit','#kfSlots','Keep going','The next empty slot lit up by itself. So you can keep tapping and holding, one sound after another, and build a full kit in a minute. You can also drag a cut onto any slot you like.',{z:1.6,need:1,act:async(t,tok)=>{const c=$$('#kfCuts .kc').find(x=>/SNARE/.test(x.textContent));if(!c)return;API().hear({k:'slice',ci:+c.dataset.ci});await cw(700,tok);kitDrop(+c.dataset.ci,KF.armed)}}],
+  ['kit','.kfauto','Auto fill','Auto fill builds a bank in one press: an M P C drum layout with kick, snare, hats, percs and tones in their places, or the best cuts, cuts in order, tonal stabs, or loops. Then change any slot by hand. The strip below shows the best cuts for the glowing slot.',{z:1.8,need:1}],
   ['kit','.kfact','Change or remove a sound','To change a slot, tap it and hold a different cut. It is replaced. Clear slot empties it. Clear bank empties all sixteen. Undo brings anything back.',{z:2,need:1}],
   ['kit','.kfsave','Save your kit','Type a name for the kit and press Save kit. Your saved kits are listed here. Tap a name to load it into any bank. The x deletes it. That is how you keep a collection of kits for each song.',{z:2,need:1}],
   ['kit','#kfPads','Play it on the pads','Play on pads switches the pad matrix to this kit and opens the drum machine.',{z:2.4,need:1}]]],
@@ -833,6 +938,7 @@ const CH=[
   ['sequence','#osPatDup','Copy for variations','Copy makes a copy of this pattern in the next empty one and jumps there. Change the copy, maybe drop the kick or add a hat roll. Now you have a verse and a variation, and the original is safe.',{z:2.4,need:1}],
   ['sequence','#osPatPrev','Jump back and forth','The arrows step between patterns. The minus and equals keys do the same. While a pattern plays, the next one waits until the current one ends, so the change always lands on time.',{z:2.4,need:1}],
   ['sequence','#patLcd','Read the display','The display shows which pattern is playing, which one is waiting, its length, and how many hits it has. The line along the bottom shows where you are in the loop.',{z:2.6,need:1}],
+  ['pads','.autoBar','Automation','This works like automation in a D A W. Set it to write, press play, and move the filter, pump or swing knob. The moves record into the pattern. Set it to read and the pattern plays your moves back every loop.',{z:2.2,need:1,act:async(t,tok)=>{go('pads');await cw(400,tok)}}],
   ['sequence','#osPatClr','Clear','Clear empties the current pattern. It asks first, and undo brings it back.',{z:2.4,need:1}]]],
  ['Keys and melodies',[
   ['tower','#rail .rb[data-grp="keys"]','Open the key tower','Press Keys on the rail. This is the key tower: three keyboards stacked on top of each other, each with its own sound and its own octave.',{z:2.4,need:1,act:async(t,tok)=>railTo('keys',tok)}],
@@ -856,6 +962,7 @@ const CH=[
   ['build','.sbchan','Turn channels on and off','Every sound in this part shows up here as a channel. Tap a channel to turn it off for this part only. Tap again to bring it back. The hits are never deleted, so you can drop the drums for an intro, then bring them back for the hook.',{z:1.8,need:1}],
   ['build','#sbFollow','Pads follow the part','Arrange two or three pad banks for a song, say chops on bank A, drums on bank B, the hook chops on bank C. Each part remembers the bank it was made with, and when that part comes round, the pads switch to it by themselves.',{z:2.2,need:1}],
   ['build','.sbsong','The song, part by part','Your parts line up here, in order. Tap one to select it. Move it earlier or later, repeat it, remove it, loop it to fix something, or play the song from that part.',{z:1.6,need:1}],
+  ['build','.tlw','The arrangement view','Below the parts is the arrangement view, like a D A W. Parts run across, channels run down, and your automation lanes sit at the bottom. Tap any block to switch that channel on or off in that part. The white line shows where the song is playing.',{z:1.5,need:1}],
   ['build','#sbSong','Play the song','Play the song plays every part from the top. Double tap any part to jump straight to it, right on the beat. When it is finished, press export.',{z:2.4,need:1}]]],
  ['Export the song',[
   ['song','#subTabs','The song arranger','The song arranger tab holds the same song order, plus exports and saves.',{z:2.4,need:1,act:async(t,tok)=>{go('song');await cw(400,tok)}}],
@@ -930,10 +1037,10 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
 
 /* ================= boot ================= */
-function init(){build();courseWire();kitWire();builderWire();factoryWire();storeWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
+function init(){build();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={page,pick};
+ window.OS={page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
