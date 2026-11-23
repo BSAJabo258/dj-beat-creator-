@@ -174,7 +174,7 @@ function init(){buildSubs();dnd();knobs();mountHW();jog();hwKeys();
  const st=$('st'),lm=$('loadMsg');new MutationObserver(()=>{const t=st.textContent;if(/^(Loading|Decoding|Analyzing)/.test(t)){lm.textContent=t;lm.className='busy';$('projMeta').dataset.flash=1;$('projMeta').textContent=t.toUpperCase();document.body.classList.add('loading')}
   else if(/^Could not/.test(t)){lm.textContent=t;lm.className='err';delete $('projMeta').dataset.flash;document.body.classList.remove('loading');if(cur!=='start')goPage('start')}
   else if(document.body.classList.contains('loading')){document.body.classList.remove('loading');lm.textContent='';lm.className='';delete $('projMeta').dataset.flash}}).observe(st,{childList:true,characterData:true,subtree:true});
- const hint=$('psHint');if(hint)new MutationObserver(()=>{const t=hint.textContent.trim();if(t)note(t)}).observe(hint,{childList:true,characterData:true,subtree:true});
+ const hint=$('psHint');if(hint)new MutationObserver(()=>{const t=hint.textContent.trim();if(t&&!(window.__sayT&&Date.now()-window.__sayT<4000))note(t)}).observe(hint,{childList:true,characterData:true,subtree:true});
  setInterval(()=>{hwSync();softSync()},250);
  const pick=$('gPick');if(pick){$('screen').insertBefore(pick,$('scrBody'));$$('[data-t]',pick).forEach(b=>{const m={A:'chop',P:'live',D:'keys',E:'parts',G:'groups',S:'sounds'};b.onclick=e=>{e.stopPropagation();goPage(m[b.dataset.t])}})}
  const pf=$('psPerf');if(pf)pf.hidden=true;const gt=$('gToast');if(gt)$('screen').appendChild(gt);

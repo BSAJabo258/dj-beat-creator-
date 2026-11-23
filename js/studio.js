@@ -109,7 +109,7 @@ const keyName=(p,j)=>{const pm=p.midi!==undefined?p.midi:48+PS.root;return nn(Ma
 function flash(j){const el=padEl[j];if(!el)return;el.classList.add('on');clearTimeout(el._ft);el._ft=setTimeout(()=>el.classList.remove('on'),110)}
 function recEv(sb,sj,vel,st,ci){if(!(TR.playing&&TR.rec))return null;const nb=beatNow(),seg=TR.seg;if(nb<0||!seg)return null;let pos=nb-seg.start;pos=((pos%seg.len)+seg.len)%seg.len;
  let t=PS.q>0?Math.round(pos/PS.q)*PS.q:pos;if(t>=seg.len-1e-4)t=0;if(!TR.recSnap){pushUndo();TR.recSnap=true}
- const ev={t:+t.toFixed(4),b:sb,p:sj,v:+vel.toFixed(2),st:st||0,d:0,_skip:seg.id};if(ci!=null){ev.pg='chop';ev.ci=ci}{const SP=PS.pats[seg.pat];if(SP.bank==null){SP.bank=PS.bank;SP.prog=PS.prog}}PS.pats[seg.pat].ev.push(ev);seqDirty=true;dirty();return ev}
+ const ev={t:+t.toFixed(4),b:sb,p:sj,v:+vel.toFixed(2),st:st||0,d:0,_skip:seg.id};if(ci!=null){ev.pg='chop';ev.ci=ci}{const SP=PS.pats[seg.pat];if(SP.bank==null){SP.bank=PS.bank;SP.prog=PS.prog}}PS.pats[seg.pat].ev.push(ev);seqDirty=true;PS.ver=(PS.ver||0)+1;dirty();return ev}
 function hit(b,j,vel){if(!ac)return null;resume();flash(j);if(HW.full)vel=1;
  if(!PS.keys&&HW.erase){hwEraseHit(b,j);return null}if(!PS.keys&&HW.mute){hwMuteHit(b,j);return null}
  if(PS.keys&&PS.kp){const p=PS.kp.pad||PS.banks[PS.kp.b][PS.kp.j];if(!p)return null;const vs=[],evs=[],t=ac.currentTime;
@@ -132,7 +132,7 @@ function nextBeatT(){const nb=beatNow();return TR.t0+Math.ceil(nb-.02)*bd()}
 /* ---------- transport ---------- */
 function beatNow(){return ac?(ac.currentTime-TR.t0)/bd():0}
 function click(t,acc){const o=ac.createOscillator(),g=ac.createGain();g._noRec=1;o.frequency.value=acc?1760:1100;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(acc?.32:.18,t+.001);g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.06)}
-function startT(){if(TR.playing||!ac)return;resume();const sf=PS.songMode&&PS.song.length?clamp(TR.songFrom||0,0,PS.song.length-1):0;TR.songFrom=0;const ci=TR.rec&&PS.countIn?4:0,first=PS.songMode&&PS.song.length?PS.song[sf]:PS.pat;
+function startT(){if(TR.playing||!ac)return;resume();try{if(window.OS&&OS.focus)OS.focus('transport')}catch(e){}const sf=PS.songMode&&PS.song.length?clamp(TR.songFrom||0,0,PS.song.length-1):0;TR.songFrom=0;const ci=TR.rec&&PS.countIn?4:0,first=PS.songMode&&PS.song.length?PS.song[sf]:PS.pat;
  TR.songPos=sf;followPart(first,0);PS.pat=first;TR.t0=ac.currentTime+.1+ci*bd();TR.seg={pat:first,start:0,len:patLen(first),id:++TR.segId};TR.sched=-ci;TR.next=null;TR.playing=true;TR.recSnap=false;
  TR.timer=setInterval(tick,25);tick();uiT();renderPats();seqDraw();loop()}
 function stopT(){clearInterval(TR.timer);TR.timer=null;const was=TR.playing;TR.playing=false;TR.next=null;TR.rec=false;if(ac){const t=ac.currentTime;TR.vs.forEach(v=>vStop(v,t,.02));for(const o of LATCH.values())vStop(o.v,t,.03)}
@@ -144,7 +144,8 @@ function adv(){const seg=TR.seg;let p;
  if(TR.next!=null){p=TR.next;TR.next=null;if(PS.songMode){const k=TR.nextPos!=null?TR.nextPos:PS.song.indexOf(p);TR.nextPos=null;if(k>=0)TR.songPos=k}}
  else if(PS.songMode&&PS.song.length){TR.songPos=(TR.songPos+1)%PS.song.length;p=PS.song[TR.songPos]}else p=seg.pat;
  TR.seg={pat:p,start:seg.start+seg.len,len:patLen(p),id:++TR.segId};TR.recSnap=false;TR.segChanged=true;if(p!==seg.pat)followPart(p,(TR.seg.start-beatNow())*bd()*1000)}
-function followPart(p,ms){const P=PS.pats[p];if(!PS.follow||!P||P.bank==null)return;setTimeout(()=>{try{if(P.prog&&P.prog!==PS.prog)setProg(P.prog,true);if(P.bank!==PS.bank)setBank(P.bank)}catch(e){}},Math.max(0,ms||0))}
+function partPads(P){if(P.bank!=null)return{bank:P.bank,prog:P.prog||'kit'};if(!P.ev.length)return null;const ch=P.ev.filter(e=>e.pg==='chop');if(ch.length>P.ev.length/2){const c=new Map();ch.forEach(e=>c.set(Math.floor(e.ci/16),(c.get(Math.floor(e.ci/16))||0)+1));const top=[...c.entries()].sort((a,b)=>b[1]-a[1])[0][0];return{prog:'chop',page:Math.floor(top/8),bank:top%8}}const c=[0,0,0,0,0,0,0,0];P.ev.forEach(e=>{if(e.pg!=='chop'&&e.b>=0&&e.b<8)c[e.b]++});return{prog:'kit',bank:c.indexOf(Math.max(...c))}}
+function followPart(p,ms){const P=PS.pats[p];if(!PS.follow||!P)return;const F=partPads(P);if(!F)return;setTimeout(()=>{try{if(F.prog&&F.prog!==PS.prog)setProg(F.prog,true);if(F.page!=null&&F.page!==PS.cpage){PS.cpage=F.page;CHOPB=null;renderAll()}if(F.bank!==PS.bank)setBank(F.bank)}catch(e){}},Math.max(0,ms||0))}
 
 /* ================= AUTOMATION (DAW style): knob moves recorded into the pattern =================
    Lanes per pattern: flt (filter -100..100), pump (0..100), sw (swing 0..100).
@@ -187,7 +188,7 @@ function undo(){const u=PS.undo.pop();if(!u){msg('Nothing to undo.');return}cons
 function ser(){const S=PS.srcs[PS.main]||{};return{v:1,app:'BeatChopperPadStudio',main:PS.main,mainLen:S.len,srcs:Object.keys(PS.srcs),
  chop:{mode:$('mode').value,bpm:$('bpm').value,sens:$('sens').value,minl:$('minl').value,maxl:$('maxl').value,manual:deep(manual)},
  bpm:PS.bpm,swing:PS.swing,q:PS.q,root:PS.root,scale:PS.scale,banks:PS.banks,packs:PS.packs||[],pats:cleanPats(),song:PS.song,songMode:PS.songMode,layout:PS.layout,saved:new Date().toISOString()}}
-function dirty(){clearTimeout(saveT);saveT=setTimeout(()=>{if(PS.main)LS.set('bcrps:auto:'+PS.main,ser())},700);renderBanks()}
+function dirty(){PS.ver=(PS.ver||0)+1;clearTimeout(saveT);saveT=setTimeout(()=>{if(PS.main)LS.set('bcrps:auto:'+PS.main,ser())},700);renderBanks()}
 const isEmpty=()=>PS.banks.every(B=>B.every(p=>!p))&&PS.pats.every(p=>!p.ev.length);
 function applyProj(d,opt){if(!d||!Array.isArray(d.banks))throw new Error('That is not a Pad Studio project file.');opt=opt||{};pushUndo();stopT();
  const cur=PS.srcs[PS.main]||{};let remap=false;if(d.main&&d.main!==PS.main&&!(PS.srcs[d.main]&&PS.srcs[d.main].chs)&&d.mainLen&&d.mainLen===cur.len)remap=true;
@@ -1002,6 +1003,10 @@ window.DBC_OS={
  autoLanes:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];return P&&P.auto?JSON.parse(JSON.stringify(P.auto)):{}},
  autoClear:(p,k)=>{ensurePS();const P=PS.pats[p==null?curPat():p];if(!P.auto)return;pushUndo();if(k)delete P.auto[k];else delete P.auto;dirty()},
  autoSet:(p,k,pts)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.auto=P.auto||{};P.auto[k]=pts.map(x=>({t:+x.t,v:+x.v})).sort((a,b)=>a.t-b.t);dirty()},
+ ver:()=>(PS.ver||0)+':'+TR.segId,
+ patMeta:()=>{ensurePS();return PS.pats.map(p=>({bars:p.bars,hits:p.ev.length}))},
+ followCur:()=>{ensurePS();followPart(curPat(),0)},
+ panic:()=>{stopT();try{for(const k of [...NR.act.keys()])nrStop(k)}catch(e){}if(ac){const t=ac.currentTime;TR.vs.forEach(v=>vStop(v,t,.02));TR.vs=[]}try{uiT()}catch(e){}renderAll()},
  level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
 let OSAN=null,OSBUF=null;
 

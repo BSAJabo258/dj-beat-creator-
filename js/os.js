@@ -11,7 +11,7 @@ const el=(tag,props,html)=>{const e=document.createElement(tag);if(props)for(con
 const API=()=>window.DBC_OS,ready=()=>!!(API()&&API().ready()&&!$('app').hidden);
 const LSg=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},LSs=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const BL='ABCDEFGH',NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],nn=m=>NN[((m%12)+12)%12]+(Math.floor(m/12)-1);
-const say=t=>{const s=$('st');if(s)s.textContent=t};
+const say=t=>{window.__sayT=Date.now();const s=$('st');if(s)s.textContent=t};
 const go=p=>window.goPage&&goPage(p);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -64,7 +64,7 @@ function build(){
  const dev=$('device'),top=$('hwTop');
  /* rail */
  const rail=el('nav',{id:'rail','aria-label':'Studio units'});
- rail.innerHTML='<div class="brand" aria-hidden="true"><b>BC</b><span>16</span></div>'+GROUPS.map((g,i)=>'<button class="rb" data-grp="'+g.id+'" data-help="rail-'+g.id+'" title="'+g.l+(i<10?' (Alt+'+((i+1)%10)+')':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+I[g.id]+'</svg><span>'+g.l+'</span><i class="rled"></i></button>').join('')+'<div class="rsp"></div><button class="rb sm" id="osExplain" data-help="osExplain" title="Explain mode (?)"><b>?</b><span>EXPLAIN</span><i class="rled"></i></button>';
+ rail.innerHTML='<div class="brand" aria-hidden="true"><b>BC</b><span>16</span></div>'+GROUPS.map((g,i)=>'<button class="rb" data-grp="'+g.id+'" data-help="rail-'+g.id+'" title="'+g.l+(i<10?' (Alt+'+((i+1)%10)+')':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+I[g.id]+'</svg><span>'+g.l+'</span><i class="rled"></i></button>').join('')+'<div class="rsp"></div><button class="rb sm" id="osCoach" data-help="osCoach" title="Coach on/off"><b>☰</b><span>COACH</span><i class="rled"></i></button><button class="rb sm" id="osExplain" data-help="osExplain" title="Explain mode (?)"><b>?</b><span>EXPLAIN</span><i class="rled"></i></button>';
  dev.prepend(rail);
  rail.addEventListener('click',e=>{const b=e.target.closest('.rb[data-grp]');if(!b)return;const g=GROUPS.find(x=>x.id===b.dataset.grp);const last=LSg('bc16:last:'+g.id,g.pages[0]);go(g.pages.includes(last)?last:g.pages[0])});
  /* meter bridge */
@@ -75,7 +75,7 @@ function build(){
  $('loadGrp').querySelector('.hwl').textContent='SONG';
  /* stage */
  const stage=el('main',{id:'stage'});
- const sub=el('div',{id:'subBar'},'<button class="stab back" id="subBack" data-help="osBack">◀ <span>BACK</span></button><div id="unitTag"><i></i><b id="unitName"></b><span id="unitModel"></span><em id="unitDesc"></em></div><div id="subTabs" role="tablist"></div>');
+ const sub=el('div',{id:'subBar'},'<button class="stab back" id="subBack" data-help="osBack">◀ <span>BACK</span></button><div id="unitTag"><i></i><b id="unitName"></b><span id="unitModel"></span><em id="unitDesc"></em></div><div id="subTabs" role="tablist"></div><button class="stab nextu" id="subNext" data-help="subNext" hidden></button>');
  stage.append(sub);
  const sw=$('screenWrap');sw.insertAdjacentHTML('afterbegin',plate('SAMPLER','CS-1','screen'));sw.classList.add('unit');stage.append(sw);
  const deck=el('section',{id:'deck',class:'unit'});deck.innerHTML=plate('PAD MATRIX','PM-16','deck','<button id="deckProg" class="pchip" data-help="scrProg">CHOP</button>');
@@ -94,21 +94,21 @@ function build(){
  ['ctlL','ctlR'].forEach(id=>{const x=$(id);if(x)x.hidden=true});
  const gt=$('gToast');if(gt)document.body.append(gt);
  /* coach / explain layers */
- document.body.insertAdjacentHTML('beforeend','<div id="coach" hidden><div id="spot"></div><div id="ccard" role="dialog" aria-live="polite"><div class="cbar"><i id="cprog"></i></div><small id="cstep"></small><h3 id="ctitle"></h3><p id="ctext"></p><div class="cbtn"><button id="cprev">◀ Back</button><button id="cexit">Exit</button><button id="cplay" class="conly">❚❚ Pause</button><button id="cnext" class="p">Next ▶</button></div><div class="crow conly"><button id="cvoice">🔊 Voice on</button><select id="cRate" aria-label="Narration speed"><option value="0.75">Very slow</option><option value="0.88">Slow and clear</option><option value="1">Normal</option><option value="1.15">Faster</option></select><select id="cChap" aria-label="Jump to chapter"></select></div></div><div id="ghost"><i></i></div></div><div id="xbub" hidden><b></b><p></p><small>Explain mode is on: buttons explain themselves instead of acting. Press ? or Esc to turn it off.</small></div>');
+ document.body.insertAdjacentHTML('beforeend','<div id="coach" hidden><div id="spot"></div><div id="ccard" role="dialog" aria-live="polite"><div class="cbar"><i id="cprog"></i></div><small id="cstep"></small><h3 id="ctitle"></h3><p id="ctext"></p><div class="cbtn"><button id="cprev">◀ Back</button><button id="cexit">Exit</button><button id="cplay" class="conly">❚❚ Pause</button><button id="cnext" class="p">Next ▶</button></div><div class="crow conly"><button id="cvoice">🔊 Voice on</button><select id="cWho" aria-label="Narrator"><option value="0">Studio voice (soft)</option><option value="1">My device’s voice</option></select><select id="cRate" aria-label="Narration speed"><option value="0.75">Very slow</option><option value="0.88">Slow and clear</option><option value="1">Normal</option><option value="1.15">Faster</option></select><select id="cChap" aria-label="Jump to chapter"></select></div></div><div id="ghost"><i></i></div></div><div id="xbub" hidden><b></b><p></p><small>Explain mode is on: buttons explain themselves instead of acting. Press ? or Esc to turn it off.</small></div>');
  /* status line mirror */
  const st=$('st');const mirror=()=>{$('osLine').textContent=st.textContent};new MutationObserver(mirror).observe(st,{childList:true,characterData:true,subtree:true});mirror();
  /* wiring */
  $('osSave').onclick=()=>{if(!ready()){say('Load a song first.');return}API().save();say('Setup saved: pads, kits, patterns and song order for '+fnameSafe()+'.')};
  $('osPatPrev').onclick=()=>patStep(-1);$('osPatHalf').onclick=()=>{PH.manual=PH.half?0:1;PH.half=PH.manual;PH.t=Date.now();halfSync()};$('osNext').onclick=()=>nextPart();$('osPatNext').onclick=()=>patStep(1);
  $('osPatDup').onclick=()=>{if(!need())return;const t=API().dupPat();say(t<0?'All 8 patterns have hits. Clear one first.':'Copied into P'+(t+1)+' and switched to it. Change it to make a variation.')};
- $('osPatClr').onclick=()=>{if(!need())return;const P=API().pat();if(!API().pats()[P].hits){say('P'+(P+1)+' is already empty.');return}if(!confirm('Clear every hit in pattern P'+(P+1)+'? UNDO brings it back.'))return;API().clearPat();say('Cleared P'+(P+1)+'. Press UNDO to bring it back.')};
+ $('osPatClr').onclick=async()=>{if(!need())return;const P=API().pat();if(!API().pats()[P].hits){say('P'+(P+1)+' is already empty.');return}if(!await ask('Clear every hit in pattern P'+(P+1)+'? UNDO brings it back.'))return;API().clearPat();say('Cleared P'+(P+1)+'. Press UNDO to bring it back.')};
  $('osUndo').onclick=()=>{if(need())API().undo()};
  $('osBack').onclick=back;$('subBack').onclick=back;
  document.body.insertAdjacentHTML('beforeend','<button id="focusExit" hidden>✕ Show all units</button>');$('focusExit').onclick=()=>{const u=$$('#stage .unit.focus')[0];if(u)zoom(u,0)};
  $('deckProg').onclick=()=>{const b=$('scrProg');if(b)b.click()};
  stage.addEventListener('click',e=>{const z=e.target.closest('.zb');if(!z)return;const u=z.closest('.unit');zoom(u,+z.dataset.z)});
  stage.addEventListener('dblclick',e=>{const p=e.target.closest('.plate');if(p&&!e.target.closest('button'))zoom(p.closest('.unit'),0)});
- $('osExplain').onclick=()=>explain(!document.body.classList.contains('explain'));
+ $('osExplain').onclick=()=>explain(!document.body.classList.contains('explain'));$('osCoach').onclick=()=>coachToggle(!CO.on);
 }
 const fnameSafe=()=>{try{return fname}catch(e){return'this song'}};
 function need(){if(!ready()){say('Load a song first: press LOAD on the meter bridge, or try the demo beat on the TAPE DECK.');return false}if(window.DBC)DBC.ensure();return true}
@@ -122,7 +122,7 @@ function applyZoom(u){const z=LSg(zoomKey(u),1),b=u.querySelector(':scope > :not
 /* ================= pages ================= */
 let curP='start',hist=[];
 function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x=>x.pages.includes(p))||GROUPS[0];
- if(p!=='kit')pickFrom=null;if(prev&&prev!==p&&!backing){hist.push(prev);if(hist.length>30)hist.shift()}backing=false;
+ if(prev&&prev!==p)leave(prev,p);if(p!=='kit')pickFrom=null;if(prev&&prev!==p&&!backing){hist.push(prev);if(hist.length>30)hist.shift()}backing=false;
  LSs('bc16:last:'+g.id,p);
  const B=document.body;B.dataset.pg=p;B.dataset.grp=g.id;B.style.setProperty('--acc',U.c);B.style.setProperty('--acc2',U.c2);B.classList.toggle('deck',WITH_DECK.has(p));
  $$('#rail .rb[data-grp]').forEach(b=>b.classList.toggle('on',b.dataset.grp===g.id));
@@ -130,16 +130,17 @@ function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
  $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');$('focusExit').hidden=true;
- if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ if((p==='sequence'||p==='launch'||p==='build')&&ready()&&API().song().follow&&!API().playing())API().followCur();if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ {const fi=FLOW.findIndex(f=>f[0]===p),nx=FLOW[fi+1],sn=$('subNext');sn.hidden=fi<0||!nx;if(nx){sn.innerHTML='<small>STEP '+(fi+1)+' OF '+FLOW.length+'</small> NEXT: '+UNITS[nx[0]].n+' ▶';sn.onclick=()=>go(nx[0])}}
  $('osBack').disabled=!hist.length;const pb=hist[hist.length-1];$('subBack').hidden=!pb;if(pb)$('subBack').querySelector('span').textContent=(UNITS[pb]||{n:'BACK'}).n;
- if(coach&&coach.mode==='tour')setTimeout(coachPlace,80)}
+ if(coach&&coach.mode==='tour')setTimeout(coachPlace,80);CO.last=null;CO.sig='';coachRender()}
 let backing=false;
 function back(){const p=hist.pop();if(!p){say('Nothing to go back to yet.');return}backing=true;go(p)}
 
 /* ================= pattern deck ================= */
 function patStep(d){if(!need())return;const A=API(),N=A.nPats(),q=A.queued(),c=q!=null?q:A.pat();const n=(c+d+N)%N;A.selPat(n);say(A.playing()?'P'+(n+1)+' plays when the current pattern finishes. Press again to keep stepping.':'Now on pattern P'+(n+1)+'.')}
 function patSync(){const A=API();if(!A||!ready()){$('patNum').textContent='P--';$('patInfo').textContent='NO SONG';return}
- let P,ps;try{P=A.pat();ps=A.pats()}catch(e){return}const q=A.queued(),info=ps[P];
+ let P,ps;try{P=A.pat();ps=A.patMeta()}catch(e){return}const q=A.queued(),info=ps[P];
  $('patNum').textContent='P'+String(P+1).padStart(2,'0')+(q!=null?' → P'+String(q+1).padStart(2,'0'):'');
  $('patInfo').textContent=info.bars+' BAR'+(info.bars>1?'S':'')+' · '+info.hits+' HITS'+(A.rec()?' · REC':'');
  $('patProg').firstChild.style.width=(A.playing()?A.pos()*100:0)+'%';$('patLcd').classList.toggle('q',q!=null);$('patLcd').classList.toggle('rec',A.rec());
@@ -150,17 +151,15 @@ function halfAuto(c){const h=c>=8?1:0;if(PH.manual!=null&&Date.now()-PH.t<6000)r
 function halfSync(){$$('#psPats .bkb').forEach((b,i)=>b.classList.toggle('ph',Math.floor(i/8)!==PH.half));$('osPatHalf').lastChild.textContent=PH.half?'1–8':'9–16'}
 
 /* ================= VU meter ================= */
-let vuL=0,vuPk=0,vuPkT=0;
-function vuDraw(){const c=$('vuC');if(!c)return;const x=c.getContext('2d'),W=c.width,H=c.height;let lv=[0,0];try{if(API())lv=API().level()}catch(e){}
- const db=20*Math.log10(Math.max(1e-5,lv[0]*1.414)),f=Math.max(0,Math.min(1,(db+30)/33));vuL+=(f-vuL)*(f>vuL?.35:.08);
- const pk=lv[1];if(pk>.97){vuPk=1;vuPkT=performance.now()}else if(performance.now()-vuPkT>900)vuPk=0;
- x.clearRect(0,0,W,H);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f3e6c1');g.addColorStop(1,'#d8c79a');x.fillStyle=g;x.fillRect(0,0,W,H);
- const cx=W/2,cy=H*1.55,R=H*1.28;x.lineWidth=2;
- for(let i=0;i<=10;i++){const a=-Math.PI/2+(-0.62+1.24*i/10),red=i>=8;x.strokeStyle=red?'#c3262e':'#2a2620';const r0=R-(i%2?8:13);x.beginPath();x.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);x.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);x.stroke()}
- x.strokeStyle='#c3262e';x.lineWidth=4;x.beginPath();x.arc(cx,cy,R+2,-Math.PI/2+.62*.6,-Math.PI/2+.62);x.stroke();
- x.fillStyle='#2a2620';x.font='600 13px "Martian Mono",monospace';x.textAlign='center';x.fillText('VU',cx,H*.78);
- const a=-Math.PI/2-0.66+1.32*vuL;x.strokeStyle='#111';x.lineWidth=2.2;x.beginPath();x.moveTo(cx+Math.cos(a)*(R*.42),cy+Math.sin(a)*(R*.42));x.lineTo(cx+Math.cos(a)*(R+4),cy+Math.sin(a)*(R+4));x.stroke();
- $('vu').classList.toggle('pk',!!vuPk)}
+let vuL=0,vuPk=0,vuPkT=0,vuBG=null,vuLast=-1,vuT=0;
+function vuFace(W,H){const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f3e6c1');g.addColorStop(1,'#d8c79a');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const cx=W/2,cy=H*1.55,R=H*1.28;x.lineWidth=2;for(let i=0;i<=10;i++){const a=-Math.PI/2+(-0.62+1.24*i/10);x.strokeStyle=i>=8?'#c3262e':'#2a2620';const r0=R-(i%2?8:13);x.beginPath();x.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);x.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);x.stroke()}
+ x.strokeStyle='#c3262e';x.lineWidth=4;x.beginPath();x.arc(cx,cy,R+2,-Math.PI/2+.62*.6,-Math.PI/2+.62);x.stroke();x.fillStyle='#2a2620';x.font='600 13px "Martian Mono",monospace';x.textAlign='center';x.fillText('VU',cx,H*.78);return c}
+function vuDraw(ts){if(document.hidden)return;if(ts-vuT<33)return;vuT=ts;const c=$('vuC');if(!c||!c.offsetParent)return;let lv=[0,0];try{if(API())lv=API().level()}catch(e){}
+ const db=20*Math.log10(Math.max(1e-5,lv[0]*1.414)),f=Math.max(0,Math.min(1,(db+30)/33));vuL+=(f-vuL)*(f>vuL?.45:.12);
+ const pk=lv[1];if(pk>.97){vuPk=1;vuPkT=ts}else if(ts-vuPkT>900)vuPk=0;$('vu').classList.toggle('pk',!!vuPk);
+ const q=Math.round(vuL*400);if(q===vuLast)return;vuLast=q;const x=c.getContext('2d'),W=c.width,H=c.height;if(!vuBG)vuBG=vuFace(W,H);x.drawImage(vuBG,0,0);
+ const cx=W/2,cy=H*1.55,R=H*1.28,a=-Math.PI/2-0.66+1.32*vuL;x.strokeStyle='#111';x.lineWidth=2.2;x.beginPath();x.moveTo(cx+Math.cos(a)*(R*.42),cy+Math.sin(a)*(R*.42));x.lineTo(cx+Math.cos(a)*(R+4),cy+Math.sin(a)*(R+4));x.stroke()}
 
 /* ================= KIT FORGE ================= */
 const KF={bank:0,armed:0,page:0,per:16,filt:'all',list:null,key:''};
@@ -183,13 +182,13 @@ function kitWire(){
  $('kfPrev').onclick=()=>pg(-1);$('kfNext').onclick=()=>pg(1);$('kfFirst').onclick=()=>pg('f');$('kfLast').onclick=()=>pg('l');KF.pg=pg;
  $('kfBanks').onclick=e=>{const b=e.target.closest('button');if(!b)return;KF.bank=+b.dataset.b;API().setBank(KF.bank);kitArmNext(true);kitRender()};
  $('kfClr').onclick=()=>{if(!need())return;API().clear(KF.bank,KF.armed);kitRender();say('Cleared slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. UNDO brings it back.')};
- $('kfClrB').onclick=()=>{if(!need())return;if(!confirm('Clear all 16 slots in kit bank '+BL[KF.bank]+'? UNDO brings them back.'))return;API().clearBank(KF.bank);KF.armed=0;kitRender()};
+ $('kfClrB').onclick=async()=>{if(!need())return;if(!await ask('Clear all 16 slots in kit bank '+BL[KF.bank]+'? UNDO brings them back.'))return;API().clearBank(KF.bank);KF.armed=0;kitRender()};
  KF.roles=true;$('kfRoles').onchange=e=>{KF.roles=e.target.checked;kitRender()};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
  holdable($('kfSug'),'.kc',(t)=>API().hear({k:'slice',ci:+t.dataset.ci}),(t)=>kitDrop(+t.dataset.ci,KF.armed),{drag:(t,slot)=>kitDrop(+t.dataset.ci,+slot.dataset.j),target:'#kfSlots .ks'});
  $('kfDone').onclick=()=>{const f=pickFrom&&pickFrom.from;pickFrom=null;if(f)go(f);else back()};
  $('kfPads').onclick=()=>{if(!need())return;API().setProg('kit');API().setBank(KF.bank);go('pads');say('The PAD MATRIX now plays kit bank '+BL[KF.bank]+' (KIT program).')};
  $('kfSv').onclick=()=>{if(!need())return;const n=$('kfName').value.trim()||('Kit '+BL[KF.bank]+' '+new Date().toLocaleDateString());if(!API().kit(KF.bank).some(Boolean)){say('Bank '+BL[KF.bank]+' is empty. Load some slots first.');return}API().saveKit(n,KF.bank);$('kfName').value='';kitRender();say('Saved “'+n+'”. Tap it under MY KITS to load it into any bank.')};
- $('kfList').onclick=e=>{const x=e.target.closest('.kdel'),b=e.target.closest('.kload');if(x){if(confirm('Delete the saved kit “'+x.dataset.n+'”?')){API().delKit(x.dataset.n);kitRender()}return}if(b){if(!need())return;API().loadKit(b.dataset.n,KF.bank);kitRender();say('Loaded “'+b.dataset.n+'” into bank '+BL[KF.bank]+'.')}};
+ $('kfList').onclick=async e=>{const x=e.target.closest('.kdel'),b=e.target.closest('.kload');if(x){if(await ask('Delete the saved kit “'+x.dataset.n+'”?')){API().delKit(x.dataset.n);kitRender()}return}if(b){if(!need())return;API().loadKit(b.dataset.n,KF.bank);kitRender();say('Loaded “'+b.dataset.n+'” into bank '+BL[KF.bank]+'.')}};
  /* slots: tap = choose (and hear); the lit slot is where the next cut lands */
  holdable($('kfSlots'),'.ks',(t)=>{KF.armed=+t.dataset.j;API().hear({k:'kit',b:KF.bank,j:KF.armed});kitRender()},(t)=>{KF.armed=+t.dataset.j;kitRender();say('Slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+' is lit. Now hold a cut in the CUT LIBRARY.')});
  /* cuts: tap = hear, hold = drop into the lit slot, drag = drop on any slot */
@@ -304,7 +303,7 @@ function launchRender(){if(!ready()){$('lcClips').innerHTML='<p class="empty">Lo
  $('lcClips').innerHTML=A.pats().map(p=>'<button class="clip'+(p.hits?' has':'')+'" data-i="'+p.i+'"><b>P'+(p.i+1)+'</b><span>'+p.bars+' BAR'+(p.bars>1?'S':'')+' · '+p.hits+' HITS</span><canvas width="200" height="56"></canvas><i class="cbar"><u></u></i>'+(p.i<12?'<kbd>F'+(p.i+1)+'</kbd>':'')+'</button>').join('');
  LC_SIG='';launchSync(A.pats(),A.pat(),A.queued())}
 let LC_SIG='';
-function launchSync(ps,P,q){const A=API(),sig=ps.map(p=>p.hits+'/'+p.bars).join(',');if(sig!==LC_SIG){LC_SIG=sig;$$('#lcClips .clip').forEach((c,i)=>{const p=ps[i];c.classList.toggle('has',!!p.hits);c.querySelector('span').textContent=p.bars+' BAR'+(p.bars>1?'S':'')+' · '+p.hits+' HITS';const cv=c.querySelector('canvas'),x=cv.getContext('2d');x.clearRect(0,0,200,56);
+function launchSync(ps,P,q){const A=API(),sig=ps.map(p=>p.hits+'/'+p.bars).join(',');if(sig!==LC_SIG){LC_SIG=sig;ps=A.pats();$$('#lcClips .clip').forEach((c,i)=>{const p=ps[i];c.classList.toggle('has',!!p.hits);c.querySelector('span').textContent=p.bars+' BAR'+(p.bars>1?'S':'')+' · '+p.hits+' HITS';const cv=c.querySelector('canvas'),x=cv.getContext('2d');x.clearRect(0,0,200,56);
   p.ev.forEach(e=>{const r=e.pg==='chop'?(e.ci%16):e.p;x.fillStyle=getComputedStyle(document.body).getPropertyValue('--acc')||'#f35';x.globalAlpha=.85;x.fillRect(e.t/(p.bars*4)*196+2,2+r*3.3,3,3)})})}
  $$('#lcClips .clip').forEach((c,i)=>{const pl=A.playing()&&i===P;c.classList.toggle('play',pl);c.classList.toggle('q',q===i);c.classList.toggle('cur',!A.playing()&&i===P);c.querySelector('.cbar u').style.width=(pl?A.pos()*100:0)+'%'});
  const lp=$('lcPads');try{lp.lastChild.textContent='PADS: '+(A.prog()==='chop'?'CHOP':'KIT')}catch(e){}}
@@ -338,7 +337,7 @@ function builderWire(){
  $('sbPads').onclick=()=>{if(!need())return;API().setPartPads();say('This part now brings up pad bank '+BL[API().bank()]+' ('+(API().prog()==='chop'?'CHOP':'KIT')+' program) whenever it plays.');SB.sig=''};
  $('sbChans').onclick=e=>{const c=e.target.closest('.ch');if(!c||!need())return;const on=API().chanToggle(null,c.dataset.k);if(on)API().chanHear(c.dataset.k);SB.sig='';buildSync()};
  $('sbAdd').onclick=()=>{if(!need())return;API().songAdd();SB.sel=API().song().list.length-1;buildRender();say('Added P'+(API().pat()+1)+' as part '+(SB.sel+1)+'.')};
- $('sbClear').onclick=()=>{if(!need())return;if(!API().song().list.length)return;if(!confirm('Clear the song order? Your patterns stay; only the order is cleared. UNDO brings it back.'))return;API().songClear();SB.sel=-1;buildRender()};
+ $('sbClear').onclick=async()=>{if(!need())return;if(!API().song().list.length)return;if(!await ask('Clear the song order? Your patterns stay; only the order is cleared. UNDO brings it back.'))return;API().songClear();SB.sel=-1;buildRender()};
  $('sbParts').onclick=e=>{const b=e.target.closest('.part');if(!b||!need())return;SB.sel=+b.dataset.i;const S=API().song();if(S.mode&&API().playing())API().jumpPart(SB.sel);buildRender()};
  $('sbTL').onclick=e=>{const c=e.target.closest('.cell:not(.none)');if(c&&need()){const on=API().chanToggle(+c.dataset.pi,c.dataset.k);if(on)API().chanHear(c.dataset.k);TLSIG='';SB.sig='';buildSync();return}const h=e.target.closest('.hd[data-part]');if(h&&need()){SB.sel=+h.dataset.part;buildRender()}};
  $('sbParts').ondblclick=e=>{const b=e.target.closest('.part');if(!b||!need())return;API().jumpPart(+b.dataset.i)};
@@ -351,7 +350,7 @@ function builderWire(){
 
 /* DAW arrangement view */
 let TLSIG='';
-function tlRender(){const box=$('sbTL');if(!box)return;const A=API(),S=A.song(),pats=A.pats();if(!S.list.length){box.innerHTML='<p class="empty">Parts appear here as you build the song.</p>';TLSIG='';return}
+function tlRender(){const box=$('sbTL');if(!box)return;const A=API(),S=A.song(),pats=A.patMeta();if(!S.list.length){box.innerHTML='<p class="empty">Parts appear here as you build the song.</p>';TLSIG='';return}
  const parts=S.list.map(pi=>({pi,bars:pats[pi].bars,ch:A.chans(pi),au:A.autoLanes(pi)}));
  const sig=JSON.stringify(parts.map(p=>[p.pi,p.bars,p.ch.map(c=>c.k+(c.on?1:0)),Object.values(p.au).map(x=>x.length)]));if(sig===TLSIG)return;TLSIG=sig;
  const rows=[],seen=new Map();parts.forEach(p=>p.ch.forEach(c=>{if(!seen.has(c.k)){seen.set(c.k,rows.length);rows.push({k:c.k,name:c.name,col:c.col})}}));
@@ -367,12 +366,12 @@ function tlPlayhead(){const ph=$('tlPh'),A=API();if(!ph||!A)return;const S=A.son
  if(i<0||!hd[i]){ph.style.display='none';return}const c=hd[i],g=c.parentElement.getBoundingClientRect(),r=c.getBoundingClientRect();ph.style.display='block';ph.style.left=(r.left-g.left+A.pos()*r.width+c.parentElement.offsetLeft)+'px';hd.forEach((x,j)=>x.classList.toggle('play',j===i))}
 function buildRender(){SB.sig='';TLSIG='';buildSync()}
 function buildSync(){if(!$('osBuild'))return;if(!ready()){$('sbParts').innerHTML='<p class="empty">Load a song to start building.</p>';return}
- const A=API(),S=A.song(),P=A.pat(),q=A.queued(),pats=A.pats(),pl=A.playing();
+ const A=API(),S=A.song(),P=A.pat(),q=A.queued(),pats=A.patMeta(),pl=A.playing();
  const partOfP=S.mode&&S.pos>=0?S.pos:(SB.sel>=0&&S.list[SB.sel]===P?SB.sel:S.list.lastIndexOf(P));
  $('sbPart').textContent=(partOfP>=0?'PART '+(partOfP+1)+' OF '+S.list.length+' · ':'')+'P'+String(P+1).padStart(2,'0')+(q!=null?' → P'+String(q+1).padStart(2,'0'):'');
  $('sbInfo').textContent=pats[P].bars+' BAR'+(pats[P].bars>1?'S':'')+' · '+pats[P].hits+' HITS · '+(pl?(S.mode?'PLAYING THE SONG':'LOOPING THIS PART'):'STOPPED')+(A.rec()?' · RECORDING':'');
- $('sbProg').style.width=(pl?A.pos()*100:0)+'%';tlRender();tlPlayhead();$('sbLcd').classList.toggle('rec',A.rec());$('sbRec').classList.toggle('on',A.rec());$('sbLoop').classList.toggle('on',pl&&!S.mode);$('sbSong').classList.toggle('on',pl&&S.mode);
- const sig=JSON.stringify([S.list,S.pos,S.nextPos,SB.sel,P,q,SB.carry,S.follow,pats.map(p=>p.hits+'/'+p.bars),A.prog(),A.bank()]);if(sig===SB.sig)return;SB.sig=sig;
+ $('sbProg').style.width=(pl?A.pos()*100:0)+'%';tlPlayhead();$('sbLcd').classList.toggle('rec',A.rec());$('sbRec').classList.toggle('on',A.rec());$('sbLoop').classList.toggle('on',pl&&!S.mode);$('sbSong').classList.toggle('on',pl&&S.mode);
+ const sig=A.ver()+'|'+S.list.join(',')+'|'+S.pos+'|'+S.nextPos+'|'+SB.sel+'|'+P+'|'+q+'|'+SB.carry+'|'+S.follow+'|'+A.prog()+'|'+A.bank()+'|'+pl;if(sig===SB.sig)return;SB.sig=sig;tlRender();
  $$('#sbCarry [data-c]').forEach(b=>b.classList.toggle('on',b.dataset.c===SB.carry));$('sbFollow').checked=!!S.follow;$('sbBars').value=String(pats[P].bars);
  const ch=A.chans();$('sbChans').innerHTML=ch.length?ch.map(c=>'<button class="ch'+(c.on?' on':'')+'" data-k="'+esc(c.k)+'" style="--pc:'+c.col+'"><i></i><b>'+esc(c.name)+'</b><small>'+c.n+' hit'+(c.n>1?'s':'')+'</small></button>').join(''):'<p class="empty">No hits in P'+(P+1)+' yet. Arm REC and play, or draw on the STEP SEQUENCER.</p>';
  $('sbParts').innerHTML=S.list.length?S.list.map((pi,i)=>{const pp=pats[pi],pd=API().partPads(pi);return'<button class="part'+(i===SB.sel?' sel':'')+(S.mode&&pl&&i===S.pos?' play':'')+(S.nextPos===i?' q':'')+(pi===P&&!S.mode?' cur':'')+'" data-i="'+i+'"><b>'+(i+1)+'</b><span>P'+(pi+1)+'</span><em>'+pp.bars+' BAR'+(pp.bars>1?'S':'')+(pd.bank!=null?' · '+BL[pd.bank]:'')+'</em><small>'+pp.hits+' hits</small></button>'}).join('<i class="parr">›</i>'):'<p class="empty">No parts yet. Loop your first part, then press NEXT PART: it is added here, and the next part starts.</p>';
@@ -460,7 +459,7 @@ function pfItemsRender(){const q=($('pfFind').value||'').toLowerCase().trim();co
 async function pfCall(path,opt){const k=pfKey();if(!k)throw new Error('Paste your API key first.');const r=await fetch(PF.api+path,{...opt,headers:{'Authorization':'Bearer '+k,'Content-Type':'application/json'}});let j=null;try{j=await r.json()}catch(e){}
  const code=j&&j.code!=null?j.code:r.status;if(code!==200){const M={400:'the request was not accepted',401:'the API key was refused',404:'the service address changed',405:'too many requests, wait a minute',413:'the description is too long',429:'not enough credits on your account',430:'too many requests, wait a minute',455:'the service is under maintenance',500:'the service had an error'};throw new Error((M[code]||'error '+code)+(j&&j.msg?' ('+j.msg+')':''))}return j}
 async function pfBuild(){if(!pfKey()){say('Paste your API key first (left column, top).');$('pfKey').focus();return}const n=PF.genres.size*PF.types.size;if(!n)return;
- if(!confirm('Send '+n+' request'+(n>1?'s':'')+'? That makes about '+(n*2)+' tracks and uses your credits.'))return;
+ if(!await ask('Send '+n+' request'+(n>1?'s':'')+'? That makes about '+(n*2)+' tracks and uses your credits.'))return;
  if($('pfRem').checked)LSs('bc16:pf:key',pfKey());PF.busy=true;pfRender();
  for(const g of PF.genres)for(const t of PF.types)PF.jobs.push({id:Math.random().toString(36).slice(2),g,t,state:'queued',t0:Date.now(),ts:Date.now(),style:pfStyle(g,t),model:$('pfModel').value,dur:+$('pfDur').value,variety:+$('pfVar').value,n:PF.items.filter(x=>x.g===g&&x.t===t).length+1});
  pfSave();pfJobsRender();await pfPump();PF.busy=false;pfRender()}
@@ -497,7 +496,7 @@ function factoryWire(){const k=LSg('bc16:pf:key','');if(k){$('pfKey').value=k;$(
   if(a==='play'){if(!au.paused&&au.dataset.id===it.id){au.pause();b.textContent='▶';return}$$('#pfItems [data-a="play"]').forEach(x=>x.textContent='▶');au.src=it.blob?URL.createObjectURL(it.blob):it.url;au.dataset.id=it.id;au.play().catch(()=>say('This track will not play here.'));b.textContent='❚❚'}
   else if(a==='load')pfLoad(it);else if(a==='pack')pfPack(it);else if(a==='save')pfOffline(it);
   else if(a==='dl'){const x=document.createElement('a');if(it.blob){x.href=URL.createObjectURL(it.blob);x.download=it.title+'.mp3'}else{x.href=it.url;x.target='_blank';x.rel='noopener'}x.click()}
-  else if(a==='del'){if(!confirm('Delete “'+it.title+'” from the library?'))return;PF.items=PF.items.filter(x=>x!==it);await idbDel(it.id);pfItemsRender()}};
+  else if(a==='del'){if(!await ask('Delete “'+it.title+'” from the library?'))return;PF.items=PF.items.filter(x=>x!==it);await idbDel(it.id);pfItemsRender()}};
  idbAll().then(L=>{PF.items=L;pfItemsRender()}).catch(()=>{});
  if(PF.jobs.some(j=>['sent','text','first'].includes(j.state))&&LSg('bc16:pf:key',''))pfPoll();
  const qd=PF.jobs.filter(j=>j.state==='queued');if(qd.length)qd.forEach(j=>{j.state='failed';j.err='not sent (page closed)'})}
@@ -608,7 +607,7 @@ function slicerWire(){
   else if(a==='cut'){if(i===0){say('The first cut cannot be removed.');return}try{manual.del.push(slices[i].t);rebuild()}catch(er){}SI.ref=null;slicerRender();say('Merged #'+(i+1)+' into #'+i+'. UNDO MY CUT EDITS puts it back.')}};
  $('sxMerge').onclick=()=>{if(!need())return;const R=sliceIntel();let n=0;try{for(const o of R.list){if(o.i===0)continue;if(o.bt<.2&&o.score<.45&&o.kind!=='hat'){manual.del.push(slices[o.i].t);n++}}if(n)rebuild()}catch(e){}SI.ref=null;slicerRender();say(n?'Merged '+n+' weak, tiny cuts into their neighbours. UNDO MY CUT EDITS puts them back.':'No weak tiny cuts found.')};
  $('sxReset').onclick=()=>{try{$('rst').click()}catch(e){}SI.ref=null;slicerRender();say('Your cut edits are cleared: the recipe’s cuts are back.')};
- $('sxKit').onclick=()=>{if(!need())return;let b=[...Array(8).keys()].find(i=>!API().kit(i).some(Boolean));let rep=false;if(b==null){if(!confirm('All 8 kit banks have sounds. Rebuild bank '+BL[KF.bank]+' as a best-of kit? UNDO brings it back.'))return;b=KF.bank;rep=true}KF.bank=b;KF.armed=0;API().setBank(b);go('kit');autoFill('roles',rep)}}
+ $('sxKit').onclick=async()=>{if(!need())return;let b=[...Array(8).keys()].find(i=>!API().kit(i).some(Boolean));let rep=false;if(b==null){if(!await ask('All 8 kit banks have sounds. Rebuild bank '+BL[KF.bank]+' as a best-of kit? UNDO brings it back.'))return;b=KF.bank;rep=true}KF.bank=b;KF.armed=0;API().setBank(b);go('kit');autoFill('roles',rep)}}
 
 /* ================= KIT FORGE: MPC roles, auto-fill and suggestions ================= */
 const ROLES=[['KICK','kick','s'],['SNARE','snare','s'],['CLAP','snare','s2'],['KICK 2','kick','s2'],['HAT','hat','s'],['OPEN HAT','hat','l'],['HAT 2','hat','s2'],['PERC','snare','p'],['PERC 2','hat','p'],['SNARE 2','snare','s3'],['FX','tone','s'],['CRASH','hat','l2'],['TONE 1','tone','t'],['TONE 2','tone','t'],['TONE 3','tone','t'],['TONE 4','tone','t']];
@@ -626,6 +625,83 @@ function kitSuggest(){const box=$('kfSug');if(!box)return;if(!ready()){box.inner
  box.innerHTML='<span class="hwl">BEST FOR '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+(KF.roles?' · '+ROLES[KF.armed][0]:'')+'</span><div class="kfsg">'+c.map(o=>{const s=A.slice(o.i);return'<button class="kc" data-ci="'+o.i+'" style="--pc:'+s.col+'"><canvas width="120" height="40"></canvas><b>#'+(o.i+1)+'</b><span>'+Math.round(o.score*100)+'</span></button>'}).join('')+'</div>';
  $$('#kfSug .kc').forEach(x=>wave(x.querySelector('canvas'),A.slice(+x.dataset.ci)))}
 
+/* ================= COACH: a guide that stays on while you work =================
+   The panel shows, for the unit you are on: what it is for, the steps to get the best from it (ticked off live),
+   what the control you just pressed did and what to do next, and pro tips. Holding any control for ½ s
+   explains it without pressing it (pads, kit slots, cuts and keys keep their own hold actions). */
+const A_=()=>API();const has=f=>{try{return!!f()}catch(e){return false}};
+const patHits=()=>has(()=>A_().patMeta()[A_().pat()].hits>0),anyKit=()=>has(()=>[0,1,2,3,4,5,6,7].some(b=>A_().kit(b).some(Boolean)));
+const GUIDE={
+ start:{why:'Every session starts here: load a song and the machine finds its tempo, key and every hit, then cuts it and builds first kits.',steps:[['Load a song: LOAD (top bar), drop a file anywhere, or try the demo beat.',()=>ready()],['Check the display: tempo, key and slice count are right.',()=>ready()],['Go to CHOP to choose how it is cut.',null,'chop']],tips:['WAV or FLAC chops cleanest; MP3 works too.','Each song remembers its own cuts, kits and patterns: switch songs and come back any time.']},
+ chop:{why:'The sampler decides where the song is cut. The PAD MATRIX plays the cuts in order (CHOP program).',steps:[['Pick a recipe on the SLICE BRAIN tab, or set SHORTEST and LONGEST.',()=>!!LSg('bc16:recipe:'+fnameSafe(),'')],['Tap through the pads to hear the cuts.',null],['Tap the waveform to add a cut, tap a cut line to remove it.',null],['Build a kit from your favourite cuts.',()=>anyKit(),'kit']],tips:['Drum hits: LONGEST 1 beat. Loop chops: LONGEST 1 or 2 bars.','More than 128 cuts? ◀ SLICES / SLICES ▶ page the banks.']},
+ slicer:{why:'Slice Brain reads the song: which chop flips best, and how good each cut is.',steps:[['Read the recommendation and press USE IT.',()=>!!LSg('bc16:recipe:'+fnameSafe(),'')],['Filter KICK, SNARE, HAT or TONE and play the top scores.',null],['Send keepers → KIT, or press BEST-OF KIT.',()=>anyKit()]],tips:['Score = on the grid + sharp start + clean tail. 70+ is a keeper.','“like #12” means the same sound repeats: keep one, hide repeats.','✕ CUT merges a slice into the one before; UNDO MY CUT EDITS puts it back.']},
+ kit:{why:'Kit Forge builds your own pads: by hand, or automatically and then by hand.',steps:[['Pick a kit bank (A–H).',null],['AUTO-FILL, or light a slot and hold a cut.',()=>has(()=>A_().kit(KF.bank).some(Boolean))],['Swap any slot: light it, hold a better cut.',null],['Name the kit and SAVE KIT.',()=>has(()=>A_().kits().length)],['PLAY ON PADS.',null,'pads']],tips:['The strip under the slots shows the best cuts for the lit slot.','Arrange 2–3 banks per song (chops, drums, hook) and the Song Builder brings the right one back per part.']},
+ pads:{why:'The drum machine: play, record and fix your parts.',steps:[['Choose what the pads play: CHOP or KIT.',null],['Pick a pattern (◀ ▶ or P1–P16).',null],['REC, then PLAY, then play the pads.',()=>patHits()],['Fix it: UNDO the take, or ERASE + a pad.',null],['Add movement: AUTOMATION WRITE, move FILTER or PUMP.',()=>has(()=>Object.keys(A_().autoLanes()).length)]],tips:['Keys A S D F … play the pads; 1–8 switch banks.','NOTE REPEAT for rolls; 16 LEVELS plays one sound as notes.']},
+ sequence:{why:'Draw and edit hits on a grid, and make variations.',steps:[['Click cells to add or remove hits.',()=>patHits()],['Set the length: 1, 2, 4 or 8 bars.',null],['COPY ▶ for a variation, then change the copy.',()=>has(()=>A_().patMeta().filter(p=>p.hits).length>1)]],tips:['Click a pad name on the left to hear it.','SMART BEAT writes a starting pattern from your sounds.']},
+ tower:{why:'Three stacked keyboards for bass, chords and leads.',steps:[['Pick a sound and octave for each tier.',null],['Play: glide, tap, or use the Z and Q rows.',null],['REC + PLAY to record the melody into the pattern.',()=>patHits()]],tips:['STACK two tiers for a layered sound.','SCALE LOCK keeps every note in key.']},
+ build:{why:'This is how a chop song gets made: loop a part, play the next part over it, NEXT PART, until it is done.',steps:[['LOOP THIS PART.',()=>has(()=>A_().playing())],['Arm REC and play the part that goes over it.',()=>patHits()],['NEXT PART.',()=>has(()=>A_().song().list.length>=2)],['Turn channels on or off for the new part.',null],['PLAY THE SONG, then EXPORT.',null,'song']],tips:['The whole loop carries into each new part; drop channels for breakdowns.','Double-tap a part to jump to it on the beat.']},
+ song:{why:'Song order, exports and saved setups.',steps:[['Check the order of parts.',()=>has(()=>A_().song().list.length)],['Export WAV, MP3 or MIDI.',null],['SAVE your setup.',null]],tips:['TAKE REC (top bar) records a live performance as audio.']},
+ launch:{why:'Perform: every pattern on one console.',steps:[['Tap a clip to play it.',()=>has(()=>A_().playing())],['Tap the next clip: it waits, then starts on time.',null],['Play pads and sweep FILTER on top.',null]],tips:['F1–F12 launch clips from the keyboard.']},
+ factory:{why:'Make new sample packs with AI, in any genre, saved to your own library.',steps:[['Paste your API key.',()=>!!(($('pfKey')||{}).value)],['Pick genres and pack types.',null],['BUILD LIBRARY.',null],['PRO PACK any track to chop it into kits.',null]],tips:['Each request makes 2 tracks and uses your credits.','SAVE keeps the audio on this device (the service only keeps it ~14 days).']},
+ store:{why:'Free starter packs and premium plans.',steps:[['Grab the free starter packs.',null],['Have a license key? Paste it under ALREADY A MEMBER.',null]],tips:[]},
+ guide:{why:'Lessons, the full narrated course and the button book.',steps:[['Take the narrated course, or one lesson at a time.',null]],tips:['Hold any button for ½ second to hear what it does.']}};
+const NEXT={psRec:'Now press PLAY. After the count-in, play the pads or keys.',psPlay:'Playing. Press STOP when you are done, or NEXT PART to move on.',psStop:'Stopped. Press PLAY to hear it back, or UNDO if the take was not right.',osUndo:'Undone. Try again whenever you are ready.',osNext:'New part: play the next part over the loop, then NEXT PART again.',osPatDup:'You are on the copy now: change it to make the variation.',kfFill:'Change any slot: light it, then hold a better cut.',sbLoop:'Arm REC and play the part that goes over this loop.',hwLoad:'When the song loads, go to CHOP.',kfSv:'Saved. Tap it under MY KITS to load it into any bank.',osSave:'Saved. Your work also saves itself as you go.',hwErase:'ERASE is lit: press a pad to wipe only that sound.',hwMute:'PAD MUTE is lit: press pads to mute or unmute them.'};
+const CO={on:LSg('bc16:coach',0),last:null,sig:''};
+function coachPanelBuild(){const p=el('aside',{id:'coachP','aria-label':'Coach'});p.innerHTML='<div class="plate"><i class="pled"></i><b class="pn">COACH</b><span class="pm">ON</span><span class="vent"></span><button class="zb" id="coachX" title="Turn the coach off" aria-label="Turn the coach off">✕</button></div><div class="cpb" id="coachB"></div>';$('device').append(p);$('coachX').onclick=()=>coachToggle(false)}
+function coachToggle(on){CO.on=on;LSs('bc16:coach',on?1:0);document.body.classList.toggle('coachon',on);$('osCoach').classList.toggle('on',on);CO.sig='';coachRender();say(on?'Coach on: steps for this unit, and what each button does as you press it. Hold any button to learn it.':'Coach off. Hold any button to learn it, any time.')}
+function coachRender(){if(!CO.on)return;const G=GUIDE[curP]||{why:(UNITS[curP]||{}).d||'',steps:[],tips:[]};const st=G.steps.map(s=>s[1]?has(s[1]):null);
+ const sig=curP+'|'+st.join(',')+'|'+(CO.last?CO.last.k+CO.last.t:'');if(sig===CO.sig)return;CO.sig=sig;const U=UNITS[curP]||{n:''};
+ let h='<h4>'+U.n+'</h4><p class="cwhy">'+G.why+'</p>';
+ if(G.steps.length)h+='<ol class="csteps">'+G.steps.map((s,i)=>'<li class="'+(st[i]?'done':'')+'"><i>'+(st[i]?'✓':i+1)+'</i><span>'+s[0]+(s[2]?' <button class="cgo" data-go="'+s[2]+'">GO ▶</button>':'')+'</span></li>').join('')+'</ol>';
+ if(CO.last)h+='<div class="clast"><small>YOU PRESSED</small><b>'+esc(CO.last.t)+'</b><p>'+esc(CO.last.d)+'</p>'+(NEXT[CO.last.k]?'<p class="cnext">Next: '+NEXT[CO.last.k]+'</p>':'')+'</div>';
+ if(G.tips&&G.tips.length)h+='<div class="ctips"><small>PRO TIPS</small>'+G.tips.map(t=>'<p>'+t+'</p>').join('')+'</div>';
+ h+='<div class="cfoot">Hold any button for ½ second to learn it · <button class="cgo" data-lesson="1">LESSONS ▶</button></div>';$('coachB').innerHTML=h}
+function coachWire2(){coachPanelBuild();
+ $('coachB').onclick=e=>{const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}if(e.target.closest('[data-lesson]'))go('guide')};
+ document.addEventListener('click',e=>{if(!CO.on||document.body.classList.contains('explain'))return;if(e.target.closest('#coachP,#coach,#xbub'))return;const h=helpFor(e.target);if(!h||h[2]==='Unit')return;const k=(h[3].dataset&&h[3].dataset.help)||h[3].id||'';CO.last={k,t:h[0],d:h[1]};setTimeout(coachRender,60)},true);
+ /* hold to learn */
+ let HT=null,HS=null,swallow=false;const NOHOLD='#psGrid .pp,.ks,.kc,.twkb,.twkb *,#c1,#pads button,.knob,input[type=range],#sbTL .cell,.clip,.part';
+ document.addEventListener('pointerdown',e=>{if(document.body.classList.contains('explain')||e.button>0)return;const t=e.target;if(t.closest(NOHOLD)||t.closest('#coach,#xbub,#welcome,input[type=text],input:not([type]),select,textarea'))return;const h=helpFor(t);if(!h||h[2]==='Unit')return;HS={x:e.clientX,y:e.clientY};clearTimeout(HT);HT=setTimeout(()=>{swallow=true;showBub(h);$('xbub').querySelector('small').textContent='Hold any button to learn it. Let go and tap it normally to use it.';try{navigator.vibrate&&navigator.vibrate(12)}catch(er){}},550)},true);
+ addEventListener('pointermove',e=>{if(HS&&Math.hypot(e.clientX-HS.x,e.clientY-HS.y)>8){clearTimeout(HT);HS=null}},true);
+ addEventListener('pointerup',()=>{clearTimeout(HT);HS=null},true);addEventListener('pointercancel',()=>{clearTimeout(HT);HS=null},true);
+ document.addEventListener('click',e=>{if(swallow){swallow=false;if(!e.target.closest('#xbub')){e.preventDefault();e.stopPropagation()}}},true);
+ document.addEventListener('contextmenu',e=>{if(swallow||HT&&HS)e.preventDefault()},true);
+ document.addEventListener('pointerdown',e=>{if(!$('xbub').hidden&&!e.target.closest('#xbub')&&!document.body.classList.contains('explain'))$('xbub').hidden=true});
+ if(CO.on)coachToggle(true)}
+
+
+
+/* ================= SOUND LOGIC: one main player at a time, page sounds stop when you leave =================
+   Main players: the transport (patterns / song), the sampler's song preview, the Auto Producer playback and
+   the library preview. Starting one stops the others. Pads, cuts and keys you play by hand are never cut off:
+   you play along with whatever is running. Leaving a page stops what only belongs to that page; the transport
+   keeps running across pages, like hardware. STOP on a stopped machine = ALL STOP (everything silent). */
+const eng=n=>{try{return window[n]}catch(e){return null}};
+function previewOn(){try{return!!src}catch(e){return false}}
+function arrangeOn(){try{return!!(AR&&AR.src)}catch(e){return false}}
+function libStop(){const a=$('pfAudio');if(a&&!a.paused){a.pause();$$('#pfItems [data-a="play"]').forEach(x=>x.textContent='▶')}}
+function towerOff(){for(const k of [...TW.ons.keys()])tOff(k)}
+function focus(who){if(who!=='preview'&&previewOn())try{stop()}catch(e){}if(who!=='arrange'&&arrangeOn())try{aStop()}catch(e){}if(who!=='library')libStop();if(who!=='transport'&&API()&&API().playing())$('psStop').click()}
+function leave(prev,p){const g=x=>(GROUPS.find(G=>G.pages.includes(x))||{}).id;
+ if(prev==='chop'&&g(p)!=='chop'&&previewOn())try{stop()}catch(e){}
+ if(prev==='arrange'&&arrangeOn())try{aStop()}catch(e){}
+ if(prev==='factory'||prev==='store')libStop();
+ if(prev==='keys'||prev==='live')try{stopAll()}catch(e){}
+ if(prev==='tower')towerOff()}
+function allStop(){try{API().panic()}catch(e){}focus('none');try{stopAll()}catch(e){}towerOff();shush();say('ALL STOP: everything is silent.')}
+function soundWire(){const wp=eng('play');if(typeof wp==='function'){window.play=function(d,btn){if(!(btn&&btn.dataset&&btn.dataset.on))focus('preview');return wp.apply(this,arguments)}}
+ const ap=eng('aPlay');if(typeof ap==='function'){window.aPlay=function(){focus('arrange');return ap.apply(this,arguments)}}
+ const au=$('pfAudio');if(au)au.addEventListener('play',()=>focus('library'));
+ $('psStop').addEventListener('click',e=>{if(!API()||!ready())return;if(!API().playing()){allStop()}},true)}
+
+/* ================= on-screen dialog: replaces the browser's pop-ups ================= */
+function ask(text,ok,cancel){return new Promise(res=>{const d=el('div',{id:'askD',role:'alertdialog','aria-modal':'true'});
+ const okL=ok||(/^Delete/.test(text)?'DELETE':/^Clear/.test(text)?'CLEAR IT':/^Send/.test(text)?'SEND':/^Rebuild/.test(text)?'REBUILD':'YES');
+ d.innerHTML='<div class="askc"><div class="plate"><i class="pled"></i><b class="pn">CHECK</b><span class="pm">BEFORE YOU GO ON</span><span class="vent"></span></div><p>'+esc(text)+'</p><div class="askb"><button class="hwb" data-a="0"><i class="led"></i>◀ '+(cancel||'NO, GO BACK')+'</button><button class="hwb np" data-a="1"><i class="led"></i>'+okL+'</button></div><small>Enter = '+okL+' · Esc = go back</small></div>';
+ document.body.append(d);const done=v=>{d.remove();removeEventListener('keydown',kd,true);res(v)};
+ d.onclick=e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a==='1');else if(e.target===d)done(false)};
+ const kd=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();done(false)}else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();done(true)}};addEventListener('keydown',kd,true);setTimeout(()=>d.querySelector('.np').focus(),30)})}
+
 /* ================= HELP: every control explains itself ================= */
 const H={
  /* rail */
@@ -640,6 +716,8 @@ const H={
  'rail-lab':['LAB','SOUND BROWSER, STEM SPLITTER and SOUND SORTER: dig through every slice, split stems, group similar sounds.','Rail'],
  'rail-brain':['BEAT BRAIN','Presets, numbered variations, full-song writing and smart sound packs built from your own slices.','Rail'],
  'rail-guide':['STUDIO MANUAL','Lessons, the studio map, the button book and a demo that plays itself.','Rail'],
+ subNext:['NEXT UNIT','The next unit in the beat-making chain: load, chop, build kits, play, program, keys, perform, build the song, export. ◀ BACK on the left goes the other way.','Unit'],
+ osCoach:['COACH','Turns the coach panel on or off. With it on, every unit shows its steps (ticked off as you do them), what the button you just pressed did and what to do next, and pro tips. It stays on while you work.','Rail'],
  osExplain:['EXPLAIN','Turns explain mode on and off. While it is on, pressing any control tells you what it does instead of doing it. Keyboard: ?','Rail'],
  /* meter bridge */
  hwLoad:['LOAD','Opens a song from your device (WAV, MP3, M4A, FLAC, OGG). You can also drop a file anywhere on the machine. Each song keeps its own pads, kits and patterns.','Meter bridge'],
@@ -650,7 +728,7 @@ const H={
  /* transport */
  psRec:['REC','Arms recording into the current pattern. Then press PLAY (count-in on) and play pads or keys; every hit lands in the pattern.','Transport'],
  hwOvd:['OVERDUB','Starts playing and recording on top of what is already in the pattern.','Transport'],
- psStop:['STOP','Stops playback and recording.','Transport'],
+ psStop:['STOP','Stops playback and recording. Press it again while stopped for ALL STOP: every sound in every unit goes silent (latched pads, note repeat, previews, held notes).','Transport'],
  psPlay:['PLAY','Plays the current pattern on a loop (or the song order when song mode is on).','Transport'],
  hwPst:['PLAY START','Plays from the very start: pattern 1 or the first entry of the song order.','Transport'],
  psTap:['TAP TEMPO','Tap 4 times in time to set the tempo.','Transport'],
@@ -818,13 +896,13 @@ function guideWire(){$('gTour').onclick=()=>coachStart('tour');$('gChap').onclic
 
 /* ----- coach: spotlight tours ----- */
 let coach=null;
-function coachStart(id){const L=LESSONS.find(x=>x.id===id);if(!L)return;if(L.need&&!ready()){coach={mode:'tour',L:{t:L.t,steps:[{p:'start',s:'#drop',t:'Load a song first',x:'This lesson uses a song. Press LOAD on the meter bridge or load the demo beat, wait for “Pads are ready”, then start the lesson again from GUIDE.'}]},i:0}}else coach={mode:'tour',L,i:0};
+function coachStart(id){narrLoad();const L=LESSONS.find(x=>x.id===id);if(!L)return;if(L.need&&!ready()){coach={mode:'tour',L:{t:L.t,steps:[{p:'start',s:'#drop',t:'Load a song first',x:'This lesson uses a song. Press LOAD on the meter bridge or load the demo beat, wait for “Pads are ready”, then start the lesson again from GUIDE.'}]},i:0}}else coach={mode:'tour',L,i:0};
  document.body.classList.add('coach');$('coach').hidden=false;$('cnext').hidden=false;$('cprev').hidden=false;coachShow()}
 function coachShow(){const S=coach.L.steps[coach.i];if(S.p&&curP!==S.p&&(ready()||S.p==='start'||S.p==='guide'))go(S.p);
  $('cstep').textContent=coach.L.t+' · step '+(coach.i+1)+' of '+coach.L.steps.length;$('ctitle').textContent=S.t;$('ctext').textContent=S.x;
  $('cprog').style.width=((coach.i+1)/coach.L.steps.length*100)+'%';$('cprev').disabled=coach.i===0;$('cnext').textContent=coach.i===coach.L.steps.length-1?'Done ✓':'Next ▶';
  setTimeout(coachPlace,60);setTimeout(coachPlace,400);if(NAR.on){shush();const tk=++COURSE.tok;COURSE.on=false;speakTour(S.x)}}
-function speakTour(x){try{if(!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(x);u.rate=NAR.rate;if(NAR.voice)u.voice=NAR.voice;u.lang='en-US';speechSynthesis.speak(u)}catch(e){}}
+function speakTour(x){const c=clipOf(x);if(c){const a=NAR.audio||(NAR.audio=new Audio());a.src=c;a.playbackRate=Math.max(.7,Math.min(1.4,NAR.rate/.88));a.play().catch(()=>{});return}try{if(!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(x);u.rate=NAR.rate;if(NAR.voice)u.voice=NAR.voice;u.lang='en-US';speechSynthesis.speak(u)}catch(e){}}
 function target(sel){if(sel&&typeof sel!=='string')return sel;let c0;try{c0=$$(sel)}catch(e){return null}const c=c0.filter(e=>e.offsetParent||e.getClientRects().length);return c[0]||null}
 function coachPlace(){if(!coach)return;const S=coach.L.steps[coach.i]||coach.cur;if(!S)return;const t=S.s?target(S.s):null,sp=$('spot'),cd=$('ccard');
  if(t){t.scrollIntoView({block:'nearest',inline:'nearest'});const r=t.getBoundingClientRect(),pad=8;Object.assign(sp.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px',opacity:1})}
@@ -844,19 +922,23 @@ function coachWire(){$('cnext').onclick=()=>{if(!coach)return;if(coach.mode==='c
    the hand shows where to press, and the machine does it while the narrator explains why. ----- */
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function ghostTo(sel,click){const t=typeof sel==='string'?target(sel):sel,g=$('ghost');if(!t)return null;const r=t.getBoundingClientRect();g.classList.add('on');g.style.transform='translate('+(r.left+r.width/2)+'px,'+(r.top+r.height/2)+'px)';await sleep(reduced?150:650);if(click){g.classList.add('tap');setTimeout(()=>g.classList.remove('tap'),300)}return t}
-const NAR={on:LSg('bc16:voice',1),rate:LSg('bc16:rate',.88),voice:null};
+const NAR={on:LSg('bc16:voice',1),rate:LSg('bc16:rate',.88),voice:null,dev:LSg('bc16:devvoice',0),audio:null};
+const hk=t=>{let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return(h>>>0).toString(36)};
+const clipOf=t=>!NAR.dev&&window.NARR&&NARR[hk(t.trim())];
+let NARRP=null;function narrLoad(){if(window.NARR)return Promise.resolve();if(NARRP)return NARRP;NARRP=(async()=>{try{const e=document.getElementById('narrData');if(e){window.NARR=JSON.parse(e.textContent);return}const r=await fetch('audio/narration.json');if(r.ok)window.NARR=await r.json()}catch(er){}})();return NARRP}
 function pickVoice(){if(!window.speechSynthesis)return null;const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
  for(const r of[/natural/i,/google us english/i,/samantha/i,/aria|jenny|guy|davis|ava|andrew|emma/i,/en-us/i]){const v=vs.find(v=>r.test(v.name)||r.test(v.lang));if(v)return v}return vs[0]||null}
 if(window.speechSynthesis){NAR.voice=pickVoice();speechSynthesis.onvoiceschanged=()=>{NAR.voice=pickVoice()}}
 const COURSE={on:false,tok:0,i:0,jump:null,paused:false};
 async function cw(ms,tok){let t=0;while(t<ms){await sleep(100);if(tok!==COURSE.tok||!COURSE.on)throw 0;if(!COURSE.paused)t+=100}}
-function speak(text,tok){return new Promise(res=>{const words=text.split(/\s+/).length,limit=words/(2.3*NAR.rate)*1000+1500;let el=0,done=false;
+function speak(text,tok){return new Promise(res=>{const words=text.split(/\s+/).length,clip=NAR.on&&clipOf(text),limit=words/(2.3*NAR.rate)*1000+1500;let el=0,done=false;
  const fin=()=>{if(done)return;done=true;clearInterval(iv);res()};
- const iv=setInterval(()=>{if(tok!==COURSE.tok||!COURSE.on){fin();return}if(!COURSE.paused)el+=200;if(el>(NAR.on&&window.speechSynthesis?limit*1.8+4000:limit))fin()},200);
+ const iv=setInterval(()=>{if(tok!==COURSE.tok||!COURSE.on){fin();return}if(!COURSE.paused)el+=200;if(el>(NAR.on&&(clip||window.speechSynthesis)?limit*2.5+6000:limit))fin()},200);
+ if(clip){const a=NAR.audio||(NAR.audio=new Audio());a.src=clip;a.playbackRate=Math.max(.7,Math.min(1.4,NAR.rate/.88));a.onended=()=>setTimeout(fin,250);a.onerror=()=>fin();a.play().catch(()=>{});return}
  if(!NAR.on||!window.speechSynthesis)return;
  try{speechSynthesis.cancel()}catch(e){}const parts=text.match(/[^.!?]+[.!?]*/g)||[text];let i=0;
  const next=()=>{if(done||tok!==COURSE.tok)return fin();if(i>=parts.length)return fin();const u=new SpeechSynthesisUtterance(parts[i++].trim());u.rate=NAR.rate;u.pitch=1;if(NAR.voice)u.voice=NAR.voice;u.lang='en-US';u.onend=()=>setTimeout(next,220);u.onerror=()=>setTimeout(next,60);speechSynthesis.speak(u)};next()})}
-function shush(){try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}}
+function shush(){try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}try{if(NAR.audio)NAR.audio.pause()}catch(e){}}
 
 /* camera: zoom the whole machine onto one part */
 let CAM={s:1,tx:0,ty:0};
@@ -884,6 +966,7 @@ const CH=[
   ['start','#tbar','The transport bar, always on the bottom','Along the bottom is the transport bar. This also never changes. Record, overdub, stop, play, play from the start, and tap tempo. Then the pattern deck, then undo and back. Whatever page you are on, these buttons are in the same place.',{z:1.4}],
   ['start','#editGrp','Undo and back','Two buttons save you from mistakes. Undo takes back the last change, up to fifty steps. Back takes you to the page you were on before, like the back button on a phone.',{z:2.2}],
   ['start','#screenWrap .zm','Zoom any unit','Every unit has these three buttons on its nameplate. Minus and plus make it smaller or bigger. The middle button makes that one unit fill the whole stage. Press it again to bring the others back.',{z:2.4}],
+  ['start','#osCoach','Coach mode','Turn on the coach with this button. A panel opens beside every unit, with the steps to get the best out of it, ticked off as you go. It also explains each button right after you press it, and tells you what to do next. And any time, you can hold a button for half a second, and it tells you what it does, without pressing it.',{z:2.2}],
   ['start','#osExplain','Explain mode','If you ever forget what a button does, press the question mark. Explain mode turns on. Now any button you press tells you what it does, instead of doing it. Press the question mark again to go back to work.',{z:2.2}]]],
  ['Load a song',[
   ['start','#loadGrp','Load','To start, press Load and choose a song from your device. W A V, M P 3, M 4 A, FLAC and OGG all work. You can also drag a file and drop it anywhere on the machine.',{z:2.2}],
@@ -994,7 +1077,7 @@ const CH=[
   ['guide','#gLessons','Practice one part at a time','This guide has short lessons for each part. Start any one of them, any time. And the button book on the right explains every single control, with show me, which points it out for you.',{z:1.4,act:async(t,tok)=>{go('guide');await cw(500,tok)}}],
   ['guide','#osExplain','You are ready','Remember: if you are ever unsure, press the question mark and press the button you are unsure about. That is the end of the course. Go make something.',{z:2.2}]]]];
 const STEPS=[];CH.forEach(([c,ss],ci)=>ss.forEach(s=>STEPS.push({ch:c,ci,p:s[0],s:s[1],t:s[2],x:s[3],o:s[4]||{}})));
-async function courseStart(at){shush();if(coach&&coach.mode==='tour')coachEnd();COURSE.on=true;COURSE.i=at||0;COURSE.paused=false;COURSE.jump=null;
+async function courseStart(at){shush();await Promise.race([narrLoad(),sleep(4000)]);if(coach&&coach.mode==='tour')coachEnd();COURSE.on=true;COURSE.i=at||0;COURSE.paused=false;COURSE.jump=null;
  coach={mode:'course',L:{t:'Course',steps:[]},i:0};document.body.classList.add('coach','course');$('coach').hidden=false;courseUI();
  while(COURSE.on&&COURSE.i<STEPS.length){const tok=++COURSE.tok;try{await courseStep(STEPS[COURSE.i],tok)}catch(e){if(e)console.warn('course step',COURSE.i,e);if(e&&tok===COURSE.tok)await sleep(1500)}
   if(!COURSE.on)break;if(COURSE.jump!=null){COURSE.i=COURSE.jump;COURSE.jump=null;continue}COURSE.i++}
@@ -1005,7 +1088,7 @@ async function courseStep(S,tok){coach.cur={s:S.s,t:S.t,x:S.x};$('cstep').textCo
  if(can&&S.p&&curP!==S.p&&!S.o.act)go(S.p);
  await cw(250,tok);if(can&&S.o.act&&/^#rail/.test(S.s)){camReset();await cw(300,tok)}else{camera(S.s,can?S.o.z:0);await cw(950,tok)}
  coachPlace();if(can)await ghostTo(S.s,false);
- const talk=speak(S.x+(can?'':' This part needs a song, so load one, or let chapter two load the demo.'),tok);
+ if(!can)$('ctext').textContent=S.x+' (This part needs a song: load one, or let chapter 2 load the demo.)';const talk=speak(S.x,tok);
  if(can&&S.o.act){await S.o.act(target(S.s),tok);if(S.p&&curP!==S.p)go(S.p);await cw(400,tok);camera(S.s,S.o.z);await cw(900,tok);coachPlace();ghostTo(S.s,false)}
  await talk;await cw(900,tok)}
 function courseUI(){$('cprev').textContent='⏮';$('cnext').textContent='⏭';$('cexit').textContent='■ End';$('cplay').textContent='❚❚ Pause';$('cvoice').classList.toggle('on',!!NAR.on);$('cvoice').textContent=NAR.on?'🔊 Voice on':'🔇 Voice off';$('cRate').value=String(NAR.rate)}
@@ -1013,16 +1096,17 @@ function courseJump(i){if(!COURSE.on)return;COURSE.jump=Math.max(0,Math.min(STEP
 function courseEnd(){COURSE.on=false;COURSE.tok++;shush();camReset();tOff('course');document.body.classList.remove('course');$('cprev').textContent='◀ Back';$('cnext').textContent='Next ▶';$('cexit').textContent='Exit';if(coach&&coach.mode==='course'){coach=null;document.body.classList.remove('coach');$('coach').hidden=true;$('ghost').classList.remove('on')}}
 function courseWire(){$('cChap').innerHTML=CH.map(([c],i)=>'<option value="'+i+'">'+(i+1)+'. '+c+'</option>').join('');
  $('cChap').onchange=e=>courseJump(STEPS.findIndex(s=>s.ci===+e.target.value));
- $('cplay').onclick=()=>{COURSE.paused=!COURSE.paused;$('cplay').textContent=COURSE.paused?'▶ Resume':'❚❚ Pause';try{COURSE.paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}};
+ $('cplay').onclick=()=>{COURSE.paused=!COURSE.paused;$('cplay').textContent=COURSE.paused?'▶ Resume':'❚❚ Pause';try{if(NAR.audio&&NAR.audio.src&&!NAR.audio.ended)COURSE.paused?NAR.audio.pause():NAR.audio.play();else COURSE.paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}};
  $('cvoice').onclick=()=>{NAR.on=!NAR.on;LSs('bc16:voice',NAR.on?1:0);if(!NAR.on)shush();courseUI();if(NAR.on&&COURSE.on)courseJump(COURSE.i)};
+ $('cWho').value=String(NAR.dev);$('cWho').onchange=e=>{NAR.dev=+e.target.value;LSs('bc16:devvoice',NAR.dev);if(COURSE.on)courseJump(COURSE.i)};
  $('cRate').onchange=e=>{NAR.rate=+e.target.value;LSs('bc16:rate',NAR.rate);if(COURSE.on)courseJump(COURSE.i)}}
 function demoStart(){courseStart(0)}
 function demoStop(){courseEnd()}
 
 /* ================= first run ================= */
 function welcome(){if(LSg('bc16:welcomed',0))return;const w=el('div',{id:'welcome',role:'dialog','aria-label':'Welcome'});
- w.innerHTML='<div class="wcard"><div class="plate"><i class="pled"></i><b class="pn">BC-16 STUDIO</b><span class="pm">FIRST POWER-ON</span><span class="vent"></span></div><div class="wbody"><h2>Welcome to the studio</h2><p>Every page is its own piece of gear. You move through them on the rail, left to right in this map:</p><div class="gmap">'+FLOW.map(([p,v],i)=>'<span class="gnode" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></span>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('')+'</div><p>Record, play, stop, patterns, undo and back are always on the bottom bar. Pick how you want to start:</p><div class="gbtns"><button class="hwb big" data-w="tour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" data-w="demo"><i class="led"></i>▶ FULL NARRATED COURSE</button><button class="hwb big" data-w="skip"><i class="led"></i>JUST LET ME IN</button></div><small>You can come back to all of this any time from GUIDE on the rail.</small></div></div>';
- document.body.append(w);w.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;LSs('bc16:welcomed',1);w.remove();if(b.dataset.w==='tour')coachStart('tour');else if(b.dataset.w==='demo')demoStart()}}
+ w.innerHTML='<div class="wcard"><div class="plate"><i class="pled"></i><b class="pn">BC-16 STUDIO</b><span class="pm">FIRST POWER-ON</span><span class="vent"></span></div><div class="wbody"><h2>Welcome to the studio</h2><p>Every page is its own piece of gear. You move through them on the rail, left to right in this map:</p><div class="gmap">'+FLOW.map(([p,v],i)=>'<span class="gnode" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></span>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('')+'</div><p>Record, play, stop, patterns, undo and back are always on the bottom bar. Pick how you want to start:</p><div class="gbtns"><button class="hwb big" data-w="tour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" data-w="demo"><i class="led"></i>▶ FULL NARRATED COURSE</button><button class="hwb big" data-w="coach"><i class="led"></i>COACH ME AS I GO</button><button class="hwb big" data-w="skip"><i class="led"></i>JUST LET ME IN</button></div><small>Hold any button for ½ second to learn what it does. Everything here is on GUIDE and COACH on the rail, any time.</small></div></div>';
+ document.body.append(w);w.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;LSs('bc16:welcomed',1);w.remove();if(b.dataset.w==='tour')coachStart('tour');else if(b.dataset.w==='demo')demoStart();else if(b.dataset.w==='coach')coachToggle(true)}}
 
 /* ================= keys ================= */
 function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELECT|TEXTAREA/.test(tg.tagName)||e.metaKey||e.ctrlKey)return;
@@ -1037,14 +1121,14 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
 
 /* ================= boot ================= */
-function init(){build();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
+function init(){build();coachWire2();soundWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
+ window.OS={focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
- setInterval(()=>{patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
- const loop=()=>{vuDraw();requestAnimationFrame(loop)};requestAnimationFrame(loop);
+ setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
+ const loop=ts=>{vuDraw(ts);requestAnimationFrame(loop)};requestAnimationFrame(loop);
  let lastF='';setInterval(()=>{const f=fnameSafe();if(f!==lastF&&ready()){lastF=f;TW.key='';KF.list=null;if(curP==='kit')kitRender();if(curP==='tower'){TW.built='';towerRender()}if(curP==='launch')launchRender()}},800);
  setTimeout(welcome,600)}
 init();
