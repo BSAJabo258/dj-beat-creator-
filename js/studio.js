@@ -1007,6 +1007,9 @@ window.DBC_OS={
  patMeta:()=>{ensurePS();return PS.pats.map(p=>({bars:p.bars,hits:p.ev.length}))},
  followCur:()=>{ensurePS();followPart(curPat(),0)},
  panic:()=>{stopT();try{for(const k of [...NR.act.keys()])nrStop(k)}catch(e){}if(ac){const t=ac.currentTime;TR.vs.forEach(v=>vStop(v,t,.02));TR.vs=[]}try{uiT()}catch(e){}renderAll()},
+ snapshot:()=>{ensurePS();return JSON.parse(JSON.stringify(ser()))},
+ restore:d=>{ensurePS();pushUndo();const miss=applyProj(JSON.parse(JSON.stringify(d)));try{syncCtl();renderAll()}catch(e){}dirty();return[...(miss||[])]},
+ main:()=>PS.main,dirtyN:()=>PS.ver||0,
  level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
 let OSAN=null,OSBUF=null;
 

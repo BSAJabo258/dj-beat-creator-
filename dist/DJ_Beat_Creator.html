@@ -1110,6 +1110,53 @@ body.os button,body.os .knob,body.os .clip,body.os .part,body.os .kc,body.os .ks
 .sbchk input{margin:0;width:auto}
 .kfauto .kfsrow{align-items:center;flex-wrap:wrap}.kfauto .kfsrow select{flex:1 1 180px}.kfauto .kfsrow .hwb{flex:none}
 .sbchk input[type=checkbox]{width:16px!important;height:16px!important;min-width:0!important;flex:none!important;appearance:auto!important;-webkit-appearance:checkbox!important;accent-color:var(--acc);padding:0!important;border:0!important;box-shadow:none!important;background:none!important}
+/* ---------- rail: six workstation stages ---------- */
+#rail .rst{display:block;font:700 7.5px var(--mono);letter-spacing:.14em;color:#5f6676;text-align:center;margin:8px 0 1px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);white-space:nowrap}
+#rail .brand+.rst{border-top:0;margin-top:0;padding-top:0}
+@media (max-height:960px) and (min-width:901px){#rail .rst{margin:4px 0 0;padding-top:4px;font-size:7px}#rail .rb{padding:5px 2px 4px}#rail .rb span{font-size:8.5px}}
+@media (max-width:900px){#rail .rst{display:none}}
+/* ---------- SAVE light: unsaved changes ---------- */
+#osSave.unsaved .led{background:#ffb020;box-shadow:0 0 8px #ffb020;animation:breathe 1.4s ease-in-out infinite}
+#osSave:not(.unsaved) .led{background:#38e07b;box-shadow:0 0 6px #38e07b}
+/* ---------- PROJECT MANAGER ---------- */
+#osProject{display:none;--face1:#152029;--face2:#0b1218}
+body[data-pg=project] #osProject{display:flex}body[data-pg=project] #screenWrap{display:none}
+.pjbody{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pjcol{min-height:0;overflow-y:auto;scrollbar-width:thin;display:flex;flex-direction:column;gap:14px;padding:2px 4px}
+.pjcol .hwl{position:static}
+.pjnow{padding:14px;border-radius:10px;background:#05070a;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent),inset 0 0 24px color-mix(in srgb,var(--acc) 10%,transparent)}
+.pjnow small,#resumeCard small{font:700 9.5px var(--mono);letter-spacing:.12em;color:var(--acc)}.pjnow b{display:block;font:700 18px var(--mono);color:#fff;margin:2px 0}.pjnow span{font:500 12px 'Archivo';color:#9ea7b5}
+.pjlist{display:flex;flex-direction:column;gap:5px}
+.pjr{display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto;gap:0 8px;align-items:center;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.pjr.cur{box-shadow:inset 0 0 0 1px var(--acc)}
+.pjr b{font:700 13px 'Archivo';color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pjr span{grid-column:1;font:500 10.5px var(--mono);color:#8a93a3}
+.pjr button{grid-row:1/3;padding:6px 9px;border-radius:7px;border:1px solid #000;background:#22252d;color:#e4e8ee;font:700 10px var(--mono);cursor:pointer}
+.pjr button[data-a=r],.pjr button[data-a=o]{background:var(--acc);color:#000}
+.pjnote,.pjstore{font:500 11.5px 'Archivo';color:#8a93a3}
+#resumeCard{display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto auto;gap:2px 10px;align-items:center;margin:0 0 14px;padding:14px 16px;border-radius:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 14%,#11151b),#0b0e12);box-shadow:inset 0 0 0 1px var(--acc),0 0 30px color-mix(in srgb,var(--acc) 20%,transparent)}
+#resumeCard b{font:800 18px 'Archivo';color:#fff}#resumeCard span{font:500 12px 'Archivo';color:#a9b2bf}
+#resumeCard .hwb{grid-row:1/4}
+@media (max-width:900px){.pjbody{grid-template-columns:1fr}#resumeCard{grid-template-columns:1fr}#resumeCard .hwb{grid-row:auto}}
+/* ---------- screens: settings drawn as hardware, not web forms ---------- */
+body.os #screen select{-webkit-appearance:none;appearance:none;background:linear-gradient(180deg,#0b0e13,#05070a) padding-box;border:1px solid #000;border-radius:6px;color:#e8fff9;font:600 12px var(--mono);letter-spacing:.04em;padding:7px 30px 7px 10px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent),inset 0 2px 6px rgba(0,0,0,.6);text-shadow:0 0 6px color-mix(in srgb,var(--acc) 45%,transparent);
+ background-image:linear-gradient(45deg,transparent 50%,var(--acc) 50%),linear-gradient(135deg,var(--acc) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;cursor:pointer}
+body.os #screen input[type=number],body.os #screen input[type=text],body.os #screen input:not([type]){background:#05070a;border:1px solid #000;border-radius:5px;color:#fff;font:700 13px var(--mono);padding:6px 8px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent),inset 0 2px 6px rgba(0,0,0,.6);text-shadow:0 0 8px color-mix(in srgb,var(--acc) 55%,transparent)}
+body.os #screen input[type=checkbox]{-webkit-appearance:none;appearance:none;width:34px;height:18px;border-radius:9px;background:#1a1d24;border:1px solid #000;box-shadow:inset 0 2px 4px rgba(0,0,0,.7);position:relative;cursor:pointer;vertical-align:middle;flex:none;margin:0 4px 0 0;transition:background .15s}
+body.os #screen input[type=checkbox]::after{content:'';position:absolute;top:1px;left:1px;width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,#d8dce3,#8c93a0);box-shadow:0 1px 2px rgba(0,0,0,.6);transition:transform .15s}
+body.os #screen input[type=checkbox]:checked{background:color-mix(in srgb,var(--acc) 70%,#111);box-shadow:inset 0 0 8px color-mix(in srgb,var(--acc) 60%,transparent)}
+body.os #screen input[type=checkbox]:checked::after{transform:translateX(16px)}
+body.os #screen input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;cursor:pointer;min-width:90px}
+body.os #screen input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 1px,transparent 1px 10%),#06080b;box-shadow:inset 0 1px 3px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05)}
+body.os #screen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:22px;margin-top:-8px;border-radius:3px;border:1px solid #000;background:linear-gradient(90deg,#9aa1ad,#e6e9ee 45%,#2d3038 50%,#e6e9ee 55%,#9aa1ad);box-shadow:0 2px 4px rgba(0,0,0,.6)}
+body.os #screen input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#06080b}
+body.os #screen input[type=range]::-moz-range-thumb{width:14px;height:22px;border-radius:3px;border:1px solid #000;background:linear-gradient(90deg,#9aa1ad,#e6e9ee 45%,#2d3038 50%,#e6e9ee 55%,#9aa1ad)}
+body.os #screen .card{background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(0,0,0,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.04);border-radius:10px}
+body.os #screen .card button:not(.sk):not(.pp):not(.tile):not(.tl){border:1px solid #000;border-radius:7px;background:linear-gradient(180deg,#2c2f37,#1d1f25);color:#e6e9ee;font:700 11px var(--mono);letter-spacing:.06em;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000;padding:7px 11px}
+body.os #screen .card button:not(.sk):not(.pp):not(.tile):not(.tl):active{transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 #000}
+body.os #screen .card button.on,body.os #screen .card button[data-on]{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 70%,#2c2f37),color-mix(in srgb,var(--acc) 45%,#1d1f25));color:#000}
+body.os #screen label{font:700 10px var(--mono);letter-spacing:.08em;color:#9aa3b2;text-transform:uppercase}
+.pjr b{grid-column:1;grid-row:1}.pjr span{grid-column:1;grid-row:2}.pjr button{grid-row:1/3!important;width:auto}.pjr button:nth-of-type(1){grid-column:2}.pjr button:nth-of-type(2){grid-column:3}
+#rail .rst{letter-spacing:.03em;font-size:7px}
 
 </style>
 </head><body>
@@ -3029,6 +3076,9 @@ window.DBC_OS={
  patMeta:()=>{ensurePS();return PS.pats.map(p=>({bars:p.bars,hits:p.ev.length}))},
  followCur:()=>{ensurePS();followPart(curPat(),0)},
  panic:()=>{stopT();try{for(const k of [...NR.act.keys()])nrStop(k)}catch(e){}if(ac){const t=ac.currentTime;TR.vs.forEach(v=>vStop(v,t,.02));TR.vs=[]}try{uiT()}catch(e){}renderAll()},
+ snapshot:()=>{ensurePS();return JSON.parse(JSON.stringify(ser()))},
+ restore:d=>{ensurePS();pushUndo();const miss=applyProj(JSON.parse(JSON.stringify(d)));try{syncCtl();renderAll()}catch(e){}dirty();return[...(miss||[])]},
+ main:()=>PS.main,dirtyN:()=>PS.ver||0,
  level:()=>{if(!MASTER)return[0,0];if(!OSAN||OSAN.context!==MASTER.context){OSAN=MASTER.context.createAnalyser();OSAN.fftSize=1024;OSAN._noRec=1;_con.call(MASTER,OSAN);OSBUF=new Float32Array(1024)}OSAN.getFloatTimeDomainData(OSBUF);let pk=0,sq=0;for(let i=0;i<OSBUF.length;i++){const v=Math.abs(OSBUF[i]);if(v>pk)pk=v;sq+=v*v}return[Math.sqrt(sq/OSBUF.length),pk]}};
 let OSAN=null,OSBUF=null;
 
@@ -3073,7 +3123,7 @@ const PAGES={
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
  song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
- slicer:{os:1,title:'SLICE BRAIN',d:'Chop intelligence.'},store:{os:1,title:'PACK STORE',d:'Packs and plans.'},factory:{os:1,title:'PACK FACTORY',d:'AI sample packs.'},build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
+ project:{os:1,title:'PROJECT',d:'Projects.'},slicer:{os:1,title:'SLICE BRAIN',d:'Chop intelligence.'},store:{os:1,title:'PACK STORE',d:'Packs and plans.'},factory:{os:1,title:'PACK FACTORY',d:'AI sample packs.'},build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
@@ -3095,7 +3145,7 @@ function ensureHead(pane,p){let h=pane.querySelector(':scope > .phead');if(!h){h
 
 /* ---- modes ---- */
 function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
- if(p!=='start'&&p!=='guide'&&p!=='factory'&&p!=='store'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
+ if(p!=='start'&&p!=='guide'&&p!=='factory'&&p!=='store'&&p!=='project'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
  const prev=cur;
  routing=true;try{
   const P=PAGES[p];$('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start'||!!P.os);
@@ -3272,11 +3322,15 @@ const I={
  lab:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>',
  brain:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>',
  lib:'<path d="M4 4v16M8 4v16M12 5l4 15M17 4h3v16h-3z"/>',
+ proj:'<path d="M4 4h12l4 4v12H4z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
  guide:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3"/><path d="M20 4v14h-7"/>'};
 const GROUPS=[
- {id:'home',l:'DECK',pages:['start']},{id:'chop',l:'CHOP',pages:['chop','slicer']},{id:'kit',l:'KITS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},
- {id:'seq',l:'SEQ',pages:['sequence']},{id:'keys',l:'KEYS',pages:['tower','keys','live']},{id:'song',l:'SONG',pages:['build','song','arrange']},
- {id:'live',l:'LIVE',pages:['launch','dj']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},{id:'brain',l:'BRAIN',pages:['brain']},{id:'lib',l:'LIBRARY',pages:['factory','store']},{id:'guide',l:'GUIDE',pages:['guide']}];
+ {id:'home',l:'DECK',st:'01 SOURCE',pages:['start']},{id:'lib',l:'LIBRARY',pages:['factory','store']},
+ {id:'chop',l:'CHOP',st:'02 SAMPLE',pages:['chop','slicer']},{id:'lab',l:'LAB',pages:['sounds','parts','groups']},
+ {id:'kit',l:'KITS',st:'03 INSTRUMENTS',pages:['kit']},{id:'pads',l:'PADS',pages:['pads']},{id:'seq',l:'SEQ',pages:['sequence']},{id:'keys',l:'KEYS',pages:['tower','keys','live']},
+ {id:'live',l:'LIVE',st:'04 PERFORM',pages:['launch','dj']},
+ {id:'song',l:'SONG',st:'05 ARRANGE',pages:['build','song','arrange']},{id:'brain',l:'BRAIN',pages:['brain']},
+ {id:'proj',l:'PROJECT',st:'06 FINISH',pages:['project']},{id:'guide',l:'GUIDE',pages:['guide']}];
 const UNITS={
  start:{g:'home',n:'TAPE DECK',m:'TD-1',c:'#29e3ff',c2:'#7a5cff',d:'Load a song. Tempo, key and every hit are found for you.'},
  chop:{g:'chop',n:'SAMPLER',m:'CS-1',c:'#29e3ff',c2:'#00ffa3',d:'Set how the song is cut. The PAD MATRIX plays the cuts in order.'},
@@ -3298,6 +3352,7 @@ const UNITS={
  brain:{g:'brain',n:'BEAT BRAIN',m:'BB-9',c:'#ff6ad5',c2:'#7a5cff',d:'Presets, variations, full songs and smart kits.'},
  factory:{g:'lib',n:'PACK FACTORY',m:'PF-1',c:'#00e5a0',c2:'#29e3ff',d:'AI-generated sample packs in any genre, saved to your own library.'},
  store:{g:'lib',n:'PACK STORE',m:'PS-3',c:'#00e5a0',c2:'#ffd23e',d:'Free starter packs, premium drops and memberships.'},
+ project:{g:'proj',n:'PROJECT MANAGER',m:'PM-1',c:'#7dd3fc',c2:'#ffd23e',d:'Reopen projects, versions, project files with audio, duplicate.'},
  guide:{g:'guide',n:'STUDIO MANUAL',m:'OS',c:'#5effc8',c2:'#29e3ff',d:'Lessons, the button book and a demo that plays itself.'}};
 const WITH_DECK=new Set(['chop','pads','sequence','launch','dj','sounds','build']);
 
@@ -3308,7 +3363,7 @@ function build(){
  const dev=$('device'),top=$('hwTop');
  /* rail */
  const rail=el('nav',{id:'rail','aria-label':'Studio units'});
- rail.innerHTML='<div class="brand" aria-hidden="true"><b>BC</b><span>16</span></div>'+GROUPS.map((g,i)=>'<button class="rb" data-grp="'+g.id+'" data-help="rail-'+g.id+'" title="'+g.l+(i<10?' (Alt+'+((i+1)%10)+')':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+I[g.id]+'</svg><span>'+g.l+'</span><i class="rled"></i></button>').join('')+'<div class="rsp"></div><button class="rb sm" id="osCoach" data-help="osCoach" title="Coach on/off"><b>☰</b><span>COACH</span><i class="rled"></i></button><button class="rb sm" id="osExplain" data-help="osExplain" title="Explain mode (?)"><b>?</b><span>EXPLAIN</span><i class="rled"></i></button>';
+ rail.innerHTML='<div class="brand" aria-hidden="true"><b>BC</b><span>16</span></div>'+GROUPS.map((g,i)=>(g.st?'<span class="rst">'+g.st+'</span>':'')+'<button class="rb" data-grp="'+g.id+'" data-help="rail-'+g.id+'" title="'+g.l+(i<10?' (Alt+'+((i+1)%10)+')':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+I[g.id]+'</svg><span>'+g.l+'</span><i class="rled"></i></button>').join('')+'<div class="rsp"></div><button class="rb sm" id="osCoach" data-help="osCoach" title="Coach on/off"><b>☰</b><span>COACH</span><i class="rled"></i></button><button class="rb sm" id="osExplain" data-help="osExplain" title="Explain mode (?)"><b>?</b><span>EXPLAIN</span><i class="rled"></i></button>';
  dev.prepend(rail);
  rail.addEventListener('click',e=>{const b=e.target.closest('.rb[data-grp]');if(!b)return;const g=GROUPS.find(x=>x.id===b.dataset.grp);const last=LSg('bc16:last:'+g.id,g.pages[0]);go(g.pages.includes(last)?last:g.pages[0])});
  /* meter bridge */
@@ -3326,7 +3381,7 @@ function build(){
  ['knobGrp','bankGrp','padsSlot','fnGrp','dataGrp'].forEach(id=>{const x=$(id);if(x)deck.append(x)});stage.append(deck);
  const kg=deck.querySelector('#knobGrp');if(kg){kg.insertAdjacentHTML('beforeend','<div class="autoBar" data-help="autoBar"><span>AUTOMATION</span><div class="seg" id="autoSeg"><button data-m="off">OFF</button><button data-m="read">READ</button><button data-m="write">WRITE</button></div><button class="chip" id="autoClr">CLEAR</button><i id="autoDot"></i></div>');kg.querySelector('#autoSeg').onclick=e=>{const b=e.target.closest('[data-m]');if(!b||!need())return;API().autoMode(b.dataset.m);autoSync();say(b.dataset.m==='write'?'WRITE: press PLAY and move FILTER, PUMP or SWING. The moves record into the pattern as automation.':b.dataset.m==='read'?'READ: the pattern plays back its knob moves.':'Automation off: knobs stay where you leave them.')};kg.querySelector('#autoClr').onclick=()=>{if(!need())return;API().autoClear();say('Automation cleared from P'+(API().pat()+1)+'. UNDO brings it back.')}}
  const bs=deck.querySelector('#banksSlot');if(bs){bs.insertAdjacentHTML('beforebegin','<button class="hwb sq bstep" id="bankPrev" data-help="bankStep" title="Previous bank (←)"><i class="led"></i>◀</button>');bs.insertAdjacentHTML('afterend','<button class="hwb sq bstep" id="bankNext" data-help="bankStep" title="Next bank (→)"><i class="led"></i>▶</button>');bs.parentElement.classList.add('bankrow');deck.querySelector('#bankPrev').onclick=()=>{if(need()){const b=API().bankStep(-1);say('Pad bank '+BL[b]+'.')}};deck.querySelector('#bankNext').onclick=()=>{if(need()){const b=API().bankStep(1);say('Pad bank '+BL[b]+'.')}}}
- stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore(),buildSlicer());
+ stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore(),buildSlicer(),buildProject());
  /* transport bar */
  const bar=el('footer',{id:'tbar'});
  const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (−)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (=)"><i class="led"></i>▶</button></div>');
@@ -3336,13 +3391,13 @@ function build(){
  bar.append($('trGrp'),pat,ed);
  dev.append(stage,bar);
  ['ctlL','ctlR'].forEach(id=>{const x=$(id);if(x)x.hidden=true});
- const gt=$('gToast');if(gt)document.body.append(gt);
+ const gt=$('gToast');if(gt){document.body.append(gt);let tt=null;new MutationObserver(()=>{if(gt.hidden)return;clearTimeout(tt);tt=setTimeout(()=>{gt.hidden=true},9000)}).observe(gt,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']})}
  /* coach / explain layers */
  document.body.insertAdjacentHTML('beforeend','<div id="coach" hidden><div id="spot"></div><div id="ccard" role="dialog" aria-live="polite"><div class="cbar"><i id="cprog"></i></div><small id="cstep"></small><h3 id="ctitle"></h3><p id="ctext"></p><div class="cbtn"><button id="cprev">◀ Back</button><button id="cexit">Exit</button><button id="cplay" class="conly">❚❚ Pause</button><button id="cnext" class="p">Next ▶</button></div><div class="crow conly"><button id="cvoice">🔊 Voice on</button><select id="cWho" aria-label="Narrator"><option value="0">Studio voice (soft)</option><option value="1">My device’s voice</option></select><select id="cRate" aria-label="Narration speed"><option value="0.75">Very slow</option><option value="0.88">Slow and clear</option><option value="1">Normal</option><option value="1.15">Faster</option></select><select id="cChap" aria-label="Jump to chapter"></select></div></div><div id="ghost"><i></i></div></div><div id="xbub" hidden><b></b><p></p><small>Explain mode is on: buttons explain themselves instead of acting. Press ? or Esc to turn it off.</small></div>');
  /* status line mirror */
  const st=$('st');const mirror=()=>{$('osLine').textContent=st.textContent};new MutationObserver(mirror).observe(st,{childList:true,characterData:true,subtree:true});mirror();
  /* wiring */
- $('osSave').onclick=()=>{if(!ready()){say('Load a song first.');return}API().save();say('Setup saved: pads, kits, patterns and song order for '+fnameSafe()+'.')};
+
  $('osPatPrev').onclick=()=>patStep(-1);$('osPatHalf').onclick=()=>{PH.manual=PH.half?0:1;PH.half=PH.manual;PH.t=Date.now();halfSync()};$('osNext').onclick=()=>nextPart();$('osPatNext').onclick=()=>patStep(1);
  $('osPatDup').onclick=()=>{if(!need())return;const t=API().dupPat();say(t<0?'All 8 patterns have hits. Clear one first.':'Copied into P'+(t+1)+' and switched to it. Change it to make a variation.')};
  $('osPatClr').onclick=async()=>{if(!need())return;const P=API().pat();if(!API().pats()[P].hits){say('P'+(P+1)+' is already empty.');return}if(!await ask('Clear every hit in pattern P'+(P+1)+'? UNDO brings it back.'))return;API().clearPat();say('Cleared P'+(P+1)+'. Press UNDO to bring it back.')};
@@ -3374,7 +3429,7 @@ function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
  $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');$('focusExit').hidden=true;
- if((p==='sequence'||p==='launch'||p==='build')&&ready()&&API().song().follow&&!API().playing())API().followCur();if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ if((p==='sequence'||p==='launch'||p==='build')&&ready()&&API().song().follow&&!API().playing())API().followCur();if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='project')projRender();if(p==='start')resumeOffer();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
  {const fi=FLOW.findIndex(f=>f[0]===p),nx=FLOW[fi+1],sn=$('subNext');sn.hidden=fi<0||!nx;if(nx){sn.innerHTML='<small>STEP '+(fi+1)+' OF '+FLOW.length+'</small> NEXT: '+UNITS[nx[0]].n+' ▶';sn.onclick=()=>go(nx[0])}}
  $('osBack').disabled=!hist.length;const pb=hist[hist.length-1];$('subBack').hidden=!pb;if(pb)$('subBack').querySelector('span').textContent=(UNITS[pb]||{n:'BACK'}).n;
  if(coach&&coach.mode==='tour')setTimeout(coachPlace,80);CO.last=null;CO.sig='';coachRender()}
@@ -3938,6 +3993,66 @@ function soundWire(){const wp=eng('play');if(typeof wp==='function'){window.play
  const au=$('pfAudio');if(au)au.addEventListener('play',()=>focus('library'));
  $('psStop').addEventListener('click',e=>{if(!API()||!ready())return;if(!API().playing()){allStop()}},true)}
 
+/* ================= PROJECTS: the song audio + everything made with it, kept on this device =================
+   Every song loaded is stored (IndexedDB) so a project reopens with one tap. The working state already
+   autosaves per song; versions are snapshots you can go back to (each SAVE, plus one every 5 minutes of work).
+   A full project file (.bc16) carries the audio AND the state, for moving to another device. */
+let PDB=null;
+function pdb(){if(PDB)return PDB;PDB=new Promise((res,rej)=>{const r=indexedDB.open('bc16proj',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('songs',{keyPath:'key'});const v=d.createObjectStore('versions',{keyPath:'id'});v.createIndex('song','song')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});return PDB}
+async function ptx(store,mode,fn){const d=await pdb();return new Promise((res,rej)=>{const t=d.transaction(store,mode),st=t.objectStore(store);let out;const r=fn(st);if(r)r.onsuccess=()=>{out=r.result};t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error)})}
+const songKey=n=>(n||'').replace(/\.[^.]+$/,'').replace(/[^\w\-]+/g,'_')||'beat';
+const PJ={savedVer:-1,lastAutoVer:-1,lastAutoAt:0,loading:false};
+function projWire(){const L=window.load;if(typeof L==='function'){window.load=async function(ab,name){const key=songKey(name);
+  if(!PJ.loading&&ab&&ab.byteLength<160e6){const bytes=ab.slice(0);ptx('songs','readwrite',st=>st.put({key,name,size:bytes.byteLength,bytes,added:Date.now(),opened:Date.now()})).catch(()=>{})}
+  else if(PJ.loading){ptx('songs','readwrite',st=>st.get(key)).then(()=>{}).catch(()=>{})}
+  LSs('bc16:lastSong',key);LSs('bc16:lastAt',Date.now());const r=await L.apply(this,arguments);PJ.savedVer=-1;return r}}
+ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+ /* unsaved light on SAVE, autosave versions every 5 minutes of changes */
+ setInterval(()=>{const A=API();if(!A||!ready())return;const v=A.dirtyN();if(PJ.savedVer<0)PJ.savedVer=v;const uns=v!==PJ.savedVer;const b=$('osSave');b.classList.toggle('unsaved',uns);b.title=uns?'Unsaved changes (they are also autosaved): press to save a version':'Saved';
+  LSs('bc16:lastAt',Date.now());if(uns&&v!==PJ.lastAutoVer&&Date.now()-PJ.lastAutoAt>300000){PJ.lastAutoVer=v;PJ.lastAutoAt=Date.now();saveVersion('autosave',true)}},2000)}
+async function saveVersion(label,auto){const A=API();if(!A||!ready())return;const song=fnameSafe(),data=A.snapshot(),id=song+'@'+Date.now();await ptx('versions','readwrite',st=>st.put({id,song,at:Date.now(),label:label||'',auto:!!auto,data})).catch(()=>{});
+ const all=await listVersions(song);const autos=all.filter(v=>v.auto);if(autos.length>20)for(const v of autos.slice(20))await ptx('versions','readwrite',st=>st.delete(v.id));if(!auto){PJ.savedVer=A.dirtyN();$('osSave').classList.remove('unsaved')}if(curP==='project')projRender()}
+async function listVersions(song){const d=await pdb();return new Promise(res=>{const q=d.transaction('versions').objectStore('versions').index('song').getAll(song);q.onsuccess=()=>res((q.result||[]).sort((a,b)=>b.at-a.at));q.onerror=()=>res([])})}
+async function listSongs(){const d=await pdb();return new Promise(res=>{const out=[];const c=d.transaction('songs').objectStore('songs').openCursor();c.onsuccess=()=>{const k=c.result;if(k){const{bytes,...m}=k.value;out.push(m);k.continue()}else res(out.sort((a,b)=>(b.opened||0)-(a.opened||0)))};c.onerror=()=>res([])})}
+async function openSong(key){const rec=await ptx('songs','readonly',st=>st.get(key));if(!rec){say('That song is no longer stored on this device.');return false}
+ rec.opened=Date.now();ptx('songs','readwrite',st=>st.put(rec)).catch(()=>{});PJ.loading=true;say('Opening “'+rec.name+'”…');try{await load(rec.bytes.slice(0),rec.name)}finally{PJ.loading=false}go('start');return true}
+function buildProject(){const u=el('section',{id:'osProject',class:'unit'});
+ u.innerHTML=plate('PROJECT MANAGER','PM-1','osProject')+'<div class="pjbody"><div class="pjcol"><div class="pjnow" id="pjNow" data-help="pjNow"></div>'+
+ '<div data-help="pjVer"><div class="sbh"><span class="hwl">VERSIONS OF THIS PROJECT</span></div><div class="kfsrow"><input id="pjLabel" maxlength="40" placeholder="Name this version, e.g. hook done"><button class="hwb np" id="pjSaveV"><i class="led"></i>SAVE VERSION</button></div><div class="pjlist" id="pjVers"></div></div></div>'+
+ '<div class="pjcol"><div data-help="pjRecent"><div class="sbh"><span class="hwl">RECENT PROJECTS ON THIS DEVICE</span></div><div class="pjlist" id="pjSongs"></div></div>'+
+ '<div data-help="pjFile"><div class="sbh"><span class="hwl">PROJECT FILE (AUDIO + EVERYTHING)</span></div><div class="kfact"><button class="hwb" id="pjDl"><i class="led"></i>⬇ DOWNLOAD .BC16</button><label class="hwb loadbtn" for="pjOpen"><i class="led"></i>OPEN .BC16 FILE</label><input type="file" id="pjOpen" accept=".bc16,application/json" hidden><button class="hwb" id="pjDup"><i class="led"></i>⧉ DUPLICATE PROJECT</button></div><small class="pjnote">A .bc16 file holds the song audio, cuts, kits, pads, patterns, automation and song order. Open it on any device to carry on.</small></div>'+
+ '<div class="pjstore" id="pjStore"></div></div></div>';return u}
+const ago=t=>{const s=(Date.now()-t)/1000;return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<172800?Math.round(s/3600)+' h ago':new Date(t).toLocaleDateString()};
+async function projRender(){if(!$('pjNow'))return;const r=ready(),song=r?fnameSafe():null,A=API();
+ $('pjNow').innerHTML=r?'<small>OPEN NOW</small><b>'+esc(song)+'</b><span>'+($('osSave').classList.contains('unsaved')?'Changes since your last version (autosaved as you work)':'All changes saved')+' · '+(A.song().list.length||0)+' song parts · '+A.patMeta().filter(p=>p.hits).length+' patterns · '+A.kits().length+' saved kits</span>':'<small>NO PROJECT OPEN</small><b>Open a recent project or load a song</b>';
+ const V=r?await listVersions(song):[];$('pjVers').innerHTML=V.length?V.map(v=>'<div class="pjr"><b>'+esc(v.label||(v.auto?'Autosave':'Version'))+'</b><span>'+ago(v.at)+' · '+new Date(v.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</span><button data-v="'+esc(v.id)+'" data-a="r">↺ RESTORE</button><button data-v="'+esc(v.id)+'" data-a="x">✕</button></div>').join(''):'<p class="empty">'+(r?'No versions yet. SAVE VERSION keeps a copy you can come back to; one is also kept every 5 minutes while you work.':'Open a project to see its versions.')+'</p>';
+ const S=await listSongs();$('pjSongs').innerHTML=S.length?S.map(x=>'<div class="pjr'+(x.key===song?' cur':'')+'"><b>'+esc(x.name)+'</b><span>'+(x.size/1e6).toFixed(1)+' MB · opened '+ago(x.opened||x.added)+'</span><button data-s="'+esc(x.key)+'" data-a="o">'+(x.key===song?'OPEN NOW':'OPEN')+'</button><button data-s="'+esc(x.key)+'" data-a="d">✕</button></div>').join(''):'<p class="empty">Songs you load are kept here so you can reopen them with their work.</p>';
+ try{const e=await navigator.storage.estimate();$('pjStore').textContent='Storage: '+(e.usage/1e6).toFixed(0)+' MB used of about '+(e.quota/1e9).toFixed(1)+' GB.'}catch(er){}}
+async function projFile(){const A=API();if(!need())return;const key=songKey(fnameSafe());const rec=await ptx('songs','readonly',st=>st.get(key));if(!rec){say('The song audio is not stored yet: load the song once more, then download.');return}
+ say('Packing the project…');const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.readAsDataURL(new Blob([rec.bytes]))});
+ const P={bc16:1,name:rec.name,saved:new Date().toISOString(),state:A.snapshot(),kits:LSg('bcrps:kits:'+API().main(),{}),audio:b64};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(P)],{type:'application/json'}));a.download=key+'.bc16';a.click();say('Downloaded '+key+'.bc16: audio and all your work in one file.')}
+async function projOpen(f){try{say('Opening '+f.name+'…');const P=JSON.parse(await f.text());if(!P.bc16||!P.audio)throw new Error('That is not a BC-16 project file.');
+ const bin=Uint8Array.from(atob(P.audio),c=>c.charCodeAt(0)).buffer,key=songKey(P.name);await ptx('songs','readwrite',st=>st.put({key,name:P.name,size:bin.byteLength,bytes:bin.slice(0),added:Date.now(),opened:Date.now()}));
+ if(P.kits)LSs('bcrps:kits:'+key,P.kits);PJ.loading=true;try{await load(bin,P.name)}finally{PJ.loading=false}let n=0;while(!ready()&&n<400){await sleep(150);n++}await sleep(1200);API().restore(P.state);PJ.savedVer=API().dirtyN();say('Opened '+P.name+' with all its work.');go('build')}catch(e){say('Could not open it: '+(e.message||e))}}
+async function projDup(){if(!need())return;const key=songKey(fnameSafe()),rec=await ptx('songs','readonly',st=>st.get(key));if(!rec){say('Load the song once more first, then duplicate.');return}
+ let nm=rec.name.replace(/(\.[^.]+)?$/,' copy$1'),i=2;const S=await listSongs();while(S.some(x=>x.key===songKey(nm)))nm=rec.name.replace(/(\.[^.]+)?$/,' copy '+(i++)+'$1');
+ const state=API().snapshot();const k2=songKey(nm);LSs('bcrps:kits:'+k2,LSg('bcrps:kits:'+API().main(),{}));
+ await ptx('songs','readwrite',st=>st.put({key:k2,name:nm,size:rec.size,bytes:rec.bytes.slice(0),added:Date.now(),opened:Date.now()}));
+ PJ.loading=true;try{await load(rec.bytes.slice(0),nm)}finally{PJ.loading=false}let n=0;while(!(ready()&&fnameSafe()===k2)&&n<400){await sleep(150);n++}await sleep(1200);API().restore(state);say('Duplicated as “'+nm+'”. The original stays as it was.');projRender()}
+function projWire2(){
+ $('pjSaveV').onclick=async()=>{if(!need())return;await saveVersion($('pjLabel').value.trim()||'Version '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));$('pjLabel').value='';say('Version saved.')};
+ $('pjVers').onclick=async e=>{const b=e.target.closest('[data-v]');if(!b)return;const v=await ptx('versions','readonly',st=>st.get(b.dataset.v));if(!v)return;
+  if(b.dataset.a==='r'){if(!await ask('Restore “'+(v.label||'autosave')+'” from '+ago(v.at)+'? Your current work is kept as a version first, and UNDO also brings it back.','RESTORE'))return;await saveVersion('Before restore',false);API().restore(v.data);say('Restored “'+(v.label||'autosave')+'”.');projRender()}
+  else{if(!await ask('Delete this version?','DELETE'))return;await ptx('versions','readwrite',st=>st.delete(v.id));projRender()}};
+ $('pjSongs').onclick=async e=>{const b=e.target.closest('[data-s]');if(!b)return;if(b.dataset.a==='o'){if(ready()&&songKey(fnameSafe())===b.dataset.s){say('This project is already open.');return}await openSong(b.dataset.s)}
+  else{if(!await ask('Remove this song from the device? Its saved work for this song stays; you would need the audio file to open it again.','REMOVE'))return;await ptx('songs','readwrite',st=>st.delete(b.dataset.s));projRender()}};
+ $('pjDl').onclick=projFile;$('pjOpen').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)projOpen(f)};$('pjDup').onclick=projDup;
+ $('osSave').onclick=async()=>{if(!need())return;API().save();await saveVersion('Saved '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),false);say('Saved: a version of '+fnameSafe()+' is kept under PROJECT. Your work also saves itself as you go.')}}
+/* resume card on the tape deck */
+async function resumeOffer(){if(ready())return;const k=LSg('bc16:lastSong','');if(!k)return;let rec;try{rec=await ptx('songs','readonly',st=>st.get(k))}catch(e){return}if(!rec||ready())return;
+ const d=$('drop');if(!d||$('resumeCard'))return;const c=el('div',{id:'resumeCard'},'<small>CARRY ON WHERE YOU LEFT OFF</small><b>'+esc(rec.name)+'</b><span>last worked on '+ago(LSg('bc16:lastAt',rec.opened||Date.now()))+'</span><button class="hwb np big" id="resumeGo"><i class="led"></i>▶ RESUME</button><button class="hwb" id="resumeAll"><i class="led"></i>ALL PROJECTS</button>');
+ d.parentElement.insertBefore(c,d);$('resumeGo').onclick=()=>openSong(k).then(()=>c.remove());$('resumeAll').onclick=()=>go('project')}
+
 /* ================= on-screen dialog: replaces the browser's pop-ups ================= */
 function ask(text,ok,cancel){return new Promise(res=>{const d=el('div',{id:'askD',role:'alertdialog','aria-modal':'true'});
  const okL=ok||(/^Delete/.test(text)?'DELETE':/^Clear/.test(text)?'CLEAR IT':/^Send/.test(text)?'SEND':/^Rebuild/.test(text)?'REBUILD':'YES');
@@ -3965,7 +4080,7 @@ const H={
  osExplain:['EXPLAIN','Turns explain mode on and off. While it is on, pressing any control tells you what it does instead of doing it. Keyboard: ?','Rail'],
  /* meter bridge */
  hwLoad:['LOAD','Opens a song from your device (WAV, MP3, M4A, FLAC, OGG). You can also drop a file anywhere on the machine. Each song keeps its own pads, kits and patterns.','Meter bridge'],
- osSave:['SAVE','Saves this setup: pads, kit banks, patterns and song order, under the song’s name. It also saves by itself as you work.','Meter bridge'],
+ osSave:['SAVE','Saves a version of this project (see PROJECT). The light blinks when there are changes since your last version; work also autosaves as you go, so nothing is lost if the browser closes.','Meter bridge'],
  vu:['OUTPUT VU','The analog meter shows the master output. The rim turns red when the signal peaks near clipping: turn MASTER down a little.','Meter bridge'],
  hwMasterIn:['MASTER','Master volume for everything the machine plays.','Meter bridge'],
  gRec:['TAKE REC','Records everything you hear, from any unit, into a take (audio). Press again to stop; takes appear on SONG → SONG ARRANGER for export.','Meter bridge'],
@@ -4047,6 +4162,10 @@ const H={
  kfSug:['BEST FOR THIS SLOT','The highest-scoring cuts for the lit slot’s role. Tap to hear, hold or drag to drop in.','Kit Forge'],
  autoBar:['AUTOMATION','Like a DAW. WRITE: press PLAY and move FILTER, PUMP or SWING; the moves record into the pattern. READ: the pattern plays its moves back every loop. OFF: ignore them. CLEAR wipes this pattern’s moves. The dot glows when the pattern has automation.','Pad matrix'],
  sbTL:['ARRANGEMENT VIEW','The song like a DAW: parts across, channels down, automation lanes at the bottom. Tap a block to turn that channel on or off in that part. A pattern used twice changes in both places.','Song Builder'],
+ pjNow:['OPEN PROJECT','The project you are in, and whether it has changes since your last saved version. Work autosaves as you go either way.','Project'],
+ pjVer:['VERSIONS','Snapshots of this project. SAVE VERSION (or SAVE on the top bar) keeps one; one is also kept every 5 minutes of work. ↺ RESTORE goes back to it (your current work is kept as a version first).','Project'],
+ pjRecent:['RECENT PROJECTS','Every song you load is kept on this device with its work. OPEN brings back the audio, cuts, kits, patterns and song exactly as you left them.','Project'],
+ pjFile:['PROJECT FILE','⬇ DOWNLOAD .BC16 packs the audio and all your work into one file to back up or move to another device; OPEN .BC16 FILE brings it back. ⧉ DUPLICATE makes a copy to try ideas on.','Project'],
  lcPlay:['PLAY / STOP','Starts or stops the transport.','Launch Console'],lcSong:['+ ADD TO SONG','Adds the current pattern to the end of the song order.','Launch Console']};
 const SOFTH={SHORTEST:'Cuts shorter than this are merged into the next. Tap to step: 1/32 … 2 bars. With SHIFT on it steps back.',LONGEST:'Cuts longer than this are split. Tap to step: ½ beat … 4 bars, or never.',PADS:'Switches the pads between CHOP (cuts in order) and KIT (your kits).','◀ SLICES':'Previous 128 cuts on the pad banks.','SLICES ▶':'Next 128 cuts on the pad banks.'};
 function helpFor(t){let e=t.closest('[data-help]');if(e)return H[e.dataset.help]?[...H[e.dataset.help],e]:null;
@@ -4062,7 +4181,7 @@ function showBub([t,d,g,elx]){const b=$('xbub');b.querySelector('b').textContent
  let x=Math.min(innerWidth-bw-10,Math.max(10,r.left+r.width/2-bw/2)),y=r.bottom+10;if(y+150>innerHeight)y=Math.max(10,r.top-160);b.style.left=x+'px';b.style.top=y+'px'}
 
 /* ================= STUDIO MANUAL: map, lessons, button book, demo ================= */
-const FLOW=[['start','Load'],['chop','Cut'],['kit','Build kits'],['pads','Play'],['sequence','Program'],['tower','Add keys'],['launch','Perform'],['build','Build the song'],['song','Export']];
+const FLOW=[['start','Load'],['chop','Cut'],['kit','Build kits'],['pads','Play'],['sequence','Program'],['tower','Add keys'],['launch','Perform'],['build','Build the song'],['song','Export'],['project','Keep it']];
 const LESSONS=[
  {id:'tour',t:'Tour of the studio',d:'Two minutes: the rail, the meter bridge, the transport bar and how the units connect.',steps:[
   {p:'start',s:'#rail',t:'The rail: your studio rack',x:'Each button on the rail opens one piece of gear. Go top to bottom and you follow the way a beat gets made: load, chop, build kits, play, program, keys, arrange, perform.'},
@@ -4129,7 +4248,7 @@ function guideRender(){
 function bookRender(){const q=($('gFind').value||'').toLowerCase().trim(),G={};
  for(const[k,[t,d,g]]of Object.entries(H)){if(q&&!(t+' '+d+' '+g).toLowerCase().includes(q))continue;(G[g]=G[g]||[]).push([k,t,d])}
  $('gBook').innerHTML=Object.entries(G).map(([g,a])=>'<section><h4>'+g+'</h4>'+a.map(([k,t,d])=>'<div class="bk1"><b>'+t+'</b><p>'+d+'</p><button class="show" data-k="'+k+'">SHOW ME</button></div>').join('')+'</section>').join('')||'<p class="empty">Nothing matches “'+esc(q)+'”.</p>'}
-const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build','Pack Factory':'factory','Pack Store':'store','Slice Brain':'slicer'};
+const SHOWP={'Meter bridge':'start',Transport:'start',Rail:'start','Pad matrix':'pads','Kit Forge':'kit','Key Tower':'tower','Launch Console':'launch','Song Builder':'build','Pack Factory':'factory','Pack Store':'store','Slice Brain':'slicer','Project':'project'};
 function guideWire(){$('gTour').onclick=()=>coachStart('tour');$('gChap').onclick=e=>{const b=e.target.closest('[data-c]');if(b)courseStart(STEPS.findIndex(s=>s.ci===+b.dataset.c))};$('gDemo').onclick=demoStart;$('gExp').onclick=()=>{explain(true);go(hist[hist.length-1]||'start')};
  $('gMap').onclick=e=>{const n=e.target.closest('.gnode');if(n)go(n.dataset.p)};
  $('gLessons').onclick=e=>{const b=e.target.closest('.glesson');if(b)coachStart(b.dataset.l)};
@@ -4365,7 +4484,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
 
 /* ================= boot ================= */
-function init(){build();coachWire2();soundWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
+function init(){build();coachWire2();soundWire();projWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();projWire2();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
  window.OS={focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
@@ -4374,7 +4493,7 @@ function init(){build();coachWire2();soundWire();courseWire();kitWire();builderW
  setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
  const loop=ts=>{vuDraw(ts);requestAnimationFrame(loop)};requestAnimationFrame(loop);
  let lastF='';setInterval(()=>{const f=fnameSafe();if(f!==lastF&&ready()){lastF=f;TW.key='';KF.list=null;if(curP==='kit')kitRender();if(curP==='tower'){TW.built='';towerRender()}if(curP==='launch')launchRender()}},800);
- setTimeout(welcome,600)}
+ setTimeout(welcome,600);setTimeout(resumeOffer,900)}
 init();
 })();
 

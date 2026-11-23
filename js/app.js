@@ -20,7 +20,7 @@ const PAGES={
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
  song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
- slicer:{os:1,title:'SLICE BRAIN',d:'Chop intelligence.'},store:{os:1,title:'PACK STORE',d:'Packs and plans.'},factory:{os:1,title:'PACK FACTORY',d:'AI sample packs.'},build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
+ project:{os:1,title:'PROJECT',d:'Projects.'},slicer:{os:1,title:'SLICE BRAIN',d:'Chop intelligence.'},store:{os:1,title:'PACK STORE',d:'Packs and plans.'},factory:{os:1,title:'PACK FACTORY',d:'AI sample packs.'},build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
@@ -42,7 +42,7 @@ function ensureHead(pane,p){let h=pane.querySelector(':scope > .phead');if(!h){h
 
 /* ---- modes ---- */
 function goPage(p,opts){opts=opts||{};if(!PAGES[p])p='start';
- if(p!=='start'&&p!=='guide'&&p!=='factory'&&p!=='store'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
+ if(p!=='start'&&p!=='guide'&&p!=='factory'&&p!=='store'&&p!=='project'&&!loaded()){p='start';note('Load a song first. Every unit opens up after that.')}
  const prev=cur;
  routing=true;try{
   const P=PAGES[p];$('pgStart').hidden=p!=='start';$('app').classList.toggle('off',p==='start'||!!P.os);
