@@ -20,7 +20,7 @@ const PAGES={
  dj:{t:'S',sub:'dj',title:'DJ',d:'Hot cues, loops, rolls, echo, gate, filter and kills.'},
  arrange:{t:'C',title:'ARRANGE',d:'A new arrangement of the song, built for you.'},
  song:{t:'S',sub:'song',title:'SONG',d:'Sequence order, audio and MIDI export, takes and saved setups.'},
- kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
+ build:{os:1,title:'SONG BUILDER',d:'Loop a part, play the next part, NEXT PART.'},kit:{os:1,title:'KIT FORGE',d:'Build your own kits from the cuts.'},tower:{os:1,title:'KEY TOWER',d:'Three stacked keyboards.'},launch:{os:1,title:'LAUNCH',d:'Every pattern on one console.'},guide:{os:1,title:'GUIDE',d:'Lessons, the button book and the demo.'}};
 const T2P={A:'chop',P:'live',C:'arrange',D:'keys',E:'parts',G:'groups'};
 let cur='start',routing=false,lastSong='';
 const engineTab=window.tab;
