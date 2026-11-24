@@ -1,0 +1,239 @@
+/* BC-16 MACHINES — studio floor (level 1), full-screen machines (level 2), mode keys (level 3).
+   Shared materials: anodized metal, LEDs, Archivo + mono. Each machine keeps its own character. */
+
+/* ================= LEVEL 1 · STUDIO FLOOR ================= */
+#osFloor{display:none}
+body[data-pg=floor] #osFloor{display:grid}
+body[data-pg=floor] #subBar,body[data-pg=floor] #screenWrap,body[data-pg=floor] #deck{display:none!important}
+body[data-pg=floor] #stage{grid-template-rows:minmax(0,1fr);grid-template-areas:"main"}
+body.os #osFloor{grid-area:main;position:relative;overflow:hidden;padding:18px 20px 34px;gap:14px 14px;border-radius:16px;
+ grid-template-columns:minmax(0,.82fr) repeat(5,minmax(0,1fr));grid-template-rows:minmax(0,.95fr) minmax(0,1.3fr) minmax(0,1fr);
+ grid-template-areas:"man td1 sb16 sb16 sb16 bb9" "pf1 cs1 pm16 pm16 sq8 lc8" "pm1 kf2 kt3 kt3 kt3 dx2";
+ background:linear-gradient(180deg,#0b0c12 0,#0b0c12 33%,#15161c 33%,#0d0e13 36%,#08090c 100%);box-shadow:inset 0 0 0 1px #000,inset 0 0 120px rgba(0,0,0,.7)}
+/* the back wall: acoustic panels; the desk: a long lit edge */
+.flWall{position:absolute;left:0;right:0;top:0;height:33%;pointer-events:none;
+ background:radial-gradient(600px 220px at 55% 0,color-mix(in srgb,#ffd23e 9%,transparent),transparent 70%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 64px),
+  repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 8px)}
+.flDesk{position:absolute;left:0;right:0;top:33%;height:5px;pointer-events:none;background:linear-gradient(90deg,transparent,#29e3ff 15%,#ff3df2 50%,#ffd23e 85%,transparent);opacity:.55;filter:blur(.4px);box-shadow:0 0 24px rgba(122,92,255,.5)}
+.flHint{position:absolute;left:20px;right:20px;bottom:9px;font:600 11px var(--mono);letter-spacing:.06em;color:var(--silk2);text-align:center;pointer-events:none}
+
+.gear{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;padding:9px 11px 9px;border-radius:12px;border:1px solid #000;cursor:pointer;outline:none;
+ background:radial-gradient(circle 3px at 8px 8px,#4a4f5c 0 1.6px,transparent 2.4px),radial-gradient(circle 3px at calc(100% - 8px) 8px,#4a4f5c 0 1.6px,transparent 2.4px),
+  linear-gradient(180deg,color-mix(in srgb,var(--c) 8%,#1d2029),#12141a);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 0 rgba(0,0,0,.6),0 14px 26px rgba(0,0,0,.55);
+ transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,filter .3s}
+.gear::before{content:'';position:absolute;inset:-18px;z-index:-1;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 22%,transparent),transparent);opacity:0;transition:opacity .5s}
+body.flOn .gear:not(.lock)::before{opacity:.7}
+.gear:hover,.gear:focus-visible{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 0 1px var(--c),0 0 28px color-mix(in srgb,var(--c) 40%,transparent),0 20px 34px rgba(0,0,0,.6)}
+.gear:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.gear.lock{filter:saturate(.25) brightness(.62)}
+.gear.lock .gled{background:#2a2d35;box-shadow:none}
+.gear.nudge{animation:nudge .5s ease 2}
+@keyframes nudge{30%{transform:translateY(-6px)}60%{transform:translateY(1px)}}
+.gear.back{animation:backglow 1.1s ease-out}
+@keyframes backglow{0%{box-shadow:0 0 0 3px var(--c),0 0 60px var(--c)}}
+.gtop{display:flex;align-items:center;gap:8px;flex:none}
+.gm{font:800 11px var(--mono);letter-spacing:.12em;color:var(--c);text-shadow:0 0 10px color-mix(in srgb,var(--c) 60%,transparent)}
+.gz{font:600 8.5px var(--mono);letter-spacing:.18em;color:var(--silk2);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gled{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
+.gname{font:900 13px 'Archivo';font-stretch:118%;letter-spacing:.08em;color:#eef1f6;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.big .gname{font-size:16px}
+.gstat{font:500 10.5px var(--mono);color:#98a1b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.3em;flex:none}
+.gface{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:7px;position:relative}
+
+/* desk perspective: the machines on the desk lean back slightly */
+.gear:is(.g-pf1,.g-cs1,.g-pm16,.g-sq8,.g-lc8,.g-pm1,.g-kf2,.g-kt3,.g-dx2){transform-origin:50% 100%}
+
+/* ---- faces ---- */
+.fReel{display:flex;align-items:center;gap:6px;width:100%;justify-content:center;position:relative}
+.fReel .rl{width:min(58px,38%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0b0c10 0 16%,transparent 17%),repeating-conic-gradient(#262932 0 14deg,#3b3f4b 14deg 60deg),#262932;box-shadow:0 0 0 3px #0a0b0f,0 0 0 4px #3b3f4b}
+body.flPlay .fReel .rl{animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+.fReel .tape{flex:0 0 18%;height:4px;background:#4a3b22;border-radius:2px}
+.fReel .ctr{position:absolute;bottom:-4px;font:700 9px var(--mono);color:#ffd9a0;background:#000;padding:1px 4px;border-radius:3px;font-style:normal}
+.fLoad{display:none}
+.g-td1 .gface{flex-direction:column}
+body:not(.flOn) .g-td1 .fLoad{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.fb.rs{flex-basis:100%;background:linear-gradient(180deg,#5effa0,#1f9c5a);color:#00140a}
+body:not(.flOn) .g-td1 .fReel{display:none}
+.fb{font:800 10px var(--mono);letter-spacing:.08em;padding:8px 10px;border-radius:7px;border:1px solid #000;background:linear-gradient(180deg,#2e313b,#1c1e25);color:#fff;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000}
+.fb:first-child{background:linear-gradient(180deg,var(--c),color-mix(in srgb,var(--c) 55%,#000));color:#001018}
+body:not(.flOn) .g-td1{filter:none;box-shadow:0 0 0 1px var(--c),0 0 36px color-mix(in srgb,var(--c) 45%,transparent),0 14px 26px rgba(0,0,0,.55)}
+body:not(.flOn) .g-td1 .gled{animation:breathe 1.2s ease-in-out infinite}
+
+.fScreen{position:relative;width:100%;height:100%;min-height:40px;border-radius:7px;background:linear-gradient(180deg,#05070d,#0a0e18);box-shadow:inset 0 0 0 1px #000,inset 0 0 30px rgba(41,227,255,.08);display:flex;align-items:center;padding:8px;overflow:hidden}
+.fParts{display:flex;gap:3px;width:100%;height:60%;align-items:stretch}
+.fParts i{min-width:0;border-radius:3px;background:#3a3f4c;display:flex;align-items:flex-end;padding:2px 4px;overflow:hidden}
+.fParts i b{font:700 8.5px var(--mono);color:rgba(0,0,0,.75);white-space:nowrap}
+.fParts .s-intro{background:#7c8594}.fParts .s-verse{background:#4c8dff}.fParts .s-hook{background:#ff3df2}.fParts .s-bridge{background:#ffd23e}.fParts .s-outro{background:#9b6bff}.fParts .s-x{background:#29e3ff}
+.fParts em{font:500 11px var(--mono);color:#59627a;font-style:normal;margin:auto}
+.fScreen .ph{position:absolute;top:6px;bottom:6px;width:2px;background:#fff;box-shadow:0 0 10px #fff;left:0;transition:left .25s linear}
+.fMatrix{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;width:86%}
+.fMatrix i{aspect-ratio:1;border-radius:50%;background:#2a1a2e}
+body.flOn .fMatrix i:nth-child(3n+1){background:var(--c);box-shadow:0 0 6px var(--c)}
+body.flOn .fMatrix i:nth-child(7n+2){background:var(--c2)}
+.fCarts{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:92%}
+.fCarts i{height:22px;border-radius:3px;background:linear-gradient(180deg,#2f333d,#1a1c22);box-shadow:inset 0 -6px 0 color-mix(in srgb,var(--c) 45%,#111)}
+.fCrt{width:100%;height:100%;min-height:40px;border-radius:9px;background:#010703;box-shadow:inset 0 0 0 2px #000,inset 0 0 24px rgba(93,255,158,.18);position:relative;overflow:hidden;display:flex}
+.fCrt canvas{width:100%;height:100%}
+.fCrt::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 1px,transparent 1px 3px);pointer-events:none}
+.fPads{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;height:100%;aspect-ratio:1;max-width:62%}
+.fPads i{border-radius:4px;background:#3a3d45;box-shadow:inset 0 -2px 0 rgba(0,0,0,.4)}
+body.flOn .fPads i.on{background:color-mix(in srgb,var(--c) 60%,#3a3d45);box-shadow:0 0 8px color-mix(in srgb,var(--c) 60%,transparent),inset 0 -2px 0 rgba(0,0,0,.4)}
+.fQ{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.fQ i{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#55596a,#1b1d24 70%);box-shadow:0 0 0 2px #000}
+.fSteps{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;width:100%}
+.fSteps i{height:12px;border-radius:2px;background:#2e333e;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.fSteps i.on{background:var(--c);box-shadow:0 0 6px var(--c)}
+.fSteps.lo u{height:14px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#4a4e5c,#191b21 70%);aspect-ratio:1}
+.g-sq8 .gface{flex-direction:column;justify-content:center}
+.fClips{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:88%}
+.fClips i{aspect-ratio:1.5;border-radius:3px;background:#24272f}
+.fClips i.on{background:color-mix(in srgb,var(--c) 70%,#24272f);box-shadow:0 0 8px color-mix(in srgb,var(--c) 50%,transparent)}
+.fTapes{display:flex;gap:3px;align-items:flex-end;height:70%}
+.fTapes i{width:12px;height:100%;border-radius:2px;background:linear-gradient(90deg,#2b2f39,#1c1f26);box-shadow:inset 0 10px 0 color-mix(in srgb,var(--c) 35%,#222)}
+.fTapes i:nth-child(odd){height:85%}
+.fSaved{position:absolute;right:2px;bottom:0;font:700 9px var(--mono);font-style:normal;color:#5effa0}
+.fSaved.dirty{color:#ffb347}
+.fPatch{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:6px 8px;width:90%}
+.fPatch i{aspect-ratio:1;border-radius:50%;background:#090a0d;box-shadow:0 0 0 2px #3a3e49}
+.fPatch svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-width:2.2;stroke:var(--c);opacity:.8;filter:drop-shadow(0 0 3px var(--c))}
+.fPatch svg path+path{stroke:var(--c2)}
+.fKeys{display:flex;flex-direction:column;gap:4px;width:100%;height:100%;justify-content:center}
+.fKeys i{height:28%;max-height:22px;border-radius:3px;background:#e9e7e0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 20' preserveAspectRatio='none'%3E%3Cg fill='%238c8a84'%3E%3Crect x='9.4' width='.6' height='20'/%3E%3Crect x='19.4' width='.6' height='20'/%3E%3Crect x='29.4' width='.6' height='20'/%3E%3Crect x='39.4' width='.6' height='20'/%3E%3Crect x='49.4' width='.6' height='20'/%3E%3Crect x='59.4' width='.6' height='20'/%3E%3Crect x='69.4' width='.6' height='20'/%3E%3C/g%3E%3Cg fill='%23101014'%3E%3Crect x='6.5' width='6' height='12'/%3E%3Crect x='16.5' width='6' height='12'/%3E%3Crect x='36.5' width='6' height='12'/%3E%3Crect x='46.5' width='6' height='12'/%3E%3Crect x='56.5' width='6' height='12'/%3E%3C/g%3E%3C/svg%3E") 0 0/70px 100% repeat-x;box-shadow:0 0 0 2px #2a1f17,0 3px 0 #000}
+.fKeys i:nth-child(1){width:84%;margin-left:8%}.fKeys i:nth-child(2){width:92%;margin-left:4%}
+.fDj{display:flex;align-items:center;gap:8px;width:100%;justify-content:center}
+.fDj .pl{width:min(54px,34%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#c9ccd4 0 8%,#111 9% 30%,#1b1c21 31% 60%,#0c0d10 61%);box-shadow:0 0 0 2px #2a2d35}
+body.flPlay .fDj .pl{animation:spin 1.8s linear infinite}
+.fDj .xf{width:26%;height:8px;border-radius:4px;background:#0a0b0e;position:relative}
+.fDj .xf u{position:absolute;left:40%;top:-5px;width:10px;height:18px;border-radius:2px;background:#d8dbe2}
+.fBook{display:flex;gap:3px;height:70%;align-items:flex-end}
+.fBook i{width:16px;height:100%;border-radius:2px 4px 4px 2px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 70%,#000),color-mix(in srgb,var(--c) 30%,#000))}
+.fBook i:nth-child(2){height:88%;background:linear-gradient(90deg,#3a3f4c,#22252d)}.fBook i:nth-child(3){height:76%;transform:rotate(9deg);transform-origin:bottom left}
+
+/* floor on short screens / tablets */
+@media (max-height:820px) and (min-width:901px){body.os #osFloor{padding:12px 14px 28px;gap:10px}.gname{font-size:11.5px}.big .gname{font-size:13px}.gstat{font-size:9.5px}}
+@media (max-width:1180px) and (min-width:901px){body.os #osFloor{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));
+ grid-template-areas:"td1 sb16 sb16 bb9" "cs1 pm16 pm16 sq8" "kf2 kt3 kt3 lc8" "pf1 pm1 man dx2"}
+ .flWall,.flDesk{top:25%}.flWall{top:0;height:25%}}
+@media (max-width:900px){body.os #osFloor{min-height:calc(100vh - 140px);grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(120px,auto);
+ grid-template-areas:"td1 td1" "sb16 sb16" "cs1 pm16" "kf2 sq8" "kt3 kt3" "lc8 dx2" "bb9 pf1" "pm1 man";padding:12px 12px 34px;overflow:visible}
+ .flDesk{display:none}.flWall{height:200px}}
+
+/* ================= HOME on the rail ================= */
+#rail #osHome{order:0}
+#rail #osHome.on{color:#fff}
+
+/* ================= LEVEL 3 · mode keys on every machine ================= */
+#subTabs{display:none!important}
+#machKeys{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0;flex:0 1 auto}
+#machKeys:empty{display:none}
+.mk{display:flex;align-items:center;gap:7px;flex:none;padding:8px 12px 7px;border-radius:7px;border:1px solid #000;cursor:pointer;
+ background:linear-gradient(180deg,#2a2d36,#191b21);color:var(--silk);font:800 10.5px var(--mono);letter-spacing:.1em;white-space:nowrap;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 0 rgba(0,0,0,.5),0 2px 0 #000}
+.mk i{width:6px;height:6px;border-radius:50%;background:#2c2f37;box-shadow:inset 0 1px 1px rgba(0,0,0,.6)}
+.mk:hover{color:#fff}
+.mk:active{transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 #000}
+.mk.on{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 26%,#2a2d36),#191b21);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 60%,transparent),0 0 14px color-mix(in srgb,var(--acc) 25%,transparent),0 2px 0 #000}
+.mk.on i{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.mk:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.mksep{width:1px;height:24px;background:#2b2e37;flex:none;margin:0 3px}
+#unitTag{flex:1 1 auto}
+body.full #unitDesc{display:none}
+
+/* ================= LEVEL 2 · full-screen machines: one chassis ================= */
+body.full #stage{padding:12px 14px 14px;border-radius:18px;border:1px solid #000;gap:12px;
+ background:radial-gradient(circle 4px at 13px 13px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),radial-gradient(circle 4px at calc(100% - 13px) 13px,#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  radial-gradient(circle 4px at 13px calc(100% - 13px),#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),radial-gradient(circle 4px at calc(100% - 13px) calc(100% - 13px),#5a5f6e 0 2px,#22242b 2.6px,transparent 3.4px),
+  var(--chassis);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -3px 0 rgba(0,0,0,.6),0 24px 50px rgba(0,0,0,.6)}
+body.full #subBar{padding:2px 14px 10px;border-bottom:1px solid rgba(0,0,0,.6);box-shadow:0 1px 0 rgba(255,255,255,.04)}
+body.full #unitTag b#unitName{font-size:24px}
+body.full #unitTag #unitModel{font:900 12px var(--mono);padding:4px 9px;border-radius:5px;background:#000;color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,#000);letter-spacing:.14em}
+body.full #subBack{display:none}
+/* the units inside become panels of the one machine */
+body.full #stage>.unit{background:var(--panel);border-radius:12px;box-shadow:inset 0 2px 10px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.05)}
+body.full #screenWrap>.plate{display:none}
+body.full #deck>.plate{margin-bottom:6px}
+body.full #deck>.plate .zm,body.full #deck>.plate .vent{display:none}
+body.full #deck>.plate .pn{font-size:11px;color:var(--silk)}
+
+/* ---- PM-16 DRUM MACHINE: graphite body, big rubber pads, LCD on the left ---- */
+body[data-mach=pm16]{--chassis:linear-gradient(180deg,#2c2e34,#1d1f24 60%,#17181c)}
+body[data-mach=pm16] #stage{--panel:linear-gradient(180deg,#202227,#18191d)}
+body.os.deck[data-mach=pm16] #stage{grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr)}
+body[data-mach=pm16] #deck>.plate{display:none}
+body[data-mach=pm16] #screen{background:#0d1a14}
+body[data-mach=pm16] #padsSlot .pp{border-radius:12px;background:radial-gradient(120% 90% at 50% 115%,color-mix(in srgb,var(--pc,#888) 30%,transparent),transparent 62%),linear-gradient(180deg,#4a4c52,#37393f 55%,#303237);
+ box-shadow:inset 0 2px 0 rgba(255,255,255,.12),inset 0 -5px 8px rgba(0,0,0,.35),0 3px 0 #000,0 6px 14px rgba(0,0,0,.4)}
+body[data-mach=pm16] #padsSlot .pp.emp{background:linear-gradient(180deg,#45474d,#35373c)}
+body[data-mach=pm16] #padsSlot .pp canvas{opacity:.16}
+body[data-mach=pm16] #padsSlot #psGrid{gap:12px}
+
+/* ---- CS-1 SAMPLER: phosphor-green CRT, chop keys on the side ---- */
+body[data-mach=cs1]{--chassis:linear-gradient(180deg,#1f2622,#141a17 60%,#0f1311)}
+body[data-mach=cs1] #stage{--panel:linear-gradient(180deg,#121815,#0c100e)}
+body.os.deck[data-mach=cs1] #stage{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,330px)}
+body[data-mach=cs1] #deck #knobGrp,body[data-mach=cs1] #deck #fnGrp,body[data-mach=cs1] #deck #dataGrp{display:none!important}
+body[data-mach=cs1] #c1,body[data-mach=cs1] #c2,body[data-mach=cs1] #c4{filter:hue-rotate(95deg) saturate(1.3) brightness(1.1);border-radius:8px;box-shadow:0 0 0 2px #000,0 0 22px rgba(93,255,158,.16)}
+body[data-mach=cs1] #screenWrap .bezel{position:relative}
+body[data-mach=cs1] #screen{background:#06100b}
+
+/* ---- SB-16 SONG BUILDER: big-screen arranger, part pads on the side ---- */
+body[data-mach=sb16]{--chassis:linear-gradient(180deg,#262119,#19150f 60%,#120f0a)}
+body[data-mach=sb16] #stage{--panel:linear-gradient(180deg,#0a0d16,#070910)}
+body.os.deck[data-mach=sb16] #stage{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,330px)}
+body[data-mach=sb16] #deck #knobGrp,body[data-mach=sb16] #deck #fnGrp,body[data-mach=sb16] #deck #dataGrp{display:none!important}
+body[data-mach=sb16] #osBuild>.plate{display:none}
+body[data-mach=sb16] #osBuild{--face1:#0a0d16;--face2:#070910}
+
+/* compact pad columns keep their pads square-ish */
+body[data-mach=cs1] #deck #padsSlot,body[data-mach=sb16] #deck #padsSlot{flex:1 1 auto;min-height:0}
+
+/* tablets: same machines, touch-first proportions */
+@media (max-width:1180px) and (min-width:901px){
+ body.os.deck[data-mach=pm16] #stage{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr)}
+ body.os.deck[data-mach=cs1] #stage,body.os.deck[data-mach=sb16] #stage{grid-template-columns:minmax(0,1fr) 250px}
+ body.full #unitTag b#unitName{font-size:19px}
+ .mk{padding:8px 10px 7px;font-size:10px}}
+@media (max-width:900px){body.full #stage{padding:8px;border-radius:12px}
+ body.os.deck[data-mach] #stage{grid-template-columns:minmax(0,1fr)!important}
+ #subBar{flex-wrap:wrap}#machKeys{order:5;width:100%}}
+@media (prefers-reduced-motion:reduce){.gear,.gear::before{transition:none}body.flPlay .fReel .rl,body.flPlay .fDj .pl{animation:none}}
+
+/* faceplate header fits: name, model, mode keys, NEXT */
+body.full #unitTag{flex:0 1 auto}
+body.full #unitTag #unitModel{white-space:nowrap}
+body.full #subNext small{display:none}
+body.full #subNext{margin-left:auto;flex:none}
+@media (max-width:1500px) and (min-width:901px){body.full #unitTag b#unitName{font-size:20px}}
+/* compact pad columns (CS-1 chop keys, SB-16 part pads): banks in two rows, square pads */
+body[data-mach=cs1] #deck #psBanks,body[data-mach=sb16] #deck #psBanks{grid-template-columns:repeat(4,minmax(0,1fr))}
+body[data-mach=cs1] #deck .bkb,body[data-mach=sb16] #deck .bkb{padding:6px 0}
+body[data-mach=cs1] #deck #padsSlot,body[data-mach=sb16] #deck #padsSlot{flex:0 1 auto!important;aspect-ratio:1/1;width:100%;max-height:none;align-self:center}
+body[data-mach=cs1] #deck,body[data-mach=sb16] #deck{justify-content:flex-start}
+
+#deckSide{display:contents}
+body.os #deck #knobGrp{order:-1}
+/* PM-16: the pads are the machine. Banks over big square pads; Q-links, pad functions and data down the right side */
+body[data-mach=pm16] #deck{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(200px,236px);grid-template-rows:auto minmax(0,1fr);
+ grid-template-areas:"bank side" "pads side";gap:12px 16px;overflow:hidden}
+body[data-mach=pm16] #deck #bankGrp{grid-area:bank}
+body[data-mach=pm16] #deck #padsSlot{grid-area:pads;height:100%;max-height:none;width:auto;max-width:100%;aspect-ratio:1/1;justify-self:center;min-height:0!important}
+body[data-mach=pm16] #deckSide{grid-area:side;padding-top:6px;display:flex;flex-direction:column;gap:10px;min-height:0;overflow-y:auto;scrollbar-width:none}
+body[data-mach=pm16] #deck #knobGrp{padding-top:0!important}
+body[data-mach=pm16] #deck #knobs{display:grid!important;grid-template-columns:1fr 1fr;gap:6px 4px}
+body[data-mach=pm16] #deck .autoBar{flex-wrap:wrap;gap:4px}
+body[data-mach=pm16] #deck #padFn,body[data-mach=pm16] #deck #padFn2{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}
+body[data-mach=pm16] #deck #fnGrp .hwb{min-width:0;width:100%}
+body[data-mach=pm16] #deck #fnGrp select{width:100%}
+body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
+
+/* CS-1 loop check readout */
+#loopChk{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:8px 0 2px;padding:7px 10px;border-radius:8px;background:#030a06;box-shadow:inset 0 0 0 1px #0f2a1a;font:500 11px var(--mono);color:#8fdcae}
+#loopChk b{color:#d7ffe6;font-weight:700}
+#loopChk .lt{font:800 10px var(--mono);letter-spacing:.1em;padding:5px 9px;border-radius:5px;border:1px solid #000;cursor:pointer;background:linear-gradient(180deg,#1f6b3e,#123d24);color:#eafff1;box-shadow:0 0 10px rgba(93,255,158,.25)}
+#loopChk .lt.off{background:linear-gradient(180deg,#2a2d36,#191b21);color:var(--silk);box-shadow:none}
+/* SYSTEM · UPDATE key on the meter bridge */
+#osUpd.on .led{background:#5effa0;box-shadow:0 0 8px #5effa0;animation:breathe 1.2s ease-in-out infinite}

@@ -162,3 +162,11 @@ js/demo-audio.js  the demo beat
 tools/            build-single.py bundles everything into dist/DJ_Beat_Creator.html
 dist/             the single-file app
 ```
+
+## BC-16 v2: the studio
+
+- **Studio Floor** (home): every machine in its place with live status. Tap one to walk up to it; HOME on the rail, the Home key or Esc brings you back.
+- **Full-screen machines**: PM-16 Drum Machine, CS-1 Sampler and SB-16 Song Builder each fill the stage with their own chassis, layout and mode keys.
+- **Loop-tight slicing** (`js/slicesmart.js`): tempo locked to the hits, dead air cut from the front and end, bar 1 on the first downbeat, cuts on the hit, LOOP CHECK readout.
+- **Self-update** (`js/updater.js`, `sw.js`): the app checks `version.json` on GitHub and offers the newest build; the live site always loads network-first.
+- Full spec: [BLUEPRINT.md](BLUEPRINT.md).

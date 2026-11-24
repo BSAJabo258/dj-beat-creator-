@@ -59,6 +59,7 @@ const UNITS={
  factory:{g:'lib',n:'PACK FACTORY',m:'PF-1',c:'#00e5a0',c2:'#29e3ff',d:'AI-generated sample packs in any genre, saved to your own library.'},
  store:{g:'lib',n:'PACK STORE',m:'PS-3',c:'#00e5a0',c2:'#ffd23e',d:'Free starter packs, premium drops and memberships.'},
  project:{g:'proj',n:'PROJECT MANAGER',m:'PM-1',c:'#7dd3fc',c2:'#ffd23e',d:'Reopen projects, versions, project files with audio, duplicate.'},
+ floor:{g:'floor',n:'STUDIO FLOOR',m:'BC-16',c:'#29e3ff',c2:'#ff3df2',d:'Every machine in its place. Tap one to walk up to it.'},
  guide:{g:'guide',n:'STUDIO MANUAL',m:'OS',c:'#5effc8',c2:'#29e3ff',d:'Lessons, the button book and a demo that plays itself.'}};
 const WITH_DECK=new Set(['chop','pads','sequence','launch','dj','sounds','build']);
 
@@ -128,11 +129,11 @@ function applyZoom(u){const z=LSg(zoomKey(u),1),b=u.querySelector(':scope > :not
 
 /* ================= pages ================= */
 let curP='start',hist=[];
-function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x=>x.pages.includes(p))||GROUPS[0];
+function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x=>x.pages.includes(p))||{id:'floor',pages:['floor']};
  if(prev&&prev!==p)leave(prev,p);if(p!=='kit')pickFrom=null;if(prev&&prev!==p&&!backing){hist.push(prev);if(hist.length>30)hist.shift()}backing=false;
  LSs('bc16:last:'+g.id,p);
  const B=document.body;B.dataset.pg=p;B.dataset.grp=g.id;B.style.setProperty('--acc',U.c);B.style.setProperty('--acc2',U.c2);B.classList.toggle('deck',WITH_DECK.has(p));
- $$('#rail .rb[data-grp]').forEach(b=>b.classList.toggle('on',b.dataset.grp===g.id));
+ $$('#rail .rb[data-grp]').forEach(b=>b.classList.toggle('on',b.dataset.grp===g.id));{const h=$('osHome');if(h)h.classList.toggle('on',p==='floor')}
  $('unitName').textContent=U.n;$('unitModel').textContent=U.m;$('unitDesc').textContent=U.d;
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
@@ -769,9 +770,10 @@ async function resumeOffer(){if(ready())return;const k=LSg('bc16:lastSong','');i
 function sessionStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;if(document.body.classList.contains('coach')){API().setProg('chop');return}let bpm='',key='';try{bpm=Math.round(+$('bpm').value);key=DBC.keyText()}catch(e){}
  const d=el('div',{id:'askD',role:'dialog','aria-modal':'true'});d.innerHTML='<div class="askc wide"><div class="plate"><i class="pled"></i><b class="pn">SESSION START</b><span class="pm">'+esc(fnameSafe())+'</span><span class="vent"></span></div>'+
  '<p class="ssum">Ready: '+(bpm?bpm+' BPM · ':'')+(key?key+' · ':'')+slicesN()+' cuts. Smart kits are built in the KIT program. Your patterns are empty and nothing plays until you press a pad or PLAY.</p><h3 class="ssq">What do you want to do with this song?</h3><div class="sopts">'+
- [['chop','CHOP & FLIP IT','The pads play the song’s cuts in order. Pick a chop, then play and record your flip.'],['beat','MAKE A BEAT FROM ITS SOUNDS','The pads play the smart kit (kick, snare, hats…). Arm REC and play.'],['song','START A FULL SONG','Lay out intro, verse, hook… and let Beat Brain write each part from your sounds. Then edit any part.'],['look','JUST LOOK AROUND','Close this and explore. GUIDE and COACH are on the rail.']].map(([k,t,x])=>'<button class="sopt" data-s="'+k+'"><b>'+t+'</b><span>'+x+'</span></button>').join('')+'</div></div>';
+ [['chop','CHOP & FLIP IT','The pads play the song’s cuts in order. Pick a chop, then play and record your flip.'],['beat','MAKE A BEAT FROM ITS SOUNDS','The pads play the smart kit (kick, snare, hats…). Arm REC and play.'],['song','START A FULL SONG','Lay out intro, verse, hook… and let Beat Brain write each part from your sounds. Then edit any part.'],['look','WALK THE STUDIO FLOOR','See every machine in its place and pick one. GUIDE and COACH are on the rail.']].map(([k,t,x])=>'<button class="sopt" data-s="'+k+'"><b>'+t+'</b><span>'+x+'</span></button>').join('')+'</div></div>';
  document.body.append(d);const done=k=>{d.remove();if(k==='chop'){API().setProg('chop');go('slicer');say('Pick a chop recipe (Slice Brain recommends one), then play the pads. REC + PLAY records your flip.')}
   else if(k==='beat'){API().setProg('kit');API().setBank(0);go('pads');say('Pads play the smart kit. Arm REC, press PLAY, and play. Fill your own kits any time in KIT FORGE.')}
+  else if(k==='look'){go('floor')}
   else if(k==='song'){go('build');setTimeout(()=>{$('sbTpl').scrollIntoView({block:'center'});$('sbTplRow').classList.add('hl');say('Pick a structure and press LAY IT OUT. Beat Brain writes each part from your sounds; then edit any part.')},300)}}
  d.onclick=e=>{const b=e.target.closest('[data-s]');if(b)done(b.dataset.s)};addEventListener('keydown',function k(e){if(e.key==='Escape'&&document.body.contains(d)){d.remove();removeEventListener('keydown',k,true)}},true)}
 
@@ -851,6 +853,9 @@ const H={
  osPatDup:['COPY ▶','Copies the current pattern into the next empty one and jumps there, so you can build a variation without losing the original.','Transport'],
  osPatClr:['CLEAR','Removes every hit from the current pattern (asks first). UNDO brings it back.','Transport'],
  osUndo:['UNDO','Takes back the last change: a recording, a cleared pattern, a pad you loaded. Up to 50 steps.','Transport'],
+ ltOn:['LOOP-TIGHT','On: the tempo is locked to the hits, silence is cut off the front and the end, bar 1 starts on the first downbeat with sound, and every cut starts right on its hit. The readout shows how tight it is. Off: cuts exactly as detected.','Sampler'],
+ osUpd:['UPDATE','A newer BC-16 is on GitHub. On the live site it reloads into the new version. From a downloaded file it opens the live app or downloads the newest file. Save projects as .bc16 files to carry them across.','System'],
+ osHome:['STUDIO','The studio floor: every machine in its place with its live status. Tap a machine to walk up to it. Keyboard: Home, or Esc from any machine.','Navigation'],
  osBack:['◀ BACK','Returns to the unit you were on before, like a back button. Keyboard: `','Transport'],
  /* pad matrix */
  scrProg:['CHOP / KIT program','CHOP: the pads play the song’s cuts in order (A01 = cut 1). KIT: the pads play the kits you built in KIT FORGE or got from Beat Brain.','Pad matrix'],
@@ -1224,7 +1229,7 @@ function demoStop(){courseEnd()}
 
 /* ================= first run ================= */
 function welcome(){if(LSg('bc16:welcomed',0))return;const w=el('div',{id:'welcome',role:'dialog','aria-label':'Welcome'});
- w.innerHTML='<div class="wcard"><div class="plate"><i class="pled"></i><b class="pn">BC-16 STUDIO</b><span class="pm">FIRST POWER-ON</span><span class="vent"></span></div><div class="wbody"><h2>Welcome to the studio</h2><p>Every page is its own piece of gear. You move through them on the rail, left to right in this map:</p><div class="gmap">'+FLOW.map(([p,v],i)=>'<span class="gnode" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></span>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('')+'</div><p>Record, play, stop, patterns, undo and back are always on the bottom bar. Pick how you want to start:</p><div class="gbtns"><button class="hwb big" data-w="tour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" data-w="demo"><i class="led"></i>▶ FULL NARRATED COURSE</button><button class="hwb big" data-w="coach"><i class="led"></i>COACH ME AS I GO</button><button class="hwb big" data-w="skip"><i class="led"></i>JUST LET ME IN</button></div><small>Hold any button for ½ second to learn what it does. Everything here is on GUIDE and COACH on the rail, any time.</small></div></div>';
+ w.innerHTML='<div class="wcard"><div class="plate"><i class="pled"></i><b class="pn">BC-16 STUDIO</b><span class="pm">FIRST POWER-ON</span><span class="vent"></span></div><div class="wbody"><h2>Welcome to the studio</h2><p>Every machine is its own piece of gear. Tap one on the studio floor, or jump between them on the rail. A song moves through them left to right:</p><div class="gmap">'+FLOW.map(([p,v],i)=>'<span class="gnode" style="--c:'+UNITS[p].c+'"><b>'+UNITS[p].n+'</b><span>'+v+'</span></span>'+(i<FLOW.length-1?'<i class="garr">→</i>':'')).join('')+'</div><p>Record, play, stop, patterns, undo and back are always on the bottom bar. Pick how you want to start:</p><div class="gbtns"><button class="hwb big" data-w="tour"><i class="led"></i>TAKE THE TOUR</button><button class="hwb big" data-w="demo"><i class="led"></i>▶ FULL NARRATED COURSE</button><button class="hwb big" data-w="coach"><i class="led"></i>COACH ME AS I GO</button><button class="hwb big" data-w="skip"><i class="led"></i>JUST LET ME IN</button></div><small>Hold any button for ½ second to learn what it does. Everything here is on GUIDE and COACH on the rail, any time.</small></div></div>';
  document.body.append(w);w.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;LSs('bc16:welcomed',1);w.remove();if(b.dataset.w==='tour')coachStart('tour');else if(b.dataset.w==='demo')demoStart();else if(b.dataset.w==='coach')coachToggle(true)}}
 
 /* ================= keys ================= */
@@ -1232,7 +1237,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(e.altKey&&/^Digit\d$/.test(e.code)){const i=(+e.code.slice(5)+9)%10;const g=GROUPS[i];if(g){e.preventDefault();$('rail').querySelector('[data-grp="'+g.id+'"]').click()}return}
  if(e.altKey)return;
  if(e.key==='?'){e.preventDefault();explain(!document.body.classList.contains('explain'));return}
- if(e.key==='Escape'){if(document.body.classList.contains('explain')){explain(false);return}if(!$('xbub').hidden){$('xbub').hidden=true;return}const f=$$('#stage .unit.focus')[0];if(f){zoom(f,0);return}const gp=$('gPick');if(gp&&!gp.hidden){$('gPickX').click();return}if(pickFrom){$('kfDone').click();return}const w=$('welcome');if(w){LSs('bc16:welcomed',1);w.remove();return}}
+ if(e.key==='Escape'){if(document.body.classList.contains('explain')){explain(false);return}if(!$('xbub').hidden){$('xbub').hidden=true;return}const f=$$('#stage .unit.focus')[0];if(f){zoom(f,0);return}const gp=$('gPick');if(gp&&!gp.hidden){$('gPickX').click();return}if(pickFrom){$('kfDone').click();return}const w=$('welcome');if(w){LSs('bc16:welcomed',1);w.remove();return}if(curP!=='floor'&&!document.querySelector('#askD,#keysD,#welcome')&&$('coach').hidden&&window.BC16){e.preventDefault();BC16.home();return}}
  if(e.key==='`'){e.preventDefault();back();return}
  if(curP==='tower')return;
  if(e.shiftKey&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();e.stopPropagation();patStep(e.key==='ArrowRight'?1:-1);return}
@@ -1244,7 +1249,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
 function init(){build();coachWire2();soundWire();projWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();projWire2();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
+ window.OS={go,say,need,ready,back,units:UNITS,groups:GROUPS,lastOf:m=>{const g=GROUPS.find(x=>x.pages.includes(m.pages[0][0]));return g?LSg('bc16:last:'+g.id,null):null},sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);

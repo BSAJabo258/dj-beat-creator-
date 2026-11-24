@@ -14,6 +14,19 @@ def inline_js(m):
     code = (root / m.group(1)).read_text(encoding='utf-8').replace('</script', '<\\/script')
     return '<script>\n' + code + '\n</script>'
 
+# version: a content hash of the app's own files (deterministic, so CI can check the build is current)
+import hashlib
+h = hashlib.sha1()
+for f in ['index.html', 'sw.js'] + sorted(str(p.relative_to(root)) for p in list((root / 'js').glob('*.js')) + list((root / 'css').glob('*.css'))):
+    h.update(f.encode()); h.update((root / f).read_bytes())
+version = h.hexdigest()[:10]
+notes = ''
+nf = root / 'tools' / 'release-notes.txt'
+if nf.exists():
+    notes = nf.read_text(encoding='utf-8').strip().splitlines()[0][:160] if nf.read_text(encoding='utf-8').strip() else ''
+import json as _json
+(root / 'version.json').write_text(_json.dumps({'v': version, 'notes': notes}) + '\n', encoding='utf-8')
+html = html.replace('</head>', '<script>window.BC16_VERSION="' + version + '"</script>\n</head>', 1)
 html = re.sub(r'<link rel="stylesheet" href="(css/[^"]+)">', inline_css, html)
 html = re.sub(r'<script src="(js/[^"]+)"></script>', inline_js, html)
 # narrated course: embed the recorded voice clips (audio/narration.json → data URIs) so the single file works offline
@@ -26,4 +39,4 @@ if nj.exists():
 out = root / 'dist' / 'DJ_Beat_Creator.html'
 out.parent.mkdir(exist_ok=True)
 out.write_text(html, encoding='utf-8')
-print(f'Wrote {out.relative_to(root)} ({out.stat().st_size / 1e6:.1f} MB)')
+print(f'Version {version}');print(f'Wrote {out.relative_to(root)} ({out.stat().st_size / 1e6:.1f} MB)')
