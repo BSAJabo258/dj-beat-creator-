@@ -182,7 +182,7 @@ function loop(){cancelAnimationFrame(raf);const f=()=>{if(!TR.playing)return;con
  if(seqDirty){seqDirty=false;seqDraw();renderPats()}raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)}
 
 /* ---------- undo / save ---------- */
-const cleanPats=()=>PS.pats.map(p=>{const o={bars:p.bars,ev:p.ev.map(({_skip,...e})=>e)};if(p.mute&&p.mute.length)o.mute=[...p.mute];if(p.bank!=null)o.bank=p.bank;if(p.prog)o.prog=p.prog;if(p.auto&&AUTOK.some(k=>p.auto[k]&&p.auto[k].length))o.auto=JSON.parse(JSON.stringify(p.auto));return o});
+const cleanPats=()=>PS.pats.map(p=>{const o={bars:p.bars,ev:p.ev.map(({_skip,...e})=>e)};if(p.mute&&p.mute.length)o.mute=[...p.mute];if(p.bank!=null)o.bank=p.bank;if(p.name)o.name=p.name;if(p.prog)o.prog=p.prog;if(p.auto&&AUTOK.some(k=>p.auto[k]&&p.auto[k].length))o.auto=JSON.parse(JSON.stringify(p.auto));return o});
 function pushUndo(){PS.undo.push(JSON.stringify({b:PS.banks,p:cleanPats(),s:PS.song}));if(PS.undo.length>50)PS.undo.shift()}
 function undo(){const u=PS.undo.pop();if(!u){msg('Nothing to undo.');return}const d=JSON.parse(u);PS.banks=d.b;PS.pats=d.p;PS.song=d.s||[];renderAll();dirty();msg('Undone.')}
 function ser(){const S=PS.srcs[PS.main]||{};return{v:1,app:'BeatChopperPadStudio',main:PS.main,mainLen:S.len,srcs:Object.keys(PS.srcs),
@@ -194,7 +194,7 @@ function applyProj(d,opt){if(!d||!Array.isArray(d.banks))throw new Error('That i
  const cur=PS.srcs[PS.main]||{};let remap=false;if(d.main&&d.main!==PS.main&&!(PS.srcs[d.main]&&PS.srcs[d.main].chs)&&d.mainLen&&d.mainLen===cur.len)remap=true;
  if(!opt.noChop&&d.chop&&(d.main===PS.main||remap)){$('mode').value=d.chop.mode;$('bpm').value=d.chop.bpm;$('sens').value=d.chop.sens;$('sv').textContent=d.chop.sens;$('minl').value=d.chop.minl;$('maxl').value=d.chop.maxl;manual=deep(d.chop.manual||{add:[],del:[]});rebuild();regMain()}
  PS.banks=Array.from({length:8},(_,i)=>{const B=(d.banks[i]||[]).slice(0,16);while(B.length<16)B.push(null);return B.map(p=>p&&p.seg?{...p,src:remap&&p.src===d.main?PS.main:p.src}:null)});
- PS.pats=Array.from({length:NPAT},(_,i)=>{const p=(d.pats||[])[i]||{bars:2,ev:[]};const o={bars:[1,2,4,8].includes(+p.bars)?+p.bars:2,ev:(p.ev||[]).filter(e=>e&&isFinite(e.t))};if(Array.isArray(p.mute))o.mute=p.mute.filter(x=>typeof x==='string');if(p.bank!=null)o.bank=clamp(+p.bank,0,7);if(p.prog)o.prog=p.prog==='kit'?'kit':'chop';if(p.auto&&typeof p.auto==='object'){o.auto={};for(const k of AUTOK)if(Array.isArray(p.auto[k]))o.auto[k]=p.auto[k].filter(x=>x&&isFinite(x.t)&&isFinite(x.v)).map(x=>({t:+x.t,v:+x.v}))}return o});
+ PS.pats=Array.from({length:NPAT},(_,i)=>{const p=(d.pats||[])[i]||{bars:2,ev:[]};const o={bars:[1,2,4,8].includes(+p.bars)?+p.bars:2,ev:(p.ev||[]).filter(e=>e&&isFinite(e.t))};if(Array.isArray(p.mute))o.mute=p.mute.filter(x=>typeof x==='string');if(p.bank!=null)o.bank=clamp(+p.bank,0,7);if(typeof p.name==='string')o.name=p.name.slice(0,16);if(p.prog)o.prog=p.prog==='kit'?'kit':'chop';if(p.auto&&typeof p.auto==='object'){o.auto={};for(const k of AUTOK)if(Array.isArray(p.auto[k]))o.auto[k]=p.auto[k].filter(x=>x&&isFinite(x.t)&&isFinite(x.v)).map(x=>({t:+x.t,v:+x.v}))}return o});
  PS.song=(d.song||[]).filter(x=>x>=0&&x<NPAT);if(Array.isArray(d.packs))PS.packs=d.packs;PS.songMode=!!d.songMode;if(d.bpm)PS.bpm=+d.bpm;PS.swing=+d.swing||0;if(d.q!==undefined)PS.q=+d.q;if(d.root!==undefined){PS.root=+d.root;PS.keySet=true}if(d.scale)PS.scale=d.scale;if(d.layout)PS.layout=d.layout;
  PS.pat=0;PS.sel=null;PS.kp=null;PS.keys=false;syncCtl();renderAll();dirty();
  const miss=new Set();PS.banks.forEach(B=>B.forEach(p=>{if(p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs))miss.add(p.src)}));
@@ -307,13 +307,13 @@ async function magic(){const btn=$('psMagicGo');btn.disabled=true;try{msg('🪄 
  const steps=[['kit',0,'smart kit'],['chains',1,'chains'],['loops',2,'loops'],['keys',3,'melodic sounds'],['groups',4,'groups'],['cues',5,'hot cues']],made=[];
  for(const[k,b,n]of steps){PS.bank=b;msg('🪄 Bank '+BL[b]+': '+n+'…');await tick0();try{const c=await fill(k,1);if(c)made.push(BL[b]+' '+n)}catch(e){}}
  PS.bpm=+songBpm().toFixed(1);$('psBpm').value=PS.bpm;const sd=VS().seed,sty=$('psSty').value;
- [0,1,2,3].forEach(i=>PS.pats[i].bars=4);
+ if(!AUTO){[0,1,2,3].forEach(i=>PS.pats[i].bars=4);
  smartBeat(0,{bank:0,chainBank:1,seed:sd,style:sty});
  smartBeat(1,{bank:0,chainBank:1,loopBank:2,seed:sd+3,loops:true,style:sty,energy:Math.min(100,+$('psEn').value+15)});
  smartBeat(2,{bank:0,chainBank:1,loopBank:2,keyBank:3,seed:sd+5,loops:true,keys:true,noKick:true,chops:false,style:sty,energy:30});
  smartBeat(3,{bank:0,chainBank:1,keyBank:3,seed:sd+9,keys:true,style:sty,energy:Math.min(100,+$('psEn').value+25)});
- PS.song=[0,0,1,0,2,3,3,1];PS.songMode=false;PS.bank=0;PS.pat=0;syncCtl();renderAll();dirty();
- msg('🪄 Done: '+made.join(', ')+'. Bank F holds hot cues for DJing the track. P1 = beat, P2 = beat + loop, P3 = breakdown, P4 = hook. The song chain is set. Press PLAY to hear it, or REC to record over it.')}
+ PS.song=[0,0,1,0,2,3,3,1]}PS.songMode=false;PS.bank=0;PS.pat=0;syncCtl();renderAll();dirty();
+ msg(AUTO?'Kits are built: '+made.join(', ')+'. Your patterns are empty: they are yours to fill.':'🪄 Done: '+made.join(', ')+'. Bank F holds hot cues for DJing the track. P1 = beat, P2 = beat + loop, P3 = breakdown, P4 = hook. The song chain is set. Press PLAY to hear it, or REC to record over it.')}
  catch(e){msg('Build stopped: '+(e.message||e))}btn.disabled=false}
 
 /* ---------- rendering ---------- */
@@ -857,7 +857,7 @@ const STYN={det:'Detroit / Flint bounce',trap:'trap',drill:'drill',boom:'boom ba
 /* --- automatic setup when a new song loads --- */
 let autoDoneFor=null;
 async function autoSetup(){ensurePS();mainFresh();try{renderAll()}catch(e){}if(!LS.get('bcrps:autoset')&&LS.get('bcrps:autoset')!==null)return;if(!PS.main||autoDoneFor===PS.main||!isEmpty())return;autoDoneFor=PS.main;
- toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
+ toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();try{if(window.OS&&OS.sessionStart){OS.sessionStart();return}}catch(e){}toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
 /* --- UI --- */
 function edgeInit(){
  // transport: note repeat
@@ -992,7 +992,9 @@ window.DBC_OS={
   if(carry==='all')N.ev=P.ev.map(cp);else if(carry==='on')N.ev=P.ev.filter(e=>!(P.mute||[]).includes(evKey(e))).map(cp);
   if(carry==='all'&&P.mute&&P.mute.length)N.mute=[...P.mute];if(carry!=='none'&&P.auto)N.auto=JSON.parse(JSON.stringify(P.auto));
   N.bank=P.bank!=null?P.bank:PS.bank;N.prog=P.prog||PS.prog;PS.pats[t]=N;PS.song.push(t);PS.songMode=false;dirty();renderSong();selPat(t);renderPats();return{from:c,to:t,part:PS.song.length}},
- chans:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];const m=new Map();P.ev.forEach(e=>{const k=evKey(e);if(!m.has(k)){const pd=padOfEv(e);m.set(k,{k,name:pd?pd.name:'missing pad',col:pd?pd.col:'#666',n:0,on:!(P.mute||[]).includes(k)})}m.get(k).n++});return[...m.values()]},
+ chans:p=>{ensurePS();const P=PS.pats[p==null?curPat():p];const m=new Map();P.ev.forEach(e=>{const k=evKey(e);if(!m.has(k)){const pd=padOfEv(e);let role=pd&&pd.role||'';if(!role&&e.pg==='chop'){try{role=KIND2ROLE[slices[e.ci].kind]||''}catch(er){}}m.set(k,{k,name:pd?pd.name:'missing pad',col:pd?pd.col:'#666',n:0,role,on:!(P.mute||[]).includes(k)})}m.get(k).n++});return[...m.values()]},
+ uniquePart:i=>{ensurePS();const c=PS.song[i];if(c==null)return-1;const t=PS.pats.findIndex((p,k)=>!p.ev.length&&!PS.song.includes(k)&&!p.name);if(t<0)return-1;pushUndo();PS.pats[t]=JSON.parse(JSON.stringify(cleanPats()[c]));PS.song[i]=t;renderSong();dirty();return t},
+ chanSet:(p,keys)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.mute=[...new Set(keys)];dirty()},
  chanToggle:(p,k)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.mute=P.mute||[];const i=P.mute.indexOf(k);if(i>=0)P.mute.splice(i,1);else P.mute.push(k);dirty();return i>=0},
  chanAll:(p,on)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.mute=on?[]:[...new Set(P.ev.map(evKey))];dirty()},
  chanHear:k=>{ensurePS();const P=PS.pats[curPat()];const e=P.ev.find(x=>evKey(x)===k);const p=e&&padOfEv(e);if(p)audition(p,e.st||0)},
@@ -1004,7 +1006,13 @@ window.DBC_OS={
  autoClear:(p,k)=>{ensurePS();const P=PS.pats[p==null?curPat():p];if(!P.auto)return;pushUndo();if(k)delete P.auto[k];else delete P.auto;dirty()},
  autoSet:(p,k,pts)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.auto=P.auto||{};P.auto[k]=pts.map(x=>({t:+x.t,v:+x.v})).sort((a,b)=>a.t-b.t);dirty()},
  ver:()=>(PS.ver||0)+':'+TR.segId,
- patMeta:()=>{ensurePS();return PS.pats.map(p=>({bars:p.bars,hits:p.ev.length}))},
+ patMeta:()=>{ensurePS();return PS.pats.map(p=>({bars:p.bars,hits:p.ev.length,name:p.name||''}))},
+ patName:(p,n)=>{ensurePS();const P=PS.pats[p==null?curPat():p];P.name=(n||'').toUpperCase().slice(0,16);dirty();renderPats()},
+ songSet:L=>{ensurePS();pushUndo();PS.song=L.filter(x=>x>=0&&x<PS.pats.length);PS.songMode=false;renderSong();dirty()},
+ writePart:(pi,sec,take,src)=>{ensurePS();const K=kitMap(src==null?'all':String(src));const n=Object.values(K).reduce((a,v)=>a+v.length,0);if(!n)return-1;pushUndo();const VV=VS(),sty=$('psSty').value;
+  writeSection(pi,SEC[sec]?sec:'verse',K,{seed:VV.seed+pi*17+(take||0)*101,style:sty,energy:+$('psEn').value/100,prog:VV.prog,kv:VV.kv+(take||0),sub:!K.bass.length});
+  const P=PS.pats[pi];P.name=sec.toUpperCase();P.mute=[];if(src!=null&&src!=='all'){P.bank=+src;P.prog='kit'}else{delete P.bank;delete P.prog}dirty();renderAll();return P.ev.length},
+ bars2:(p,f)=>{ensurePS();const P=PS.pats[p==null?curPat():p],nb=f>1?P.bars*2:P.bars/2;if(![1,2,4,8].includes(nb))return P.bars;pushUndo();if(f>1){const L=P.bars*4;P.ev=P.ev.concat(P.ev.map(e=>{const{_skip,...x}=e;return{...x,t:+(x.t+L).toFixed(4)}}));if(P.auto)for(const k in P.auto)P.auto[k]=P.auto[k].concat(P.auto[k].map(a=>({t:a.t+L,v:a.v})))}else{const L=nb*4;P.ev=P.ev.filter(e=>e.t<L);if(P.auto)for(const k in P.auto)P.auto[k]=P.auto[k].filter(a=>a.t<L)}P.bars=nb;if((p==null?curPat():p)===PS.pat)$('psBars').value=nb;dirty();renderAll();return nb},
  followCur:()=>{ensurePS();followPart(curPat(),0)},
  panic:()=>{stopT();try{for(const k of [...NR.act.keys()])nrStop(k)}catch(e){}if(ac){const t=ac.currentTime;TR.vs.forEach(v=>vStop(v,t,.02));TR.vs=[]}try{uiT()}catch(e){}renderAll()},
  snapshot:()=>{ensurePS();return JSON.parse(JSON.stringify(ser()))},

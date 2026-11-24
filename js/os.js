@@ -75,8 +75,9 @@ function build(){
  /* meter bridge */
  const ol=$('oled');ol.insertAdjacentHTML('beforeend','<span id="osLine" aria-live="polite"></span>');
  const vu=el('div',{id:'vuGrp',class:'hwgrp'},'<span class="hwl">OUTPUT</span><div id="vu" data-help="vu"><canvas id="vuC" width="236" height="92"></canvas></div>');
+ const kref=el('div',{id:'krefGrp',class:'hwgrp'},'<span class="hwl">KEYS</span><button class="hwb" id="osKeys" data-help="osKeys" title="Every keyboard shortcut (Shift+K)"><i class="led"></i>SHORTCUTS</button>');
  const save=el('div',{id:'saveGrp',class:'hwgrp'},'<span class="hwl">SETUP</span><button class="hwb" id="osSave" data-help="osSave"><i class="led"></i>SAVE</button>');
- top.insertBefore(vu,$('loadGrp'));$('loadGrp').after(save);
+ top.insertBefore(vu,$('loadGrp'));$('loadGrp').after(save);save.after(kref);
  $('loadGrp').querySelector('.hwl').textContent='SONG';
  /* stage */
  const stage=el('main',{id:'stage'});
@@ -90,7 +91,7 @@ function build(){
  stage.append(buildKit(),buildTower(),buildLaunch(),buildGuide(),buildBuilder(),buildFactory(),buildStore(),buildSlicer(),buildProject());
  /* transport bar */
  const bar=el('footer',{id:'tbar'});
- const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (−)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (=)"><i class="led"></i>▶</button></div>');
+ const pat=el('div',{id:'patGrp',class:'hwgrp'},'<span class="hwl">PATTERN</span><div id="patDeck"><button class="hwb sq" id="osPatPrev" data-help="osPatPrev" title="Previous pattern (Shift+←)"><i class="led"></i>◀</button><div id="patLcd" data-help="patLcd"><b id="patNum">P01</b><span id="patInfo">—</span><i id="patProg"><u></u></i></div><button class="hwb sq" id="osPatNext" data-help="osPatNext" title="Next pattern (Shift+→)"><i class="led"></i>▶</button></div>');
  pat.querySelector('#patDeck').append($('seqSlot'));
  pat.querySelector('#patDeck').insertAdjacentHTML('beforeend','<button class="hwb sq" id="osPatHalf" data-help="osPatHalf" title="Show P1–P8 or P9–P16"><i class="led"></i>9–16</button><button class="hwb" id="osPatDup" data-help="osPatDup"><i class="led"></i>COPY ▶</button><button class="hwb" id="osPatClr" data-help="osPatClr"><i class="led"></i>CLEAR</button><button class="hwb np" id="osNext" data-help="osNext"><i class="led"></i>NEXT PART ▶</button>');
  const ed=el('div',{id:'editGrp',class:'hwgrp'},'<span class="hwl">EDIT</span><div><button class="hwb" id="osUndo" data-help="osUndo"><i class="led"></i>UNDO</button><button class="hwb" id="osBack" data-help="osBack" title="Back to the last unit (`)"><i class="led"></i>◀ BACK</button></div>');
@@ -107,6 +108,7 @@ function build(){
  $('osPatPrev').onclick=()=>patStep(-1);$('osPatHalf').onclick=()=>{PH.manual=PH.half?0:1;PH.half=PH.manual;PH.t=Date.now();halfSync()};$('osNext').onclick=()=>nextPart();$('osPatNext').onclick=()=>patStep(1);
  $('osPatDup').onclick=()=>{if(!need())return;const t=API().dupPat();say(t<0?'All 8 patterns have hits. Clear one first.':'Copied into P'+(t+1)+' and switched to it. Change it to make a variation.')};
  $('osPatClr').onclick=async()=>{if(!need())return;const P=API().pat();if(!API().pats()[P].hits){say('P'+(P+1)+' is already empty.');return}if(!await ask('Clear every hit in pattern P'+(P+1)+'? UNDO brings it back.'))return;API().clearPat();say('Cleared P'+(P+1)+'. Press UNDO to bring it back.')};
+ $('osKeys').onclick=keysOverlay;
  $('osUndo').onclick=()=>{if(need())API().undo()};
  $('osBack').onclick=back;$('subBack').onclick=back;
  document.body.insertAdjacentHTML('beforeend','<button id="focusExit" hidden>✕ Show all units</button>');$('focusExit').onclick=()=>{const u=$$('#stage .unit.focus')[0];if(u)zoom(u,0)};
@@ -322,8 +324,10 @@ function buildBuilder(){const u=el('section',{id:'osBuild',class:'unit'});
  '<div class="sbctl"><button class="hwb sq" id="sbPrev" data-help="sbPrev" title="Previous part"><i class="led"></i>◀</button><button class="hwb" id="sbLoop" data-help="sbLoop"><i class="led"></i>⟲ LOOP THIS PART</button><button class="hwb" id="sbRec" data-help="psRec"><i class="led"></i>● REC</button><button class="hwb np big" id="sbNext" data-help="osNext"><i class="led"></i>NEXT PART ▶</button><button class="hwb sq" id="sbFwd" data-help="sbPrev" title="Next part in the song"><i class="led"></i>▶</button></div></div>'+
  '<div class="sbrow" data-help="sbCarry"><span class="hwl">NEXT PART STARTS WITH</span><div class="seg" id="sbCarry"><button data-c="all">THE WHOLE LOOP</button><button data-c="on">ONLY CHANNELS THAT ARE ON</button><button data-c="none">NOTHING (BLANK)</button></div><label class="sbchk" data-help="sbFollow"><input type="checkbox" id="sbFollow"> Pads follow the part (each part brings back the bank it was made with)</label></div>'+
  '<div class="sbchan" data-help="sbChan"><div class="sbh"><span class="hwl">CHANNELS IN THIS PART</span><span class="sbbars">LENGTH <select id="sbBars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></span><button class="chip" id="sbAllOn">ALL ON</button><button class="chip" id="sbAllOff">ALL OFF</button><button class="chip" id="sbPads">SET PADS = CURRENT BANK</button></div><div class="chans" id="sbChans"></div></div>'+
+ '<div class="sbtpl" id="sbTplRow" data-help="sbTpl"><span class="hwl">SONG STRUCTURE</span><div class="kfsrow"><select id="sbTpl"><option value="classic">Classic: intro · verse · hook · verse · hook · bridge · hook · outro</option><option value="trap">Trap: intro · hook · verse · hook · verse · hook · outro</option><option value="flip">Chop flip: intro · verse · verse · hook · verse · hook · outro</option><option value="short">Short: intro · verse · hook · outro</option></select><select id="sbSrc" title="Which sounds Beat Brain writes with"><option value="all">Sounds: all kit banks</option>'+'ABCDEFGH'.split('').map((L,i)=>'<option value="'+i+'">Sounds: kit bank '+L+'</option>').join('')+'</select><label class="sbchk"><input type="checkbox" id="sbWrite" checked> write the parts from my sounds</label><button class="hwb np" id="sbLay"><i class="led"></i>LAY IT OUT</button></div></div>'+
  '<div class="sbsong" data-help="sbSong"><div class="sbh"><span class="hwl">THE SONG, PART BY PART</span><button class="chip" id="sbAdd">+ ADD CURRENT PATTERN</button><button class="chip" id="sbClear">CLEAR ORDER</button></div><div class="parts" id="sbParts"></div>'+
  '<div class="sbedit" id="sbEdit"><span id="sbSelT">Tap a part to select it.</span><button class="hwb sq" data-e="l" title="Move earlier"><i class="led"></i>◀</button><button class="hwb sq" data-e="r" title="Move later"><i class="led"></i>▶</button><button class="hwb" data-e="d"><i class="led"></i>⧉ REPEAT</button><button class="hwb" data-e="x"><i class="led"></i>✕ REMOVE</button><button class="hwb" data-e="lp"><i class="led"></i>⟲ LOOP IT</button><button class="hwb" data-e="pf"><i class="led"></i>▶ PLAY FROM HERE</button></div>'+
+ '<div class="sbsmart" id="sbSmart" data-help="sbSmart"><span class="hwl">SMART EDIT · SELECTED PART</span><div class="kfsrow"><select id="sbSec">'+SECS.map(x=>'<option value="'+x+'">'+x.toUpperCase()+'</option>').join('')+'</select><button class="hwb np" data-x="write"><i class="led"></i>✎ WRITE AS THIS</button><button class="hwb" data-x="take"><i class="led"></i>⟳ NEW TAKE</button><button class="hwb" data-x="name"><i class="led"></i>LABEL ONLY</button></div><div class="kfsrow"><button class="hwb" data-x="drums"><i class="led"></i>DRUMS ONLY</button><button class="hwb" data-x="nodrums"><i class="led"></i>NO DRUMS</button><button class="hwb" data-x="allon"><i class="led"></i>ALL ON</button><button class="hwb" data-x="x2"><i class="led"></i>×2 LENGTH</button><button class="hwb" data-x="half"><i class="led"></i>½ LENGTH</button><button class="hwb" data-x="uniq" id="sbUniq"><i class="led"></i>MAKE IT ITS OWN</button></div><small id="sbShare"></small></div>'+
  '<div class="tlw" data-help="sbTL"><div class="sbh"><span class="hwl">ARRANGEMENT VIEW</span><span class="tlhint">Parts across, channels down. Tap a block to switch that channel in that part.</span></div><div class="tl" id="sbTL"></div></div>'+
  '<div class="sbplay"><button class="hwb big" id="sbSong" data-help="sbSongPlay"><i class="led"></i>▶ PLAY THE SONG</button><button class="hwb big" id="sbStop"><i class="led"></i>■ STOP</button><button class="hwb big" id="sbExport" data-help="sbExport"><i class="led"></i>EXPORT ▶</button></div></div></div>';
  return u}
@@ -349,6 +353,7 @@ function builderWire(){
  $('sbEdit').onclick=e=>{const b=e.target.closest('[data-e]');if(!b||!need())return;const S=API().song(),i=SB.sel;if(i<0||i>=S.list.length){say('Tap a part in the song first.');return}const a=b.dataset.e;
   if(a==='l'||a==='r'){if(API().songMove(i,a==='l'?-1:1))SB.sel=i+(a==='l'?-1:1)}else if(a==='d'){API().songDup(i);SB.sel=i+1;say('Part '+(i+1)+' repeats: it now plays twice in a row.')}else if(a==='x'){API().songDel(i);SB.sel=Math.min(i,API().song().list.length-1);say('Removed part '+(i+1)+' from the order. The pattern itself is kept.')}
   else if(a==='lp'){API().loopPart(S.list[i]);say('Looping part '+(i+1)+' (P'+(S.list[i]+1)+'). Play over it, or fix it, then press ▶ PLAY THE SONG.')}else if(a==='pf'){API().playSong(i);say('Playing the song from part '+(i+1)+'.')}buildRender()};
+ $('sbLay').onclick=layOut;$('sbSmart').onclick=e=>{const b=e.target.closest('[data-x]');if(b)smartEdit(b.dataset.x)};
  $('sbSong').onclick=()=>{if(!need())return;if(!API().playSong(0)){say('The song has no parts yet. Loop a part and press NEXT PART, or + ADD CURRENT PATTERN.');return}say('Playing the whole song from the top.')};
  $('sbStop').onclick=()=>$('psStop').click();
  $('sbExport').onclick=()=>go('song')}
@@ -379,7 +384,8 @@ function buildSync(){if(!$('osBuild'))return;if(!ready()){$('sbParts').innerHTML
  const sig=A.ver()+'|'+S.list.join(',')+'|'+S.pos+'|'+S.nextPos+'|'+SB.sel+'|'+P+'|'+q+'|'+SB.carry+'|'+S.follow+'|'+A.prog()+'|'+A.bank()+'|'+pl;if(sig===SB.sig)return;SB.sig=sig;tlRender();
  $$('#sbCarry [data-c]').forEach(b=>b.classList.toggle('on',b.dataset.c===SB.carry));$('sbFollow').checked=!!S.follow;$('sbBars').value=String(pats[P].bars);
  const ch=A.chans();$('sbChans').innerHTML=ch.length?ch.map(c=>'<button class="ch'+(c.on?' on':'')+'" data-k="'+esc(c.k)+'" style="--pc:'+c.col+'"><i></i><b>'+esc(c.name)+'</b><small>'+c.n+' hit'+(c.n>1?'s':'')+'</small></button>').join(''):'<p class="empty">No hits in P'+(P+1)+' yet. Arm REC and play, or draw on the STEP SEQUENCER.</p>';
- $('sbParts').innerHTML=S.list.length?S.list.map((pi,i)=>{const pp=pats[pi],pd=API().partPads(pi);return'<button class="part'+(i===SB.sel?' sel':'')+(S.mode&&pl&&i===S.pos?' play':'')+(S.nextPos===i?' q':'')+(pi===P&&!S.mode?' cur':'')+'" data-i="'+i+'"><b>'+(i+1)+'</b><span>P'+(pi+1)+'</span><em>'+pp.bars+' BAR'+(pp.bars>1?'S':'')+(pd.bank!=null?' · '+BL[pd.bank]:'')+'</em><small>'+pp.hits+' hits</small></button>'}).join('<i class="parr">›</i>'):'<p class="empty">No parts yet. Loop your first part, then press NEXT PART: it is added here, and the next part starts.</p>';
+ $('sbParts').innerHTML=S.list.length?S.list.map((pi,i)=>{const pp=pats[pi],pd=API().partPads(pi);return'<button class="part'+(i===SB.sel?' sel':'')+(S.mode&&pl&&i===S.pos?' play':'')+(S.nextPos===i?' q':'')+(pi===P&&!S.mode?' cur':'')+'" data-i="'+i+'"><b>'+(i+1)+'</b><span>'+(pp.name?pp.name+' · ':'')+'P'+(pi+1)+'</span><em>'+pp.bars+' BAR'+(pp.bars>1?'S':'')+(pd.bank!=null?' · '+BL[pd.bank]:'')+'</em><small>'+pp.hits+' hits</small></button>'}).join('<i class="parr">›</i>'):'<p class="empty">No parts yet. Loop your first part, then press NEXT PART: it is added here, and the next part starts.</p>';
+ {const sp=SB.sel>=0&&SB.sel<S.list.length?S.list[SB.sel]:-1,uses=sp<0?0:S.list.filter(x=>x===sp).length;$('sbSmart').classList.toggle('dim',sp<0);if(sp>=0&&pats[sp].name&&SECS.includes(pats[sp].name.toLowerCase()))$('sbSec').value=pats[sp].name.toLowerCase();$('sbShare').textContent=sp<0?'Tap a part above to edit it.':uses>1?'P'+(sp+1)+' is used by '+uses+' parts: edits change all of them. MAKE IT ITS OWN gives this part its own copy.':'Edits change only this part.';$('sbUniq').disabled=uses<2}
  $('sbSelT').textContent=SB.sel>=0&&SB.sel<S.list.length?'Part '+(SB.sel+1)+' (P'+(S.list[SB.sel]+1)+') selected:':'Tap a part to select it.'}
 
 /* ================= PACK FACTORY: AI-generated sample libraries for every genre =================
@@ -644,7 +650,7 @@ const GUIDE={
  pads:{why:'The drum machine: play, record and fix your parts.',steps:[['Choose what the pads play: CHOP or KIT.',null],['Pick a pattern (◀ ▶ or P1–P16).',null],['REC, then PLAY, then play the pads.',()=>patHits()],['Fix it: UNDO the take, or ERASE + a pad.',null],['Add movement: AUTOMATION WRITE, move FILTER or PUMP.',()=>has(()=>Object.keys(A_().autoLanes()).length)]],tips:['Keys A S D F … play the pads; 1–8 switch banks.','NOTE REPEAT for rolls; 16 LEVELS plays one sound as notes.']},
  sequence:{why:'Draw and edit hits on a grid, and make variations.',steps:[['Click cells to add or remove hits.',()=>patHits()],['Set the length: 1, 2, 4 or 8 bars.',null],['COPY ▶ for a variation, then change the copy.',()=>has(()=>A_().patMeta().filter(p=>p.hits).length>1)]],tips:['Click a pad name on the left to hear it.','SMART BEAT writes a starting pattern from your sounds.']},
  tower:{why:'Three stacked keyboards for bass, chords and leads.',steps:[['Pick a sound and octave for each tier.',null],['Play: glide, tap, or use the Z and Q rows.',null],['REC + PLAY to record the melody into the pattern.',()=>patHits()]],tips:['STACK two tiers for a layered sound.','SCALE LOCK keeps every note in key.']},
- build:{why:'This is how a chop song gets made: loop a part, play the next part over it, NEXT PART, until it is done.',steps:[['LOOP THIS PART.',()=>has(()=>A_().playing())],['Arm REC and play the part that goes over it.',()=>patHits()],['NEXT PART.',()=>has(()=>A_().song().list.length>=2)],['Turn channels on or off for the new part.',null],['PLAY THE SONG, then EXPORT.',null,'song']],tips:['The whole loop carries into each new part; drop channels for breakdowns.','Double-tap a part to jump to it on the beat.']},
+  build:{why:'This is how a chop song gets made: loop a part, play the next part over it, NEXT PART, until it is done. Or lay out a structure and let Beat Brain write the parts, then edit each one.',steps:[['Optional: SONG STRUCTURE → LAY IT OUT writes named parts for you.',()=>has(()=>A_().patMeta().some(p=>p.name))],['LOOP THIS PART.',()=>has(()=>A_().playing())],['Arm REC and play the part that goes over it.',()=>patHits()],['NEXT PART.',()=>has(()=>A_().song().list.length>=2)],['Turn channels on or off for the new part.',null],['PLAY THE SONG, then EXPORT.',null,'song']],tips:['The whole loop carries into each new part; drop channels for breakdowns.','Tap a part, then SMART EDIT: rewrite it as a hook, a new take, drums only… MAKE IT ITS OWN before changing a repeated part.','Double-tap a part to jump to it on the beat.']},
  song:{why:'Song order, exports and saved setups.',steps:[['Check the order of parts.',()=>has(()=>A_().song().list.length)],['Export WAV, MP3 or MIDI.',null],['SAVE your setup.',null]],tips:['TAKE REC (top bar) records a live performance as audio.']},
  launch:{why:'Perform: every pattern on one console.',steps:[['Tap a clip to play it.',()=>has(()=>A_().playing())],['Tap the next clip: it waits, then starts on time.',null],['Play pads and sweep FILTER on top.',null]],tips:['F1–F12 launch clips from the keyboard.']},
  factory:{why:'Make new sample packs with AI, in any genre, saved to your own library.',steps:[['Paste your API key.',()=>!!(($('pfKey')||{}).value)],['Pick genres and pack types.',null],['BUILD LIBRARY.',null],['PRO PACK any track to chop it into kits.',null]],tips:['Each request makes 2 tracks and uses your credits.','SAVE keeps the audio on this device (the service only keeps it ~14 days).']},
@@ -739,12 +745,12 @@ async function projFile(){const A=API();if(!need())return;const key=songKey(fnam
  const P={bc16:1,name:rec.name,saved:new Date().toISOString(),state:A.snapshot(),kits:LSg('bcrps:kits:'+API().main(),{}),audio:b64};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(P)],{type:'application/json'}));a.download=key+'.bc16';a.click();say('Downloaded '+key+'.bc16: audio and all your work in one file.')}
 async function projOpen(f){try{say('Opening '+f.name+'…');const P=JSON.parse(await f.text());if(!P.bc16||!P.audio)throw new Error('That is not a BC-16 project file.');
  const bin=Uint8Array.from(atob(P.audio),c=>c.charCodeAt(0)).buffer,key=songKey(P.name);await ptx('songs','readwrite',st=>st.put({key,name:P.name,size:bin.byteLength,bytes:bin.slice(0),added:Date.now(),opened:Date.now()}));
- if(P.kits)LSs('bcrps:kits:'+key,P.kits);PJ.loading=true;try{await load(bin,P.name)}finally{PJ.loading=false}let n=0;while(!ready()&&n<400){await sleep(150);n++}await sleep(1200);API().restore(P.state);PJ.savedVer=API().dirtyN();say('Opened '+P.name+' with all its work.');go('build')}catch(e){say('Could not open it: '+(e.message||e))}}
+ if(P.kits)LSs('bcrps:kits:'+key,P.kits);PJ.quietUntil=Date.now()+60000;PJ.loading=true;try{await load(bin,P.name)}finally{PJ.loading=false}let n=0;while(!ready()&&n<400){await sleep(150);n++}await sleep(1200);API().restore(P.state);PJ.savedVer=API().dirtyN();say('Opened '+P.name+' with all its work.');go('build')}catch(e){say('Could not open it: '+(e.message||e))}}
 async function projDup(){if(!need())return;const key=songKey(fnameSafe()),rec=await ptx('songs','readonly',st=>st.get(key));if(!rec){say('Load the song once more first, then duplicate.');return}
  let nm=rec.name.replace(/(\.[^.]+)?$/,' copy$1'),i=2;const S=await listSongs();while(S.some(x=>x.key===songKey(nm)))nm=rec.name.replace(/(\.[^.]+)?$/,' copy '+(i++)+'$1');
  const state=API().snapshot();const k2=songKey(nm);LSs('bcrps:kits:'+k2,LSg('bcrps:kits:'+API().main(),{}));
  await ptx('songs','readwrite',st=>st.put({key:k2,name:nm,size:rec.size,bytes:rec.bytes.slice(0),added:Date.now(),opened:Date.now()}));
- PJ.loading=true;try{await load(rec.bytes.slice(0),nm)}finally{PJ.loading=false}let n=0;while(!(ready()&&fnameSafe()===k2)&&n<400){await sleep(150);n++}await sleep(1200);API().restore(state);say('Duplicated as “'+nm+'”. The original stays as it was.');projRender()}
+ PJ.quietUntil=Date.now()+60000;PJ.loading=true;try{await load(rec.bytes.slice(0),nm)}finally{PJ.loading=false}let n=0;while(!(ready()&&fnameSafe()===k2)&&n<400){await sleep(150);n++}await sleep(1200);API().restore(state);say('Duplicated as “'+nm+'”. The original stays as it was.');projRender()}
 function projWire2(){
  $('pjSaveV').onclick=async()=>{if(!need())return;await saveVersion($('pjLabel').value.trim()||'Version '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));$('pjLabel').value='';say('Version saved.')};
  $('pjVers').onclick=async e=>{const b=e.target.closest('[data-v]');if(!b)return;const v=await ptx('versions','readonly',st=>st.get(b.dataset.v));if(!v)return;
@@ -758,6 +764,47 @@ function projWire2(){
 async function resumeOffer(){if(ready())return;const k=LSg('bc16:lastSong','');if(!k)return;let rec;try{rec=await ptx('songs','readonly',st=>st.get(k))}catch(e){return}if(!rec||ready())return;
  const d=$('drop');if(!d||$('resumeCard'))return;const c=el('div',{id:'resumeCard'},'<small>CARRY ON WHERE YOU LEFT OFF</small><b>'+esc(rec.name)+'</b><span>last worked on '+ago(LSg('bc16:lastAt',rec.opened||Date.now()))+'</span><button class="hwb np big" id="resumeGo"><i class="led"></i>▶ RESUME</button><button class="hwb" id="resumeAll"><i class="led"></i>ALL PROJECTS</button>');
  d.parentElement.insertBefore(c,d);$('resumeGo').onclick=()=>openSong(k).then(()=>c.remove());$('resumeAll').onclick=()=>go('project')}
+
+/* ================= SESSION START: a clear direction as soon as a song is ready ================= */
+function sessionStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;if(document.body.classList.contains('coach')){API().setProg('chop');return}let bpm='',key='';try{bpm=Math.round(+$('bpm').value);key=DBC.keyText()}catch(e){}
+ const d=el('div',{id:'askD',role:'dialog','aria-modal':'true'});d.innerHTML='<div class="askc wide"><div class="plate"><i class="pled"></i><b class="pn">SESSION START</b><span class="pm">'+esc(fnameSafe())+'</span><span class="vent"></span></div>'+
+ '<p class="ssum">Ready: '+(bpm?bpm+' BPM · ':'')+(key?key+' · ':'')+slicesN()+' cuts. Smart kits are built in the KIT program. Your patterns are empty and nothing plays until you press a pad or PLAY.</p><h3 class="ssq">What do you want to do with this song?</h3><div class="sopts">'+
+ [['chop','CHOP & FLIP IT','The pads play the song’s cuts in order. Pick a chop, then play and record your flip.'],['beat','MAKE A BEAT FROM ITS SOUNDS','The pads play the smart kit (kick, snare, hats…). Arm REC and play.'],['song','START A FULL SONG','Lay out intro, verse, hook… and let Beat Brain write each part from your sounds. Then edit any part.'],['look','JUST LOOK AROUND','Close this and explore. GUIDE and COACH are on the rail.']].map(([k,t,x])=>'<button class="sopt" data-s="'+k+'"><b>'+t+'</b><span>'+x+'</span></button>').join('')+'</div></div>';
+ document.body.append(d);const done=k=>{d.remove();if(k==='chop'){API().setProg('chop');go('slicer');say('Pick a chop recipe (Slice Brain recommends one), then play the pads. REC + PLAY records your flip.')}
+  else if(k==='beat'){API().setProg('kit');API().setBank(0);go('pads');say('Pads play the smart kit. Arm REC, press PLAY, and play. Fill your own kits any time in KIT FORGE.')}
+  else if(k==='song'){go('build');setTimeout(()=>{$('sbTpl').scrollIntoView({block:'center'});$('sbTplRow').classList.add('hl');say('Pick a structure and press LAY IT OUT. Beat Brain writes each part from your sounds; then edit any part.')},300)}}
+ d.onclick=e=>{const b=e.target.closest('[data-s]');if(b)done(b.dataset.s)};addEventListener('keydown',function k(e){if(e.key==='Escape'&&document.body.contains(d)){d.remove();removeEventListener('keydown',k,true)}},true)}
+
+/* ================= SONG STRUCTURE + SMART EDIT per part ================= */
+const SECS=['intro','verse','hook','bridge','outro'],TPL={classic:['intro','verse','hook','verse','hook','bridge','hook','outro'],trap:['intro','hook','verse','hook','verse','hook','outro'],flip:['intro','verse','verse','hook','verse','hook','outro'],short:['intro','verse','hook','outro']};
+const TAKE={};const DRUM=/kick|snare|clap|hat|open|perc|rim|tom|crash|ride|cym/i;
+const isDrum=c=>DRUM.test(c.role||'')||DRUM.test(c.name||'');
+async function layOut(){if(!need())return;const T=TPL[$('sbTpl').value],write=$('sbWrite').checked,src=$('sbSrc').value,A=API();
+ if(A.song().list.length&&!await ask('Replace the current song order with '+T.length+' parts ('+T.join(', ')+')? Your patterns are kept; UNDO brings the order back.','LAY IT OUT'))return;
+ const meta=A.patMeta(),uniq=[...new Set(T)],map={},used=new Set();
+ for(const sec of uniq){let i=meta.findIndex((m,k)=>m.name===sec.toUpperCase()&&!used.has(k));if(i<0||write&&false)i=meta.findIndex((m,k)=>!m.hits&&!m.name&&!used.has(k));if(i<0)i=meta.findIndex((m,k)=>!used.has(k));map[sec]=i;used.add(i)}
+ let wrote=0;for(const sec of uniq){const pi=map[sec];if(write){const n=A.writePart(pi,sec,TAKE[pi]||0,src);if(n<0){say('No kit sounds to write with yet: fill a kit in KIT FORGE (or press AUTO-FILL), then lay it out again.');return}wrote++}else A.patName(pi,sec)}
+ A.songSet(T.map(s=>map[s]));SB.sel=0;A.loopPart(T.map(s=>map[s])[0]);A.selPat(map[T[0]]);try{$('psStop').click()}catch(e){}buildRender();
+ say(write?'Laid out '+T.length+' parts; Beat Brain wrote '+wrote+' sections from your sounds. Tap a part, then use SMART EDIT to change it: new take, drums only, rewrite as a hook…':'Laid out '+T.length+' parts with names. Loop each part and play it in.')}
+function selPart(){const S=API().song();if(SB.sel<0||SB.sel>=S.list.length){say('Tap a part in the song first.');return null}return{i:SB.sel,pi:S.list[SB.sel],S}}
+function smartEdit(a){if(!need())return;const P=selPart();if(!P)return;const A=API(),pi=P.pi;
+ if(a==='write'||a==='take'){const sec=$('sbSec').value;if(a==='take')TAKE[pi]=(TAKE[pi]||0)+1;const n=A.writePart(pi,sec,TAKE[pi]||0,$('sbSrc').value);if(n<0){say('No kit sounds to write with yet: fill a kit first.');return}say((a==='take'?'New take #'+(TAKE[pi]+1)+' of':'Wrote')+' part '+(P.i+1)+' as a '+sec.toUpperCase()+' ('+n+' hits). UNDO goes back.')}
+ else if(a==='drums'||a==='nodrums'||a==='allon'){const ch=A.chans(pi);if(!ch.length){say('This part has no hits yet.');return}const off=a==='allon'?[]:ch.filter(c=>a==='drums'?!isDrum(c):isDrum(c)).map(c=>c.k);A.chanSet(pi,off);say(a==='drums'?'Part '+(P.i+1)+': drums only.':a==='nodrums'?'Part '+(P.i+1)+': drums out (a breakdown).':'Part '+(P.i+1)+': every channel on.')}
+ else if(a==='x2'||a==='half'){const nb=A.bars2(pi,a==='x2'?2:.5);say('Part '+(P.i+1)+' is now '+nb+' bar'+(nb>1?'s':'')+'.')}
+ else if(a==='uniq'){const r=A.uniquePart(P.i);say(r<0?'All 16 patterns are in use.':'Part '+(P.i+1)+' now has its own pattern (P'+(r+1)+'): edit it without changing the other parts.')}
+ else if(a==='name'){A.patName(pi,$('sbSec').value);say('Part '+(P.i+1)+' is labelled '+$('sbSec').value.toUpperCase()+'.')}
+ SB.sig='';TLSIG='';buildSync()}
+
+/* ================= KEY REFERENCE ================= */
+function keysOverlay(){if($('keysD')){$('keysD').remove();return}const row=(k,t)=>'<div class="kr"><kbd>'+k+'</kbd><span>'+t+'</span></div>';
+ const d=el('div',{id:'keysD',role:'dialog','aria-modal':'true'});d.innerHTML='<div class="askc wide"><div class="plate"><i class="pled"></i><b class="pn">KEY REFERENCE</b><span class="pm">EVERY SHORTCUT</span><span class="vent"></span><button class="zb" id="keysX" aria-label="Close">✕</button></div><div class="kgrid">'+
+ '<section><h4>TRANSPORT</h4>'+row('Space','Play / stop')+row('Enter','Record on / off (count-in)')+row('Backspace','Undo')+row('0','Click on / off')+row('Shift + ← / →','Previous / next pattern')+row('Z X C V B N M ,','Patterns 1–8')+'</section>'+
+ '<section><h4>PADS</h4>'+row('A S D F G H J K','Pads, bottom two rows')+row('Q W E R T Y U I','Pads, top two rows')+row('1 – 8','Pad bank A–H')+row('← / →','Previous / next bank')+row('L','16 LEVELS: one sound as 16 notes')+'</section>'+
+ '<section><h4>PERFORM (DJ)</h4>'+row('O P [ ]','Hold: roll 1/4, 1/8, 1/16, 1/32')+row('; \' . /','Gate, echo (hold) · backspin, tape stop (tap)')+row('9  -  =','Kill low / mid / high')+row('F1 – F12','Launch pattern clips (LIVE)')+'</section>'+
+ '<section><h4>UNITS</h4>'+row('Alt + 1 … 0','Jump to a unit on the rail')+row('`','Back to the last unit')+row('Esc','Back out of anything open')+row('?','Explain mode')+row('Hold a button','Learn what it does')+'</section>'+
+ '<section><h4>KEY TOWER</h4>'+row('Z S X D C …','Tier 1 keys')+row('Q 2 W 3 E …','Tier 2 keys')+row('MIDI keyboard','The tier with MIDI IN lit')+'</section>'+
+ '<section><h4>KIT FORGE</h4>'+row('Page Up / Down','Previous / next page of cuts')+row('Hold a cut','Drop it in the lit slot')+'</section></div></div>';
+ document.body.append(d);$('keysX').onclick=()=>d.remove();d.onclick=e=>{if(e.target===d)d.remove()};addEventListener('keydown',function k(e){if(e.key==='Escape'&&document.body.contains(d)){e.stopPropagation();d.remove();removeEventListener('keydown',k,true)}},true)}
 
 /* ================= on-screen dialog: replaces the browser's pop-ups ================= */
 function ask(text,ok,cancel){return new Promise(res=>{const d=el('div',{id:'askD',role:'alertdialog','aria-modal':'true'});
@@ -797,8 +844,8 @@ const H={
  psPlay:['PLAY','Plays the current pattern on a loop (or the song order when song mode is on).','Transport'],
  hwPst:['PLAY START','Plays from the very start: pattern 1 or the first entry of the song order.','Transport'],
  psTap:['TAP TEMPO','Tap 4 times in time to set the tempo.','Transport'],
- osPatPrev:['PATTERN ◀','Steps back one pattern. While playing, the new pattern waits until the current one finishes. Keyboard: −','Transport'],
- osPatNext:['PATTERN ▶','Steps forward one pattern (P1–P8). While playing it queues. Keyboard: =','Transport'],
+ osPatPrev:['PATTERN ◀','Steps back one pattern. While playing, the new pattern waits until the current one finishes. Keyboard: Shift+←','Transport'],
+ osPatNext:['PATTERN ▶','Steps forward one pattern (P1–P16). While playing it queues. Keyboard: Shift+→','Transport'],
  patLcd:['PATTERN DISPLAY','Shows the pattern playing, the one queued (→), its length, number of hits and a progress line.','Transport'],
  psPats:['P1–P8','Jump straight to any of the 8 patterns. A lit button has hits in it. Keyboard: Z X C V B N M ,','Transport'],
  osPatDup:['COPY ▶','Copies the current pattern into the next empty one and jumps there, so you can build a variation without losing the original.','Transport'],
@@ -872,6 +919,9 @@ const H={
  pjVer:['VERSIONS','Snapshots of this project. SAVE VERSION (or SAVE on the top bar) keeps one; one is also kept every 5 minutes of work. ↺ RESTORE goes back to it (your current work is kept as a version first).','Project'],
  pjRecent:['RECENT PROJECTS','Every song you load is kept on this device with its work. OPEN brings back the audio, cuts, kits, patterns and song exactly as you left them.','Project'],
  pjFile:['PROJECT FILE','⬇ DOWNLOAD .BC16 packs the audio and all your work into one file to back up or move to another device; OPEN .BC16 FILE brings it back. ⧉ DUPLICATE makes a copy to try ideas on.','Project'],
+ osKeys:['KEY REFERENCE','Every keyboard shortcut on one card: transport, pads, DJ moves, units, Key Tower and Kit Forge. Shift+K opens it too.','Meter bridge'],
+ sbTpl:['SONG STRUCTURE','Pick a structure and press LAY IT OUT: the song order is filled with named parts (intro, verse, hook…). With “write the parts” ticked, Beat Brain writes each section from your sounds; untick it to play every part in yourself.','Song Builder'],
+ sbSmart:['SMART EDIT','For the part you tapped: WRITE AS THIS rewrites it as an intro, verse, hook, bridge or outro from your sounds; NEW TAKE gives another version; DRUMS ONLY / NO DRUMS / ALL ON switch channels; ×2 and ½ change its length; MAKE IT ITS OWN gives a repeated part its own pattern so you can change just that one.','Song Builder'],
  lcPlay:['PLAY / STOP','Starts or stops the transport.','Launch Console'],lcSong:['+ ADD TO SONG','Adds the current pattern to the end of the song order.','Launch Console']};
 const SOFTH={SHORTEST:'Cuts shorter than this are merged into the next. Tap to step: 1/32 … 2 bars. With SHIFT on it steps back.',LONGEST:'Cuts longer than this are split. Tap to step: ½ beat … 4 bars, or never.',PADS:'Switches the pads between CHOP (cuts in order) and KIT (your kits).','◀ SLICES':'Previous 128 cuts on the pad banks.','SLICES ▶':'Next 128 cuts on the pad banks.'};
 function helpFor(t){let e=t.closest('[data-help]');if(e)return H[e.dataset.help]?[...H[e.dataset.help],e]:null;
@@ -923,7 +973,7 @@ const LESSONS=[
  {id:'pat',t:'Build and flip patterns',d:'Variations, jumping back and forth, the step grid.',need:1,steps:[
   {p:'sequence',s:'#psSeqCard',t:'The step grid',x:'Rows are pads, columns are 16th notes. Click a cell to add or remove a hit.'},
   {p:'sequence',s:'#osPatDup',t:'COPY ▶ for variations',x:'Copies this pattern into the next empty one and jumps there. Change the copy: drop a kick, add a roll. The original stays safe.'},
-  {p:'sequence',s:'#osPatPrev',t:'Flip back and forth',x:'◀ ▶ (or − and = on the keyboard) step between patterns. While playing, the next one waits until the current one finishes, so it always lands on time.'},
+  {p:'sequence',s:'#osPatPrev',t:'Flip back and forth',x:'◀ ▶ (or Shift + ← → on the keyboard) step between patterns. While playing, the next one waits until the current one finishes, so it always lands on time.'},
   {p:'sequence',s:'#patLcd',t:'The display',x:'Shows the pattern playing, the one waiting (→ P03), length, hits and a progress line.'}]},
  {id:'keys',t:'Play the Key Tower',d:'Three keyboards, each its own sound and octave, stacked or apart.',need:1,steps:[
   {p:'tower',s:'#twTiers .tier:last-child .tl',t:'Tier sound and octave',x:'Each tier picks its own sound (◀ ▶) and octave (− +). Tier 1 is bass, tier 2 the middle, tier 3 the top: or anything you like.'},
@@ -1088,7 +1138,7 @@ const CH=[
   ['sequence','#psBars','Pattern length','Set how many bars the pattern lasts: one, two, four or eight.',{z:2.4,need:1}],
   ['sequence','#psGen','Smart beat','Smart beat writes a pattern for you, from your own sounds, into the current pattern. Use it as a starting point, then change it.',{z:2.4,need:1}],
   ['sequence','#osPatDup','Copy for variations','Copy makes a copy of this pattern in the next empty one and jumps there. Change the copy, maybe drop the kick or add a hat roll. Now you have a verse and a variation, and the original is safe.',{z:2.4,need:1}],
-  ['sequence','#osPatPrev','Jump back and forth','The arrows step between patterns. The minus and equals keys do the same. While a pattern plays, the next one waits until the current one ends, so the change always lands on time.',{z:2.4,need:1}],
+  ['sequence','#osPatPrev','Jump back and forth','The arrows step between patterns. Shift with the left and right arrow keys does the same. While a pattern plays, the next one waits until the current one ends, so the change always lands on time.',{z:2.4,need:1}],
   ['sequence','#patLcd','Read the display','The display shows which pattern is playing, which one is waiting, its length, and how many hits it has. The line along the bottom shows where you are in the loop.',{z:2.6,need:1}],
   ['pads','.autoBar','Automation','This works like automation in a D A W. Set it to write, press play, and move the filter, pump or swing knob. The moves record into the pattern. Set it to read and the pattern plays your moves back every loop.',{z:2.2,need:1,act:async(t,tok)=>{go('pads');await cw(400,tok)}}],
   ['sequence','#osPatClr','Clear','Clear empties the current pattern. It asks first, and undo brings it back.',{z:2.4,need:1}]]],
@@ -1185,7 +1235,8 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
  if(e.key==='Escape'){if(document.body.classList.contains('explain')){explain(false);return}if(!$('xbub').hidden){$('xbub').hidden=true;return}const f=$$('#stage .unit.focus')[0];if(f){zoom(f,0);return}const gp=$('gPick');if(gp&&!gp.hidden){$('gPickX').click();return}if(pickFrom){$('kfDone').click();return}const w=$('welcome');if(w){LSs('bc16:welcomed',1);w.remove();return}}
  if(e.key==='`'){e.preventDefault();back();return}
  if(curP==='tower')return;
- if(e.key==='-'||e.key==='='){e.preventDefault();patStep(e.key==='='?1:-1);return}
+ if(e.shiftKey&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();e.stopPropagation();patStep(e.key==='ArrowRight'?1:-1);return}
+ if(e.key==='K'&&e.shiftKey){e.preventDefault();keysOverlay();return}
  if(curP==='launch'&&ready()){let i=-1;if(/^F([1-9]|1[0-2])$/.test(e.key))i=+e.key.slice(1)-1;else if(e.shiftKey&&/^Digit[1-8]$/.test(e.code))i=+e.code.slice(5)-1;if(i>=0){e.preventDefault();e.stopPropagation();launch(i);return}}
  if(curP==='kit'&&(e.key==='PageUp'||e.key==='PageDown')){e.preventDefault();KF.pg(e.key==='PageDown'?1:-1)}},true)}
 
@@ -1193,7 +1244,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
 function init(){build();coachWire2();soundWire();projWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();projWire2();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
+ window.OS={sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
