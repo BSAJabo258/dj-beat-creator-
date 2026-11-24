@@ -1,0 +1,17 @@
+{
+  "name": "bc16-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BC-16 DJ Beat Creator as an Android app (Capacitor shell around the single-file build)",
+  "scripts": {
+    "www": "cp ../dist/DJ_Beat_Creator.html www/index.html && cp ../icon.svg www/icon.svg",
+    "sync": "npm run www && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3"
+  }
+}

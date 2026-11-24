@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BC-16</string>
+    <string name="title_activity_main">BC-16</string>
+    <string name="package_name">com.bau.bc16</string>
+    <string name="custom_url_scheme">com.bau.bc16</string>
+</resources>

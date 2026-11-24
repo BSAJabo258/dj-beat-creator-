@@ -13,11 +13,13 @@ const RAW='https://raw.githubusercontent.com/'+REPO+'/'+BRANCH+'/';
 const LIVE='https://'+REPO.split('/')[0].toLowerCase()+'.github.io/'+REPO.split('/')[1]+'/';
 const $=id=>document.getElementById(id);
 const onLive=location.href.startsWith(LIVE);
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const APK='https://github.com/'+REPO+'/releases/latest';
 const U={local:window.BC16_VERSION||null,remote:null,state:'idle'};
 window.BC16_UPDATE=U;
 
 /* service worker: only on the live site (https) */
-if(onLive&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+if(onLive&&!NATIVE&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
 function key(){let g=$('updGrp');if(g)return g;const top=$('hwTop');if(!top)return null;
  g=document.createElement('div');g.id='updGrp';g.className='hwgrp';g.hidden=true;
@@ -30,6 +32,7 @@ async function check(){U.state='checking';
   U.state=lv&&j.v&&j.v!==lv?'ready':'current';}catch(e){U.state='offline'}
  const g=key();if(g)g.hidden=U.state!=='ready';const b=$('osUpd');if(b)b.classList.toggle('on',U.state==='ready');return U.state}
 async function apply(){const say=window.OS&&OS.say||(()=>{});
+ if(NATIVE){say('Opening the newest BC-16 APK on GitHub. Download it and tap it to update; your projects stay on the phone.');window.open(APK,'_system');return}
  if(onLive){say('Updating to the newest BC-16…');try{const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update()}catch(e){}location.reload();return}
  const ask=window.OS&&OS.ask;
  const pick=await choose();if(pick==='live'){window.open(LIVE,'_blank','noopener');say('The live BC-16 opened in a new tab. Bring projects across with PROJECT ARCHIVE → save a .bc16 file, then open it there.')}

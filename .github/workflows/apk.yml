@@ -1,0 +1,47 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+    paths: ['dist/**','app/**','version.json']
+  workflow_dispatch:
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: 21}
+      - uses: android-actions/setup-android@v3
+      - name: Build web bundle
+        run: python3 tools/build-single.py
+      - name: Sync Capacitor
+        working-directory: app
+        run: npm ci && npm run sync
+      - name: Build signed APK
+        working-directory: app/android
+        env:
+          BC16_KEYSTORE_B64: ${{ secrets.BC16_KEYSTORE_B64 }}
+          BC16_KEYSTORE_PASSWORD: ${{ secrets.BC16_KEYSTORE_PASSWORD }}
+          BC16_KEY_ALIAS: ${{ secrets.BC16_KEY_ALIAS }}
+          BC16_KEY_PASSWORD: ${{ secrets.BC16_KEY_PASSWORD }}
+          BC16_VERSION_CODE: ${{ github.run_number }}
+          BC16_VERSION_NAME: 2.0.${{ github.run_number }}
+        run: |
+          if [ -n "$BC16_KEYSTORE_B64" ]; then
+            echo "$BC16_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/bc16.jks"
+            export BC16_KEYSTORE_FILE="$RUNNER_TEMP/bc16.jks"
+            ./gradlew assembleRelease --no-daemon
+          else
+            ./gradlew assembleDebug --no-daemon
+          fi
+      - name: Collect APK
+        run: |
+          mkdir out; cp app/android/app/build/outputs/apk/*/*.apk out/BC16.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: BC-16 APK ${{ github.run_number }}
+          files: out/BC16.apk
+          make_latest: true

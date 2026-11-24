@@ -1461,10 +1461,75 @@ body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
 @media (min-width:901px){#smartCard{left:118px;transform:none;width:min(470px,calc(100vw - 140px));animation-name:scIn2}}
 @keyframes scIn2{from{opacity:0;transform:translateY(14px)}}
 
+/* ================= PHONE LANDSCAPE (the Android app's main way to hold it) =================
+   One slim strip on top (song, LOAD, SAVE, REC), an icon rail, a slim transport, and the machine gets the rest. */
+@media (orientation:landscape) and (max-height:520px){
+ body.os #device{grid-template-columns:58px minmax(0,1fr)!important;gap:6px!important;padding:6px!important;height:100dvh!important;min-height:0!important}
+ #rail{padding:4px 3px!important;gap:2px!important;border-radius:12px}
+ #rail .brand,#rail .rst,#rail .rsp{display:none!important}
+ #rail .rb{padding:5px 1px 4px!important;gap:1px!important;min-height:0!important}
+ #rail .rb span{font-size:7px!important;letter-spacing:.03em!important}
+ #rail .rb svg{width:17px!important;height:17px!important}
+ #rail .rb b{font-size:13px!important}
+ #hwTop{padding:4px 8px!important;gap:6px!important;min-height:0!important;align-items:center!important;flex-wrap:nowrap!important}
+ #hwTop .hwl{display:none!important}
+ #hwTop .hwgrp{padding:0!important;border:0!important;background:none!important;box-shadow:none!important;margin:0!important;min-height:0!important}
+ #vuGrp,#krefGrp,#masterGrp,#menuBtn{display:none!important}
+ #oled{flex:1 1 auto!important;min-width:0!important;padding:3px 10px!important;min-height:0!important;max-height:44px;overflow:hidden}
+ #oled *{font-size:11px!important;line-height:1.3!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #hwTop .hwb,#hwTop label.hwb{padding:7px 10px 6px!important;min-height:0!important;height:auto!important;font-size:9.5px!important}
+ #tbar{padding:4px 6px!important;gap:6px!important;min-height:0!important}
+ #tbar .hwl{display:none!important}
+ #tbar .hwgrp{padding:0!important;border:0!important;background:none!important;box-shadow:none!important;margin:0!important}
+ #hwOvd,#hwPst,#psTap,#osPatHalf,#osPatDup,#osPatClr,#osBack{display:none!important}
+ #tbar .hwb{padding:8px 10px 7px!important;min-height:0!important;height:auto!important;font-size:9.5px!important}
+ #patLcd{padding:2px 8px!important;min-height:0!important}#patLcd b{font-size:14px!important}#patLcd span{font-size:8px!important}
+ #stage{padding:6px!important;gap:6px!important}
+ #subBar{padding:0 4px 4px!important;gap:6px!important;min-height:0!important}
+ #unitTag b#unitName{font-size:14px!important}#unitDesc{display:none!important}#unitTag #unitModel{font-size:9px!important;padding:2px 5px!important}
+ #subNext{padding:6px 9px!important;font-size:9px!important}#subNext small{display:none}#subBack{padding:6px 8px!important;font-size:9px!important}
+ .mk{padding:6px 9px 5px!important;font-size:9px!important}
+ .plate{margin-bottom:4px!important;padding:2px 0 4px!important}.plate .pn{font-size:11px!important}
+ /* studio floor: a compact rack of tiles */
+ body.os #osFloor{grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important;grid-template-areas:none!important;padding:8px 8px 22px!important;gap:6px!important;min-height:0!important}
+ #osFloor .gear{grid-area:auto!important;padding:6px 8px!important;transform:none!important}
+ #osFloor .gface{display:none!important}
+ #osFloor .gear.g-td1 .gface{display:flex!important;margin-top:2px}
+ #osFloor .g-td1 .fReel{display:none!important}
+ .gname{font-size:11px!important;margin-top:3px!important}.gstat{font-size:8.5px!important}.gz{display:none}
+ .flWall,.flDesk{display:none}.flHint{bottom:4px!important;font-size:9px!important}
+ /* PM-16: pads fill the height */
+ body.os.deck[data-mach=pm16] #stage{grid-template-columns:minmax(0,1fr) auto!important}
+ body[data-mach=pm16] #deck{grid-template-columns:auto minmax(120px,170px)!important;gap:6px 8px!important;padding:6px!important}
+ body[data-mach=pm16] #deck #padsSlot{height:100%!important}
+ body[data-mach=pm16] #padsSlot #psGrid{gap:6px!important}
+ body[data-mach=pm16] #deck #bankGrp .bkb{padding:3px 0!important;font-size:10px!important}
+ body[data-mach=pm16] #deckSide{font-size:9px}
+ /* CS-1 / SB-16 side pads narrower */
+ body.os.deck[data-mach=cs1] #stage,body.os.deck[data-mach=sb16] #stage{grid-template-columns:minmax(0,1fr) 190px!important}
+ /* smart strip: a compact sheet */
+ #smartCard{left:70px!important;right:8px;width:auto!important;top:auto!important;bottom:54px!important;max-height:70vh;overflow:auto;padding:8px 10px!important}
+ #smartCard p{font-size:10.5px!important;margin:3px 0 6px!important}
+ .scB button{padding:7px 9px 6px!important;font-size:9px!important;flex:0 0 auto!important}
+ #coach #ccard{max-height:80vh;overflow:auto}
+ /* landscape fixes: title vs keys, rail scroll, transport, smart card */
+ #rail{overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:none}#rail::-webkit-scrollbar{display:none}
+ #unitTag{min-width:0!important;max-width:150px!important;overflow:hidden!important;flex:0 1 150px!important}
+ #unitTag b#unitName{font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+ #tbar{flex-wrap:nowrap!important;overflow:hidden!important;align-items:center!important;min-height:44px!important}
+ #tbar .hwb{padding:6px 8px 5px!important;font-size:9px!important;flex:0 0 auto!important;line-height:1.1!important}
+ #smartCard{max-height:46vh!important;bottom:50px!important}
+ #smartCard p:nth-of-type(n+2){display:none!important}
+ .qlink,#qlinks{transform:none}.qk .hwl,.qk label{font-size:7px!important}
+ #tbar .hwb{height:30px!important;line-height:1.5!important;padding:4px 8px!important;overflow:visible!important}
+ #machKeys{overflow-x:auto!important;flex:1 1 0!important;min-width:0!important;scrollbar-width:none}#machKeys::-webkit-scrollbar{display:none}
+ #subNext{flex:0 0 auto!important}
+}
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#050508">
-<script>window.BC16_VERSION="75035fd82d"</script>
+<script>window.BC16_VERSION="a6b2b21700"</script>
 </head><body>
 <div id="device">
  <header id="hwTop">
@@ -5364,11 +5429,13 @@ const RAW='https://raw.githubusercontent.com/'+REPO+'/'+BRANCH+'/';
 const LIVE='https://'+REPO.split('/')[0].toLowerCase()+'.github.io/'+REPO.split('/')[1]+'/';
 const $=id=>document.getElementById(id);
 const onLive=location.href.startsWith(LIVE);
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const APK='https://github.com/'+REPO+'/releases/latest';
 const U={local:window.BC16_VERSION||null,remote:null,state:'idle'};
 window.BC16_UPDATE=U;
 
 /* service worker: only on the live site (https) */
-if(onLive&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+if(onLive&&!NATIVE&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
 function key(){let g=$('updGrp');if(g)return g;const top=$('hwTop');if(!top)return null;
  g=document.createElement('div');g.id='updGrp';g.className='hwgrp';g.hidden=true;
@@ -5381,6 +5448,7 @@ async function check(){U.state='checking';
   U.state=lv&&j.v&&j.v!==lv?'ready':'current';}catch(e){U.state='offline'}
  const g=key();if(g)g.hidden=U.state!=='ready';const b=$('osUpd');if(b)b.classList.toggle('on',U.state==='ready');return U.state}
 async function apply(){const say=window.OS&&OS.say||(()=>{});
+ if(NATIVE){say('Opening the newest BC-16 APK on GitHub. Download it and tap it to update; your projects stay on the phone.');window.open(APK,'_system');return}
  if(onLive){say('Updating to the newest BC-16…');try{const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update()}catch(e){}location.reload();return}
  const ask=window.OS&&OS.ask;
  const pick=await choose();if(pick==='live'){window.open(LIVE,'_blank','noopener');say('The live BC-16 opened in a new tab. Bring projects across with PROJECT ARCHIVE → save a .bc16 file, then open it there.')}
@@ -5390,6 +5458,41 @@ function choose(){return new Promise(res=>{const d=document.createElement('div')
  document.body.append(d);d.onclick=e=>{const b=e.target.closest('[data-u]');if(!b&&e.target!==d)return;d.remove();res(b?b.dataset.u:'')}})}
 window.BC16_checkUpdate=check;
 setTimeout(check,2500);setInterval(check,30*60*1000);
+})();
+
+</script>
+<script>
+/* BC-16 NATIVE: runs only inside the Android app (Capacitor). On the web it does nothing.
+   - Exports: the web app saves files with <a download>. Android's WebView cannot, so every download is
+     written to the app's storage and handed to the share sheet (Save to Files, Drive, WhatsApp, email…).
+   - Updates: the app reads version.json from GitHub; UPDATE opens the newest APK on the GitHub release page.
+   - Full screen and screen-on are set by the Android side (MainActivity). */
+(()=>{
+"use strict";
+const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return;
+document.documentElement.classList.add('native');
+const P=C.Plugins||{},FS=P.Filesystem,SH=P.Share;
+const say=t=>{try{(window.OS&&OS.say||(()=>{}))(t)}catch(e){}};
+const b64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(blob)});
+async function saveAndShare(href,name){
+ name=(name||'bc16-export').replace(/[\\/:*?"<>|]+/g,'_');
+ if(!FS){say('This app build cannot save files.');return}
+ try{say('Saving '+name+'…');const blob=await (await fetch(href)).blob();const data=await b64(blob);
+  const w=await FS.writeFile({path:'BC16/'+name,data,directory:'DATA',recursive:true});
+  if(SH){try{await SH.share({title:name,text:'Made on BC-16',url:w.uri,dialogTitle:'Save or send '+name})}catch(e){/* closed */}}
+  say('Saved '+name+'. Use the share sheet to keep it in Files or Drive, or send it.')}
+ catch(e){say('Could not save '+name+': '+(e&&e.message||e))}}
+const click=HTMLAnchorElement.prototype.click;
+HTMLAnchorElement.prototype.click=function(){const h=this.getAttribute('href')||'';if(this.hasAttribute('download')&&/^(blob:|data:)/.test(h)){saveAndShare(h,this.getAttribute('download'));return}
+ if(/^https?:/.test(h)&&!h.startsWith(location.origin)){window.open(h,'_system');return}return click.call(this)};
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(!a)return;const h=a.getAttribute('href')||'';if(/^(blob:|data:)/.test(h)){e.preventDefault();saveAndShare(h,a.getAttribute('download'))}},true);
+/* the phone's back button: close what is open, else step back through machines, else go to the studio floor; false = leave the app */
+window.BC16_back=()=>{const close=document.querySelector('#askD,#keysD,#welcome');if(close){close.remove();return true}
+ const sc=document.getElementById('smartCard');if(sc){sc.remove();return true}
+ const co=document.getElementById('coach');if(co&&!co.hidden){const x=document.getElementById('cexit');if(x)x.click();return true}
+ if(document.body.classList.contains('explain')){const e=document.getElementById('osExplain');if(e)e.click();return true}
+ const pg=document.body.dataset.pg;if(pg&&pg!=='floor'&&window.BC16){BC16.home();return true}return false};
+window.BC16_NATIVE={saveAndShare,platform:C.getPlatform()};
 })();
 
 </script>

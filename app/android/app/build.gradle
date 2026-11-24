@@ -1,0 +1,71 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace = "com.bau.bc16"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.bau.bc16"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // version: CI passes the run number (BC16_VERSION_CODE) so every build installs over the last one
+        versionCode Integer.parseInt(System.getenv("BC16_VERSION_CODE") ?: "1")
+        versionName String.valueOf(System.getenv("BC16_VERSION_NAME") ?: "1.0")
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    // release signing: keystore.properties locally (never committed), or BC16_KEYSTORE_* env vars in GitHub Actions
+    def ksProps = new Properties()
+    def ksFile = rootProject.file('keystore.properties')
+    if (ksFile.exists()) ksFile.withInputStream { ksProps.load(it) }
+    def ksPath = System.getenv("BC16_KEYSTORE_FILE") ?: ksProps['storeFile']
+    signingConfigs {
+        release {
+            if (ksPath) {
+                storeFile file(ksPath)
+                storePassword System.getenv("BC16_KEYSTORE_PASSWORD") ?: ksProps['storePassword']
+                keyAlias System.getenv("BC16_KEY_ALIAS") ?: ksProps['keyAlias']
+                keyPassword System.getenv("BC16_KEY_PASSWORD") ?: ksProps['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (ksPath) signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

@@ -1,0 +1,10 @@
+{
+  "appId": "com.bau.bc16",
+  "appName": "BC-16",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#050508"
+  },
+  "server": { "androidScheme": "https" }
+}
