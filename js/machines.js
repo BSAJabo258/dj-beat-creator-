@@ -29,7 +29,7 @@ const M=[
  {id:'cs1',m:'CS-1',n:'SAMPLER',zone:'SAMPLE',look:'crt',full:1,pages:[['chop','CHOP'],['slicer','ANALYSE'],['sounds','LIBRARY'],['parts','STEMS'],['groups','SORT']],deck:'CHOP KEYS'},
  {id:'pm16',m:'PM-16',n:'DRUM MACHINE',zone:'INSTRUMENTS',look:'pads',full:1,pages:[['pads','PADS']],
   modes:[{l:'PLAY',k:'play',act:tap('#psPadCard .mb','Play'),on:isOn('#psPadCard .mb','Play')},{l:'EDIT',k:'edit',act:tap('#psPadCard .mb','Edit'),on:isOn('#psPadCard .mb','Edit')},{l:'ARRANGE',k:'arr',act:tap('#psPadCard .mb','Arrange'),on:isOn('#psPadCard .mb','Arrange')},
-   {sep:1},{l:'16 LEVELS',k:'lv',act:tap('#psKeys'),on:isOn('#psKeys')},{l:'NOTE REPEAT',k:'nr',act:tap('#nrB'),on:isOn('#nrB')},{sep:1},{l:()=>'PADS: '+((A()&&A().prog&&A().prog())==='kit'?'KIT':'CHOP'),k:'prog',act:tap('#scrProg'),on:()=>false}]},
+   {sep:1},{l:'16 LEVELS',k:'lv',act:tap('#psKeys'),on:isOn('#psKeys')},{l:'NOTE REPEAT',k:'nr',act:tap('#nrB'),on:isOn('#nrB')},{sep:1},{l:()=>'PADS: '+((A()&&A().prog&&A().prog())==='kit'?'KIT':'CHOP'),k:'prog',act:tap('#scrProg'),on:()=>false},{l:()=>'RETEMPO: '+((A()&&A().tmode&&A().tmode())==='vari'?'VARISPEED':'STRETCH'),k:'tm',act:()=>{const a=A();a.setTmode(a.tmode()==='vari'?'stretch':'vari');OS.say(a.tmode()==='vari'?'VARISPEED: loops and flip chops follow the tempo like a turntable, pitch moves with it (classic chipmunk soul).':'STRETCH: loops and flip chops fit the tempo and keep their key.')},on:()=>false}]},
  {id:'sq8',m:'SQ-8',n:'STEP SEQUENCER',zone:'INSTRUMENTS',look:'steps',pages:[['sequence','STEPS']]},
  {id:'lc8',m:'LC-8',n:'LAUNCH CONSOLE',zone:'PERFORM',look:'clips',pages:[['launch','CLIPS']]},
  {id:'pm1',m:'PM-1',n:'PROJECT ARCHIVE',fl:'ARCHIVE',zone:'FINISH',look:'tapes',pages:[['project','PROJECTS']],free:1},

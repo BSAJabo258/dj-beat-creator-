@@ -120,6 +120,17 @@ Terminology: DAW (the whole production environment), sampler, drum machine, step
 **Functional specification:** on load the machine locks the tempo, cuts loop-tight, detects the genre (or takes it from the pack), builds the genre drum kit in bank A and exact 1- and 2-bar loops in bank C, switches the pads to the KIT program, and opens the PM-16 drum machine. A strip (beside the pads, never over them) says what it built and why, with one-tap next moves: RECORD A BEAT, WRITE A STARTER BEAT, CHOP THE SONG, BUILD A FULL SONG, CHANGE GENRE. Patterns stay empty; nothing plays until a pad or PLAY is pressed. The old SESSION START menu is retired.
 **Acceptance:** demo → drum machine, bank A = KICK, 808, SNARE, CLAP, HAT…; bank C = 12 loops; 0 sounds start without input; WRITE A STARTER BEAT fills P1 and PLAY plays it.
 
+## 0.8c Producer engine: retempo, stretch, flip (built)
+**Design intent:** the machine does what a producer does with a sample: put it at the genre's tempo without wrecking its key, chop it on the beat, and turn it into a new phrase over drums.
+**Functional specification:**
+| Function | Behaviour |
+|----------|-----------|
+| Time-stretch | WSOLA stretch (2048-sample windows for loops, 1024 for chops, ±12 ms alignment search). Every loop, chain and flip chop follows the project tempo with its key kept. Built ahead of time when the tempo changes. |
+| RETEMPO key (PM-16) | STRETCH (key kept) or VARISPEED (turntable: pitch follows tempo, chipmunk soul). Saved with the project. |
+| Producer tempo | Each genre has a tempo range (trap 140–160, Detroit 145–165, boom bap 86–96, lo-fi 70–88, house 120–126, amapiano 108–115…). The sample sits on the grid, rides half-time under a double-time grid, or runs double-time, whichever needs the least stretch. E.g. a 100 BPM soul loop under trap → 160 grid, sample plays as 80, 20 % stretch instead of 60 %. |
+| FLIP IT | Picks the most melodic, cleanest 2-bar phrase; 8 beat chops moved onto their real attacks; each chop stretched to exactly its slot; re-sequenced in the genre's flip style (trap: repeats and stutters; sample: swung; club: offbeat stabs; afro: syncopated; chill: long holds) over the bank A drums; PHRASE, HALF A, HALF B pads for holds. Bank G holds the chops. |
+**Acceptance:** at 120 BPM a 2-bar loop renders exactly 4.000 s with pitch unchanged (zero-crossing rate 1621 → 1576 Hz; varispeed would drop 20 %), in 65 ms; boom bap from a 150 BPM sample → 86 grid, double-time, 15 % stretch; FLIP on the demo → 8 chops from the hook (bar 29), 4-bar pattern, plays.
+
 ## 0.8b Genre kits: auto 1-bar and 2-bar loops + genre drum layout (built)
 **Design intent:** one press on KF-2 KIT FORGE turns the loaded song (or a Pack Factory track) into a ready kit for the genre: a loops bank and a drum bank.
 **Functional specification:**

@@ -195,7 +195,7 @@ function kitWire(){
  KF.roles=true;$('kfRoles').onchange=e=>{KF.roles=e.target.checked;kitRender()};
  $('kfGen').innerHTML='<option value="auto">AUTO (detect the genre)</option>'+Object.entries(PROF).map(([k,P])=>'<optgroup label="'+P.n+'">'+GENRES.filter(x=>G2P[x[0]]===k).map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</optgroup>').join('');
  $('kfGen').onchange=()=>genWhy();
- $('kfGo').onclick=()=>{if(!need())return;let g=$('kfGen').value;if(g==='auto')g=genreGuess().g;genreKit(g,{l1:$('kfL1').checked,l2:$('kfL2').checked,drums:$('kfDr').checked,t:window.BC16_PACK&&window.BC16_PACK.t})};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
+ $('kfGo').onclick=()=>{if(!need())return;let g=$('kfGen').value;if(g==='auto')g=genreGuess().g;genreKit(g,{retempo:true,l1:$('kfL1').checked,l2:$('kfL2').checked,drums:$('kfDr').checked,t:window.BC16_PACK&&window.BC16_PACK.t})};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
  holdable($('kfSug'),'.kc',(t)=>API().hear({k:'slice',ci:+t.dataset.ci}),(t)=>kitDrop(+t.dataset.ci,KF.armed),{drag:(t,slot)=>kitDrop(+t.dataset.ci,+slot.dataset.j),target:'#kfSlots .ks'});
  $('kfDone').onclick=()=>{const f=pickFrom&&pickFrom.from;pickFrom=null;if(f)go(f);else back()};
  $('kfPads').onclick=()=>{if(!need())return;API().setProg('kit');API().setBank(KF.bank);go('pads');say('The PAD MATRIX now plays kit bank '+BL[KF.bank]+' (KIT program).')};
@@ -690,12 +690,13 @@ async function genreKit(g,opt){if(!need())return null;opt=opt||{};const A=API(),
  const empty=[...Array(8).keys()].filter(b=>!A.kit(b).some(Boolean));let need2=(do1||do2?1:0)+(doD?1:0);
  if(!opt.banks&&empty.length<need2&&!opt.force){if(!await ask('Not enough empty kit banks. Build the genre kit into banks '+BL[KF.bank]+(need2>1?' and '+BL[(KF.bank+1)%8]:'')+' and replace what is there? UNDO brings it back.'))return null}
  const banks=opt.banks||(empty.length>=need2?empty:[KF.bank,(KF.bank+1)%8]);let bi=0,res={};
+ if(opt.retempo){const PT=producerTempo(g,+$('bpm').value||120);A.setFeel(PT.K);A.setTempo(PT.T);res.plan=PT}
  if(do1||do2){const b=banks[bi++];res.loops=A.writeLoops(b,{l1:do1?P.l1:0,l2:do2?P.l2:0,w:P.w,perSec:2});res.lb=b}
  if(doD){const b=banks[bi++];res.drums=genreDrums(P.drums,b);res.db=b}
  const gn=(GENRES.find(x=>x[0]===g)||[0,g])[1];
  if(opt.save!==false){if(res.loops)A.saveKit(gn+' · loops'+(opt.title?' · '+opt.title:''),res.lb);if(res.drums)A.saveKit(gn+' · drums'+(opt.title?' · '+opt.title:''),res.db)}
  if(opt.quiet)return res;KF.bank=res.lb!=null?res.lb:res.db;A.setBank(KF.bank);kitRender();
- say(gn+' kit built: '+(res.loops?res.loops+' loops (exact '+(do2?'2-bar':'')+(do2&&do1?' and ':'')+(do1?'1-bar':'')+', cut on the bar line) in bank '+BL[res.lb]:'no loops found')+(res.drums!=null?', '+res.drums+'-pad '+P.n.toLowerCase()+' drum layout in bank '+BL[res.db]:'')+'. Saved under MY KITS. UNDO takes it back.');
+ say((res.plan?res.plan.say+'. ':'')+gn+' kit built: '+(res.loops?res.loops+' loops (exact '+(do2?'2-bar':'')+(do2&&do1?' and ':'')+(do1?'1-bar':'')+', cut on the bar line) in bank '+BL[res.lb]:'no loops found')+(res.drums!=null?', '+res.drums+'-pad '+P.n.toLowerCase()+' drum layout in bank '+BL[res.db]:'')+'. Saved under MY KITS. UNDO takes it back.');
  return res}
 
 function genWhy(){const w=$('kfGenWhy');if(!w)return;if(!ready()){w.textContent='Load a song: the kit is cut from it.';return}const sel=$('kfGen').value;let g=sel,why='';
@@ -846,24 +847,37 @@ function sessionStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;if(doc
  d.onclick=e=>{const b=e.target.closest('[data-s]');if(b)done(b.dataset.s)};addEventListener('keydown',function k(e){if(e.key==='Escape'&&document.body.contains(d)){d.remove();removeEventListener('keydown',k,true)}},true)}
 
 
+
+/* ================= PRODUCER TEMPO: where this genre lives, and how the sample gets there =================
+   The sample can sit at its own tempo, ride half-time under a double-time grid (a 100 BPM soul loop under 150 trap hats
+   plays as 75), or double up. The machine picks whichever needs the least stretching, then stretches with the key kept. */
+const TEMPO={detroit:[145,165],trap:[140,160],drill:[140,146],phonk:[130,150],jersey:[136,145],boombap:[86,96],lofi:[70,88],gfunk:[88,98],rnb:[62,76],neosoul:[72,92],gospel:[68,92],soul:[72,100],funk:[96,112],jazz:[80,130],blues:[70,100],
+ afrobeats:[98,112],amapiano:[108,115],reggaeton:[88,98],dancehall:[90,104],latin:[95,110],house:[120,126],deephouse:[118,124],techno:[126,134],edm:[124,130],dnb:[170,176],dubstep:[138,142],pop:[100,124],rock:[100,140],country:[90,120],cinematic:[70,120],ambient:[60,100],kpop:[100,130],bollywood:[90,120],arab:[90,120]};
+function producerTempo(g,S){const R=TEMPO[g]||[S*.95,S*1.05];let best=null;for(const K of[1,2,.5]){const e=S*K,T=Math.max(R[0],Math.min(R[1],e)),st=Math.abs(Math.log(T/e));if(!best||st<best.st-1e-6)best={K,T:Math.round(T*10)/10,st,e}}
+ const pct=Math.round((best.T/best.e-1)*100),sm=best.K===2?'rides half-time under the '+best.T+' grid (plays as '+Math.round(best.T/2)+')':best.K===.5?'runs double-time over the '+best.T+' grid (two of its bars per bar)':'sits right on the '+best.T+' grid';
+ best.say='The sample ('+Math.round(S)+' BPM) '+sm+(Math.abs(pct)>=1?', stretched '+(pct>0?'faster ':'slower ')+Math.abs(pct)+'% with the key kept':', no stretching needed');return best}
+const FLIPSTY={trap:'trap',drill:'trap',detroit:'trap',phonk:'trap',lofi:'chill',rnb:'chill',neosoul:'chill',ambient:'chill',cinematic:'chill',jazz:'sample',boombap:'sample',gfunk:'sample',gospel:'sample',soul:'sample',funk:'sample',blues:'sample'};
+const flipStyle=g=>FLIPSTY[g]||({club:'club',afro:'afro',band:'band',sample:'sample',trap:'trap'})[G2P[g]]||'band';
+
 /* ================= SMART START: the machine does the thinking when a song loads =================
    Tempo locked, cuts loop-tight, genre detected, genre drum kit in bank A, exact 1- and 2-bar loops in bank C.
    Lands on the drum machine in the KIT program, ready to play. Nothing plays until you touch a pad or PLAY.
    One strip of next moves; no menu to answer. */
 async function smartStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;const touring=document.body.classList.contains('coach');
  const A=API();let fn='';try{fn=fname}catch(e){}const pk=window.BC16_PACK,fromPack=pk&&(pk.title||'').replace(/[^\w\- ]+/g,'').trim().replace(/[^\w\-]+/g,'_')===fn;
- const q=genreGuess(),g=fromPack&&pk.g?pk.g:q.g;let r=null;
+ const q=genreGuess(),g=fromPack&&pk.g?pk.g:q.g;let r=null;const S=+$('bpm').value||120,PT=producerTempo(g,S);try{A.setFeel(PT.K);A.setTempo(PT.T)}catch(e){console.warn(e)}
  try{r=await genreKit(g,{banks:[2,0],save:false,quiet:true,t:fromPack?pk.t:null})}catch(e){console.warn(e)}
- if(touring){A.setProg('chop');return}A.setProg('kit');A.setBank(0);go('pads');smartCard(g,fromPack?'from the pack you picked':q.why,r)}
-function smartCard(g,why,r){const old=$('smartCard');if(old)old.remove();let bpm='',key='';try{bpm=(+$('bpm').value).toFixed(1);key=DBC.keyText()}catch(e){}
+ if(touring){A.setProg('chop');return}A.setProg('kit');A.setBank(0);go('pads');smartCard(g,fromPack?'from the pack you picked':q.why,r,PT)}
+function smartCard(g,why,r,PT){const old=$('smartCard');if(old)old.remove();let bpm='',key='';try{bpm=(+$('bpm').value).toFixed(1);key=DBC.keyText()}catch(e){}
  const gn=(GENRES.find(x=>x[0]===g)||[0,g])[1],P=genreProfile(g);
  const c=el('div',{id:'smartCard',role:'status'});
  c.innerHTML='<div class="scTop"><b>'+esc(gn.toUpperCase())+'</b><span>'+bpm+' BPM'+(key?' · '+esc(key):'')+'</span><button class="scX" aria-label="Close">✕</button></div>'+
-  '<p>Ready to play. <b>Bank A</b>: '+esc(P.n.toLowerCase())+' drum kit ('+P.drums.slice(0,5).join(', ').toLowerCase()+'…). <b>Bank C</b>: '+((r&&r.loops)||0)+' loops, 1 and 2 bars, cut on the bar line. Genre: '+esc(why)+'.</p>'+
-  '<div class="scB"><button data-k="rec"><i></i>RECORD A BEAT</button><button data-k="write"><i></i>WRITE A STARTER BEAT</button><button data-k="chop"><i></i>CHOP THE SONG</button><button data-k="song"><i></i>BUILD A FULL SONG</button><button data-k="genre"><i></i>CHANGE GENRE</button></div>';
+  '<p class="scPlan"><b>Producer plan:</b> '+esc(gn)+' at '+(PT?PT.T:'')+' BPM. '+esc(PT?PT.say:'')+'.</p><p>Ready to play. <b>Bank A</b>: '+esc(P.n.toLowerCase())+' drum kit ('+P.drums.slice(0,5).join(', ').toLowerCase()+'…). <b>Bank C</b>: '+((r&&r.loops)||0)+' loops, 1 and 2 bars, cut on the bar line. Genre: '+esc(why)+'.</p>'+
+  '<div class="scB"><button data-k="flip"><i></i>FLIP IT</button><button data-k="rec"><i></i>RECORD A BEAT</button><button data-k="write"><i></i>DRUMS ONLY</button><button data-k="chop"><i></i>CHOP THE SONG</button><button data-k="song"><i></i>BUILD A FULL SONG</button><button data-k="genre"><i></i>CHANGE GENRE</button></div>';
  document.body.append(c);
  c.onclick=e=>{if(e.target.closest('.scX')){c.remove();return}const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k,A=API();c.remove();
-  if(k==='rec'){A.setProg('kit');A.setBank(0);go('pads');const r=$('psRec'),p=$('psPlay');if(r&&!A.rec())r.click();if(p&&!A.playing())p.click();say('Recording after the count-in. Play the pads (keys A S D F, Q W E R…). Press STOP when done.')}
+  if(k==='flip'){const f=A.flip(A.pat(),{style:flipStyle(g)});go('pads');if(f.err){say('Could not find a clean phrase to flip: '+f.err+'.');return}A.setBank(f.bank);say('Flipped: 8 chops from the '+String(f.sec).toLowerCase()+' (bar '+f.bar+'), each cut on its hit and stretched to '+A.tempo()+' BPM with the key kept, re-sequenced '+f.style+'-style over the bank A drums in P'+(A.pat()+1)+' ('+f.bars+' bars). Press PLAY. Bank '+BL[f.bank]+' holds the chops to play your own flip. UNDO takes it back.')}
+  else if(k==='rec'){A.setProg('kit');A.setBank(0);go('pads');const r=$('psRec'),p=$('psPlay');if(r&&!A.rec())r.click();if(p&&!A.playing())p.click();say('Recording after the count-in. Play the pads (keys A S D F, Q W E R…). Press STOP when done.')}
   else if(k==='write'){const n=A.writePart(A.pat(),'verse',0,'0');go('pads');say(n<0?'No drum sounds in bank A to write with.':'Wrote a starter beat into P'+(A.pat()+1)+' from the bank A kit. Press PLAY. Change any hit in the STEP SEQUENCER, or UNDO.')}
   else if(k==='chop'){A.setProg('chop');go('chop');say('The pads now play the song’s cuts in order. Pick a recipe on ANALYSE if you want different cuts.')}
   else if(k==='song'){go('build');setTimeout(()=>{const t=$('sbTpl');if(t){t.scrollIntoView({block:'center'});$('sbTplRow').classList.add('hl')}say('Pick a structure and press LAY IT OUT. Beat Brain writes each part from your sounds.')},300)}
@@ -1189,7 +1203,7 @@ const CH=[
   ['floor','#osExplain','Explain mode','If you ever forget what a button does, press the question mark. Explain mode turns on. Now any button you press tells you what it does, instead of doing it. Press the question mark again to go back to work.',{z:2.2}]]],
  ['Load a song',[
   ['start','#loadGrp','Load','To start, walk up to the tape deck. Press Load and choose a song from your device. W A V, M P 3, M 4 A, FLAC and OGG all work. You can also drag a file and drop it anywhere on the machine.',{z:2.2}],
-  ['start','#drop','The tape deck','When a song loads, the machine finds the tempo, the key, every hit, and the bars. Then it cuts the song so every loop lands on the bar, hears the genre, and builds two things for you: a drum kit for that genre in bank A, and exact one and two bar loops in bank C. When you load a song on your own, it opens the drum machine ready to play, with a strip of next moves: record a beat, write a starter beat, chop the song, or build a full song. If no song is loaded yet, I will load the demo beat now so you can follow along.',{z:1.4,act:async(t,tok)=>{if(!ready()){const d=$('demo');if(d&&!d.hidden)d.click();let n=0;while(!ready()&&n<2400){await cw(100,tok);n++}await cw(1200,tok)}}}],
+  ['start','#drop','The tape deck','When a song loads, the machine finds the tempo, the key, every hit, and the bars. Then it cuts the song so every loop lands on the bar, hears the genre, and builds two things for you: a drum kit for that genre in bank A, and exact one and two bar loops in bank C. When you load a song on your own, it picks the tempo a producer would for that genre, letting the sample ride half time or double time so it barely needs stretching, and keeps its key. Then it opens the drum machine ready to play, with a strip of next moves. Flip it chops the best phrase on the beat and re-sequences it over the drums. You can also record a beat, lay down drums only, chop the song, or build a full song. If no song is loaded yet, I will load the demo beat now so you can follow along.',{z:1.4,act:async(t,tok)=>{if(!ready()){const d=$('demo');if(d&&!d.hidden)d.click();let n=0;while(!ready()&&n<2400){await cw(100,tok);n++}await cw(1200,tok)}}}],
   ['start','#oled','What was found','Look at the display. It now shows the song name, the tempo in beats per minute, the key, the Camelot number for mixing, and how many slices were cut. Each song you load keeps its own pads and patterns, so you can switch songs and come back.',{z:2}]]],
  ['Chop the song',[
   ['chop','#rail .rb[data-grp="chop"]','Open the sampler','Press Chop on the rail, or tap the sampler on the studio floor. This is the C S one sampler. It decides where the song is cut into slices. Across the top are its mode keys: chop, analyse, library, stems and sort. Each one is a mode of this same machine.',{z:2.4,act:async(t,tok)=>railTo('chop',tok),need:1}],
@@ -1219,6 +1233,7 @@ const CH=[
   ['kit','#kfPads','Play it on the pads','Play on pads switches the pad matrix to this kit and opens the drum machine.',{z:2.4,need:1}]]],
  ['Play the pads',[
   ['pads','#rail .rb[data-grp="pads"]','Open the drum machine','Press Pads on the rail, or tap the drum machine on the floor. This is the P M sixteen. The big pads are in the middle, the screen on the left edits them, and the knobs and pad functions run down the right side. The mode keys on top switch between play, edit and arrange.',{z:2.4,need:1,act:async(t,tok)=>railTo('pads',tok)}],
+  ['pads','#machKeys [data-k="tm"]','Retempo','Retempo decides what happens when the project tempo is not the sample’s tempo. Stretch fits loops and flip chops to the tempo and keeps their key. Varispeed plays them faster or slower like a turntable, so the pitch moves with the tempo: the classic chipmunk soul sound.',{z:2.4,need:1}],
   ['pads','#machKeys [data-k="prog"]','Chop or kit program','This mode key decides what the pads play. Chop means the song’s slices in order. Kit means the kits you built or the ones the machine built. Tap it to switch any time.',{z:2.6,need:1}],
   ['pads','#padsSlot','Playing','Tap the pads with your mouse or finger, or use your computer keyboard. The bottom row is A S D F, then G H J K, then Q W E R, then T Y U I on top.',{z:1.6,need:1,act:async(t,tok)=>{API().setProg('kit');API().setBank(0);await cw(300,tok);await flashPads(tok)}}],
   ['pads','#banksSlot','Pad banks','Banks A to H switch which sixteen sounds are on the pads. Number keys one to eight do the same.',{z:2,need:1}],
@@ -1346,7 +1361,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
 function init(){build();coachWire2();soundWire();projWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();projWire2();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={smartStart,go,say,need,ready,back,units:UNITS,groups:GROUPS,lastOf:m=>{const g=GROUPS.find(x=>x.pages.includes(m.pages[0][0]));return g?LSg('bc16:last:'+g.id,null):null},sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
+ window.OS={smartStart,producerTempo,flipStyle,go,say,need,ready,back,units:UNITS,groups:GROUPS,lastOf:m=>{const g=GROUPS.find(x=>x.pages.includes(m.pages[0][0]));return g?LSg('bc16:last:'+g.id,null):null},sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);

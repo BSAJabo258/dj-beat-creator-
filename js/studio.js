@@ -72,7 +72,37 @@ function chopPage(d){const n=Math.max(1,Math.ceil(slices.length/128));PS.cpage=c
 /* ---------- pad buffers ---------- */
 const PBUF=new Map();
 const pbKey=p=>p.src+'|'+p.seg.map(a=>a[0]+'-'+a[1]).join(',')+'|'+(p.rev?1:0)+'|'+(p.ts||0)+'|'+(p.te||0);
-function padBuf(p){if(!p)return null;const S=PS.srcs[p.src];if(!S||!S.chs)return null;const k=pbKey(p);let b=PBUF.get(k);if(b)return b;
+
+/* ================= TIME-STRETCH: change tempo, keep the key =================
+   WSOLA: overlapping windows are re-spaced to the new length; each window is shifted (±~12 ms) to the spot where
+   its waveform lines up best with what is already written, so the sound joins without phasing. Pitch stays put.
+   Sync pads (loops, flip chops) are stretched to the project tempo; VARISPEED (classic MPC pitch-with-tempo) is
+   still available per pad (tm:'vari') or for the whole project (PS.tmode). */
+function stretchCh(chs,ratio,N){N=N||2048;const H=N>>1,Ha=H/ratio,tol=Math.min(512,N>>2),inL=chs[0].length,outL=Math.max(N,Math.round(inL*ratio)),nc=chs.length;
+ const win=new Float32Array(N);for(let i=0;i<N;i++)win[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+ const D=4,m=new Float32Array(Math.ceil(inL/D));for(let i=0;i<m.length;i++){let v=0;for(let c=0;c<nc;c++)v+=chs[c][i*D]||0;m[i]=v};
+ const out=[...Array(nc)].map(()=>new Float32Array(outL+N)),nrm=new Float32Array(outL+N);let prev=0;
+ const corr=(a,b,L)=>{let x=0;for(let i=0;i<L;i++)x+=m[a+i]*m[b+i];return x};
+ for(let k=0;k*H<outL;k++){let pos=Math.round(k*Ha);
+  if(k>0){const nat=prev+H,lo=Math.max(0,pos-tol),hi=Math.min(inL-N-1,pos+tol);if(hi>lo&&nat+H<inL){const L=Math.floor(H/D);let best=pos,bv=-1e30;
+    for(let q=lo;q<=hi;q+=D){const v=corr(Math.floor(q/D),Math.floor(nat/D),Math.min(L,m.length-Math.floor(Math.max(q,nat)/D)-1));if(v>bv){bv=v;best=q}}
+    let b2=best,bv2=-1e30;for(let q=Math.max(lo,best-D);q<=Math.min(hi,best+D);q++){let v=0;for(let i=0;i<H;i+=2){let a=0,b=0;for(let c=0;c<nc;c++){a+=chs[c][q+i]||0;b+=chs[c][nat+i]||0}v+=a*b}if(v>bv2){bv2=v;b2=q}}pos=b2}}
+  pos=Math.max(0,Math.min(inL-1,pos));const o=k*H;
+  for(let c=0;c<nc;c++){const s=chs[c],d=out[c];for(let i=0;i<N;i++){d[o+i]+=(s[pos+i]||0)*win[i]}}for(let i=0;i<N;i++)nrm[o+i]+=win[i];prev=pos}
+ for(let c=0;c<nc;c++){const d=out[c];for(let i=0;i<outL;i++)d[i]/=Math.max(nrm[i],.5)}return out.map(d=>d.subarray(0,outL))}
+const tmOf=p=>p.tm||PS.tmode||'stretch';
+const synced=p=>!!(p&&p.bpm&&p.lb&&(p.sync||p.role==='chain'||p.role==='loop'));
+function isStretch(p){return!!(synced(p)&&p.mode!=='cue'&&tmOf(p)==='stretch'&&Math.abs(PS.bpm/p.bpm-1)>.004)}
+function padBuf(p){if(!isStretch(p))return padBuf0(p);const r0=Math.pow(2,(p.tune||0)/12),ratio=(p.bpm/PS.bpm)*r0,k=pbKey(p)+'|S'+ratio.toFixed(5)+'|'+(p.role==='loop'||p.mode==='latch'?2048:1024);
+ let b=PBUF.get(k);if(b)return b;const base=padBuf0(p);if(!base)return null;const chs=[];for(let c=0;c<base.numberOfChannels;c++)chs.push(base.getChannelData(c));
+ const o=stretchCh(chs,ratio,p.role==='loop'||p.mode==='latch'?2048:1024);b=ac.createBuffer(o.length,o[0].length,sr);const f=Math.min(Math.floor(.0015*sr),o[0].length>>1);
+ o.forEach((d,c)=>{for(let j=0;j<f;j++){d[j]*=j/f;d[d.length-1-j]*=j/f}b.copyToChannel(d,c)});if(PBUF.size>400)PBUF.clear();PBUF.set(k,b);return b}
+/* build stretched buffers ahead of time, a few per frame, so the first hit never stutters */
+let warmQ=[];function warm(){warmQ=[];PS.banks.forEach(B=>B.forEach(p=>{if(isStretch(p))warmQ.push(p)}));const step=()=>{const t=performance.now();while(warmQ.length&&performance.now()-t<12){try{padBuf(warmQ.shift())}catch(e){}}if(warmQ.length)setTimeout(step,16)};setTimeout(step,30)}
+/* source beats -> project beats (2 = the sample counts in half time under a double-time grid, 0.5 = the reverse) */
+function setFeel(K){K=+K||1;const was=PS.feel||1,f=K/was;if(Math.abs(f-1)<1e-6)return;PS.banks.forEach(B=>B.forEach(p=>{if(synced(p)){p.bpm*=f;p.lb*=f}}));PS.feel=K}
+
+function padBuf0(p){if(!p)return null;const S=PS.srcs[p.src];if(!S||!S.chs)return null;const k=pbKey(p);let b=PBUF.get(k);if(b)return b;
  const nc=S.chs.length,f=Math.floor(.003*sr);let tot=0;for(const[s,e]of p.seg)tot+=Math.max(0,e-s);if(tot<160)return null;
  const a=clamp(Math.round((p.ts||0)/1000*sr),0,tot-128),z=clamp(Math.round((p.te||0)/1000*sr),0,tot-a-128),n=tot-a-z;
  b=ac.createBuffer(nc,n,sr);
@@ -87,7 +117,7 @@ function wave(cv,b,col){const r=Math.min(2,devicePixelRatio||1),w=cv.clientWidth
  const p=peaks(b,Math.max(10,Math.floor(w)));let mx=0;for(const v of p)mx=Math.max(mx,v);mx=mx||1;g.fillStyle=col;for(let x=0;x<p.length;x++){const hh=p[x]/mx*h*.42;g.fillRect(x,h/2-hh,1,Math.max(1,hh*2))}}
 
 /* ---------- voices ---------- */
-function rateOf(p,st){let r=Math.pow(2,((p.tune||0)+(st||0))/12);if(p.sync&&p.bpm)r*=PS.bpm/p.bpm;return r}
+function rateOf(p,st){let r=Math.pow(2,((p.tune||0)+(st||0))/12);if(synced(p)&&!isStretch(p))r*=PS.bpm/p.bpm;return r}
 function voice(ctx,dest,p,when,vel,st,dur,ck){const cue=p.mode==='cue',b=cue?srcBuf(p.src):padBuf(p);if(!b)return null;const off=cue?Math.min(b.duration-.05,p.seg[0][0]/sr):0;const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=b;src.playbackRate.value=rateOf(p,st);
  const looping=p.mode==='loop'||p.mode==='latch';if(looping)src.loop=true;
  const lv=(p.gain??1)*Math.pow(clamp(vel,0,1),1.2),att=Math.max(.003,(p.att||0)/1000);g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(lv,when+att);
@@ -172,7 +202,7 @@ function sched(a,b,seg){
   {const j=evRow(ev);if(j>=0&&!PS.keys)setTimeout(()=>flash(j),Math.max(0,(when-ac.currentTime)*1000))}}}
 function togglePlay(){TR.playing?stopT():startT()}
 function toggleRec(){TR.rec=!TR.rec;TR.recSnap=false;if(TR.rec&&!TR.playing)startT();uiT()}
-function setBpm(v){v=clamp(+v||PS.bpm,40,240);if(TR.playing){const nb=beatNow();PS.bpm=v;TR.t0=ac.currentTime-nb*bd()}else PS.bpm=v;$('psBpm').value=v;dirty()}
+function setBpm(v){v=clamp(+v||PS.bpm,40,240);setTimeout(warm,50);if(TR.playing){const nb=beatNow();PS.bpm=v;TR.t0=ac.currentTime-nb*bd()}else PS.bpm=v;$('psBpm').value=v;dirty()}
 function uiT(){$('psRec').classList.toggle('on',TR.rec);$('psPlay').classList.toggle('on',TR.playing);(!$('psPlay').dataset.hw&&($('psPlay').textContent=TR.playing?'▶ PLAYING':'▶ PLAY'))}
 function loop(){cancelAnimationFrame(raf);const f=()=>{if(!TR.playing)return;const nb=beatNow(),seg=TR.seg;
  if(TR.segChanged){TR.segChanged=false;if(PS.pat!==seg.pat){PS.pat=seg.pat;seqDraw();$('psBars').value=PS.pats[PS.pat].bars}renderPats()}
@@ -187,7 +217,7 @@ function pushUndo(){PS.undo.push(JSON.stringify({b:PS.banks,p:cleanPats(),s:PS.s
 function undo(){const u=PS.undo.pop();if(!u){msg('Nothing to undo.');return}const d=JSON.parse(u);PS.banks=d.b;PS.pats=d.p;PS.song=d.s||[];renderAll();dirty();msg('Undone.')}
 function ser(){const S=PS.srcs[PS.main]||{};return{v:1,app:'BeatChopperPadStudio',main:PS.main,mainLen:S.len,srcs:Object.keys(PS.srcs),
  chop:{mode:$('mode').value,bpm:$('bpm').value,sens:$('sens').value,minl:$('minl').value,maxl:$('maxl').value,manual:deep(manual)},
- bpm:PS.bpm,swing:PS.swing,q:PS.q,root:PS.root,scale:PS.scale,banks:PS.banks,packs:PS.packs||[],pats:cleanPats(),song:PS.song,songMode:PS.songMode,layout:PS.layout,saved:new Date().toISOString()}}
+ feel:PS.feel||1,tmode:PS.tmode||'stretch',bpm:PS.bpm,swing:PS.swing,q:PS.q,root:PS.root,scale:PS.scale,banks:PS.banks,packs:PS.packs||[],pats:cleanPats(),song:PS.song,songMode:PS.songMode,layout:PS.layout,saved:new Date().toISOString()}}
 function dirty(){PS.ver=(PS.ver||0)+1;clearTimeout(saveT);saveT=setTimeout(()=>{if(PS.main)LS.set('bcrps:auto:'+PS.main,ser())},700);renderBanks()}
 const isEmpty=()=>PS.banks.every(B=>B.every(p=>!p))&&PS.pats.every(p=>!p.ev.length);
 function applyProj(d,opt){if(!d||!Array.isArray(d.banks))throw new Error('That is not a Pad Studio project file.');opt=opt||{};pushUndo();stopT();
@@ -195,7 +225,7 @@ function applyProj(d,opt){if(!d||!Array.isArray(d.banks))throw new Error('That i
  if(!opt.noChop&&d.chop&&(d.main===PS.main||remap)){$('mode').value=d.chop.mode;$('bpm').value=d.chop.bpm;$('sens').value=d.chop.sens;$('sv').textContent=d.chop.sens;$('minl').value=d.chop.minl;$('maxl').value=d.chop.maxl;manual=deep(d.chop.manual||{add:[],del:[]});rebuild();regMain()}
  PS.banks=Array.from({length:8},(_,i)=>{const B=(d.banks[i]||[]).slice(0,16);while(B.length<16)B.push(null);return B.map(p=>p&&p.seg?{...p,src:remap&&p.src===d.main?PS.main:p.src}:null)});
  PS.pats=Array.from({length:NPAT},(_,i)=>{const p=(d.pats||[])[i]||{bars:2,ev:[]};const o={bars:[1,2,4,8].includes(+p.bars)?+p.bars:2,ev:(p.ev||[]).filter(e=>e&&isFinite(e.t))};if(Array.isArray(p.mute))o.mute=p.mute.filter(x=>typeof x==='string');if(p.bank!=null)o.bank=clamp(+p.bank,0,7);if(typeof p.name==='string')o.name=p.name.slice(0,16);if(p.prog)o.prog=p.prog==='kit'?'kit':'chop';if(p.auto&&typeof p.auto==='object'){o.auto={};for(const k of AUTOK)if(Array.isArray(p.auto[k]))o.auto[k]=p.auto[k].filter(x=>x&&isFinite(x.t)&&isFinite(x.v)).map(x=>({t:+x.t,v:+x.v}))}return o});
- PS.song=(d.song||[]).filter(x=>x>=0&&x<NPAT);if(Array.isArray(d.packs))PS.packs=d.packs;PS.songMode=!!d.songMode;if(d.bpm)PS.bpm=+d.bpm;PS.swing=+d.swing||0;if(d.q!==undefined)PS.q=+d.q;if(d.root!==undefined){PS.root=+d.root;PS.keySet=true}if(d.scale)PS.scale=d.scale;if(d.layout)PS.layout=d.layout;
+ PS.song=(d.song||[]).filter(x=>x>=0&&x<NPAT);if(Array.isArray(d.packs))PS.packs=d.packs;PS.songMode=!!d.songMode;if(d.bpm)PS.bpm=+d.bpm;PS.feel=+d.feel||1;PS.tmode=d.tmode||'stretch';PS.swing=+d.swing||0;if(d.q!==undefined)PS.q=+d.q;if(d.root!==undefined){PS.root=+d.root;PS.keySet=true}if(d.scale)PS.scale=d.scale;if(d.layout)PS.layout=d.layout;
  PS.pat=0;PS.sel=null;PS.kp=null;PS.keys=false;syncCtl();renderAll();dirty();
  const miss=new Set();PS.banks.forEach(B=>B.forEach(p=>{if(p&&!(PS.srcs[p.src]&&PS.srcs[p.src].chs))miss.add(p.src)}));
  return miss}
@@ -232,6 +262,44 @@ function smartChains(max){max=max||16;const beat=60/songBpm(),G=globMean(),cand=
  pick.sort((a,b)=>a.Lb-b.Lb||a.s-b.s);
  return pick.map(c=>mkPad(PS.main,[[c.s,c.e]],(c.Lb===4?'BAR':c.Lb===.5?'½B':c.Lb+'B')+' · '+c.bar+'.'+c.beatN,'chain',{choke:3,lb:c.Lb,bpm:songBpm(),why:c.why}))}
 /* Smart loops: bar-aligned 1/2/4-bar windows that repeat well and loop without a click */
+
+
+/* ================= FLIP: what a producer does with a sample =================
+   1. find the most melodic, cleanest phrase (2 bars of the source),
+   2. chop it into 8 beats, each cut moved onto the real attack near the beat, on a zero crossing,
+   3. each chop stretched to exactly its slot at the project tempo (key kept),
+   4. re-sequence the chops into a new phrase in the genre's style (repeat, stutter, swing, offbeat stabs, long holds),
+   5. drums from the genre kit underneath. Everything lands in one pattern; UNDO takes it back. */
+const FLIPS={
+ trap:[[0,0],[1,0],[1.5,0],[2,2],[3,3],[4,0],[5,1],[6,6],[6.5,6],[7,7],[7.25,7],[7.5,7],[7.75,7]],
+ sample:[[0,0],[1.5,1],[2,2],[3,3],[4,0],[5.5,1],[6,4],[7,7]],
+ club:[[.5,0],[1.5,0],[2.5,2],[3.5,2],[4.5,0],[5.5,0],[6.5,4],[7.5,5]],
+ afro:[[0,0],[.75,1],[1.5,2],[2.5,0],[3,3],[4,0],[4.75,1],[5.5,4],[6.5,5],[7,6]],
+ band:[[0,0],[1,1],[2,2],[3,3],[4,0],[5,1],[6,4],[7,5]],
+ chill:[[0,0],[2,2],[4,0],[5,1],[6,4]]};
+function flipBuild(pi,o){o=o||{};const F=PS.feel||1,S=songBpm(),beatS=60/S;
+ /* 1. the phrase */
+ const L=genreLoops({l2:3,l1:0,w:{lo:.2,mi:1.7,hi:.3,reg:0,perc:0},perSec:1});if(!L.length)return{err:'no clean phrase found'};const ph=L[o.take?Math.min(o.take,L.length-1):0];
+ /* 2. eight chops on the beat, moved onto real attacks */
+ const cuts=[];for(let i=0;i<=8;i++){let t=ph.s/sr+i*beatS;if(i>0&&i<8){let best=null,bd=.045;for(const q of on){const d=Math.abs(q.t-t);if(d<bd&&q.r>=.6){bd=d;best=q}}if(best)t=best.t}cuts.push(i===8?ph.e:zx(Math.round(t*sr)))}
+ /* 3. pads: each chop is synced so it fills exactly its share of beats at the project tempo */
+ const bank=o.bank==null?6:o.bank,B=emptyBank(),pads=[];
+ for(let i=0;i<8;i++){const a=cuts[i],b=cuts[i+1];if(b-a<400)continue;const srcBeats=(b-a)/sr/beatS;
+  const p=mkPad(PS.main,[[a,b]],'FLIP '+(i+1),'chop',{mode:'one',sync:true,bpm:S*F,lb:+(srcBeats*F).toFixed(4),choke:7,why:'Chop '+(i+1)+' of the flip: beat '+(i+1)+' of the phrase at bar '+(ph.b+1)+', cut on its attack, stretched to the project tempo with the key kept.'});B[i]=p;pads.push(i)}
+ /* the whole phrase too, and its halves, for holds */
+ B[8]=mkPad(PS.main,[[cuts[0],cuts[8]]],'PHRASE','loop',{choke:7,mode:'latch',sync:true,bpm:S*F,lb:8*F});
+ B[9]=mkPad(PS.main,[[cuts[0],cuts[4]]],'HALF A','chop',{choke:7,mode:'one',sync:true,bpm:S*F,lb:+((cuts[4]-cuts[0])/sr/beatS*F).toFixed(4)});
+ B[10]=mkPad(PS.main,[[cuts[4],cuts[8]]],'HALF B','chop',{choke:7,mode:'one',sync:true,bpm:S*F,lb:+((cuts[8]-cuts[4])/sr/beatS*F).toFixed(4)});
+ pushUndo();PS.banks[bank]=B;
+ /* 4. the new phrase: template slots are chop lengths (F project beats each) */
+ const T=FLIPS[o.style]||FLIPS.band,P=PS.pats[pi],slots=8,barsNeed=Math.max(1,Math.round(slots*F/4));
+ const bars=Math.min(8,o.bars||Math.max(4,barsNeed));P.bars=bars;
+ /* 5. drums under it from the genre kit (bank A) */
+ if(o.drums!==false){try{const K=kitMap('0');if(Object.values(K).some(v=>v.length))writeSection(pi,'verse',K,{seed:VS().seed+pi*17,style:$('psSty').value,energy:+$('psEn').value/100,prog:VS().prog,kv:VS().kv,sub:!K.bass.length})}catch(e){console.warn(e)}}else P.ev=[];
+ P.bars=bars;const len=bars*4,rep=Math.max(1,Math.round(len/(slots*F)));let n=0;
+ for(let r=0;r<rep;r++)for(const[pos,ci]of T){const j=r===rep-1&&rep>1&&ci===0&&pos>=4?((ci+5)%8):ci;if(!B[j])continue;const t=(r*slots+pos)*F;if(t>=len)continue;P.ev.push({t:+t.toFixed(4),b:bank,p:j,v:pos%1?.78:.92,st:0,d:0});n++}
+ P.ev.sort((a,b)=>a.t-b.t);P.name='FLIP';P.prog='kit';P.bank=bank;dirty();renderAll();warm();
+ return{n,bank,bar:ph.b+1,bars,style:o.style||'band',sec:ph.sec&&ph.sec.name||'song'}}
 
 /* ================= GENRE LOOP KITS =================
    Exact 1-bar and 2-bar loops on the locked grid (BC16_LOOP / barPhase), chosen per genre.
@@ -275,7 +343,7 @@ function genreLoops(o){o=o||{};const F=barFeats(),B=F.bars,n=B.length,w=Object.a
  pick.sort((a,b)=>b.nb-a.nb||a.b-b.b);
  return pick.map(c=>Object.assign(c,{name:c.sec.name+' '+c.nb+'BAR '+(c.b+1),why:c.nb+'-bar loop from the '+c.sec.name.toLowerCase()+' (bar '+(c.b+1)+'), cut on the bar line at '+songBpm().toFixed(2)+' BPM, exactly '+c.nb*4+' beats long. Groove repeats '+Math.round(Math.max(0,c.rep)*100)+'%'+(c.one>.6?', hit on the one':'')+'.'}))}
 function zx(i){i=clamp(i,1,y.length-2);for(let d=0;d<24;d++){for(const j of[i-d,i+d]){if(j>0&&j<y.length&&(y[j-1]<=0)!==(y[j]<=0))return j}}return i}
-function loopPads(list){return list.map(c=>mkPad(PS.main,[[c.s,c.e]],c.name,'loop',{choke:4,mode:'latch',sync:true,bpm:songBpm(),lb:c.nb*4,why:c.why}))}
+function loopPads(list){const F=PS.feel||1;return list.map(c=>mkPad(PS.main,[[c.s,c.e]],F===1?c.name:c.name.replace(/(\d)BAR/,(m,d)=>(+d*F)+'BAR'),'loop',{choke:4,mode:'latch',sync:true,bpm:songBpm()*F,lb:c.nb*4*F,why:c.why}))}
 function genreStats(){const F=barFeats(),B=F.bars;if(!B.length)return null;const top=B.filter(f=>f.E>.35);const m=k=>top.reduce((p,f)=>p+f[k],0)/(top.length||1);
  return{bpm:songBpm(),reg:m('reg'),dH:m('dH'),dL:m('dL'),sL:m('sL'),sM:m('sM'),sH:m('sH'),bars:B.length}}
 function smartLoops(max){max=max||16;const beat=60/songBpm(),bar=beat*4,G=globMean(),dur=y.length/sr,cand=[];gMean=0;
@@ -1002,6 +1070,10 @@ window.DBC_OS={
  swap:(b1,j1,b2,j2)=>{ensurePS();pushUndo();const t=PS.banks[b1][j1];PS.banks[b1][j1]=PS.banks[b2][j2];PS.banks[b2][j2]=t;dirty();renderAll()},
  kits:()=>Object.keys(LS.get(KITKEY())||{}),
  genreLoops:o=>{try{return genreLoops(o).map(c=>({s:c.s,e:c.e,nb:c.nb,bar:c.b+1,name:c.name,sec:c.sec.name,why:c.why}))}catch(e){console.warn(e);return[]}},
+ flip:(pi,o)=>{ensurePS();try{return flipBuild(pi==null?curPat():pi,o)}catch(e){console.warn(e);return{err:String(e)}}},
+ setFeel:K=>{ensurePS();setFeel(K);dirty()},feel:()=>PS.feel||1,
+ setTempo:v=>{ensurePS();setBpm(v);warm();return PS.bpm},tempo:()=>PS.bpm,setTmode:m=>{ensurePS();PS.tmode=m;PBUF.clear();warm();dirty()},tmode:()=>PS.tmode||'stretch',
+ probe:(b,j)=>{const p=PS.banks[b]&&PS.banks[b][j];if(!p)return null;const t=performance.now(),x=padBuf(p),ms=performance.now()-t,o=padBuf0(p);const zc=d=>{let n=0;for(let i=1;i<d.length;i++)if((d[i-1]<0)!==(d[i]<0))n++;return n/d.length*sr};return{name:p.name,dur:x.duration,want:p.lb?p.lb*60/PS.bpm:null,ms,zc0:zc(o.getChannelData(0)),zc1:zc(x.getChannelData(0)),rate:rateOf(p,0),stretch:isStretch(p)}},
  genreStats:()=>{try{return genreStats()}catch(e){return null}},
  writeLoops:(b,o)=>{ensurePS();const L=genreLoops(o);if(!L.length)return 0;const B=emptyBank();loopPads(L).slice(0,16).forEach((p,j)=>B[j]=p);pushUndo();PS.banks[b]=B;renderAll();dirty();return L.length},
  saveKit:(name,b)=>{ensurePS();const all=LS.get(KITKEY())||{};all[name]=deep(PS.banks[b]);return LS.set(KITKEY(),all)},
