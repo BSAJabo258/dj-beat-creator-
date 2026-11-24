@@ -237,3 +237,23 @@ body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
 #loopChk .lt.off{background:linear-gradient(180deg,#2a2d36,#191b21);color:var(--silk);box-shadow:none}
 /* SYSTEM · UPDATE key on the meter bridge */
 #osUpd.on .led{background:#5effa0;box-shadow:0 0 8px #5effa0;animation:breathe 1.2s ease-in-out infinite}
+/* ---- fixes from the layout sweep ---- */
+/* nameplates: the title gives way before the zoom keys do */
+.plate .pn{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.plate .pm{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.plate .vent{min-width:0;flex:1 1 0}
+.plate .zm{flex:none;margin-left:auto}
+@media (max-width:1180px){.plate .pm{display:none}}
+/* phones: the rail scrolls inside its own strip, never the page */
+@media (max-width:900px){#rail{min-width:0;max-width:100%}#device,#stage,#osFloor{min-width:0;max-width:100%}html,body{overflow-x:hidden}}
+/* phones: each keyboard tier stacks — sound controls, a full-width keyboard, then the tier switches */
+@media (max-width:900px){.tier{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto 140px auto}.twl{flex-direction:row;flex-wrap:wrap;align-items:center}.twr{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:900px){.twl .tlcd{flex:1 1 100%;order:-1}}
+.twr .hwb{padding-top:9px!important}
+/* KF-2 · GENRE KIT */
+.kfgenre{padding:10px;border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 10%,#14161c),#0e1015);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,#000),0 0 18px color-mix(in srgb,var(--acc) 12%,transparent);display:flex;flex-direction:column;gap:7px}
+.kfgenre .hwl{position:static;display:block}
+.kfgenre .kfsrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kfgenre select{flex:1 1 180px;min-width:0;background:#0b0d12;color:#fff;border:1px solid #000;border-radius:6px;padding:8px;font:600 11.5px 'Archivo'}
+.kfgenre .hwb{flex:none}
+.kfgenre small{font:500 10.5px var(--mono);color:var(--silk2);line-height:1.45}

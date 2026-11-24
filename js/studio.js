@@ -232,6 +232,52 @@ function smartChains(max){max=max||16;const beat=60/songBpm(),G=globMean(),cand=
  pick.sort((a,b)=>a.Lb-b.Lb||a.s-b.s);
  return pick.map(c=>mkPad(PS.main,[[c.s,c.e]],(c.Lb===4?'BAR':c.Lb===.5?'½B':c.Lb+'B')+' · '+c.bar+'.'+c.beatN,'chain',{choke:3,lb:c.Lb,bpm:songBpm(),why:c.why}))}
 /* Smart loops: bar-aligned 1/2/4-bar windows that repeat well and loop without a click */
+
+/* ================= GENRE LOOP KITS =================
+   Exact 1-bar and 2-bar loops on the locked grid (BC16_LOOP / barPhase), chosen per genre.
+   Per bar: low (<150 Hz), mid and high (>4 kHz) energy in 16 steps. From that:
+   sections (where the music changes), how well a loop repeats, a clean seam, a hit on the one,
+   and how well the loop fits the genre's weights (low end + hats for trap, mids for sample-based, a steady kick for club). */
+let BF=null;
+function barFeats(){const beat=60/songBpm(),bar=beat*4,t0=Math.max(0,barPhase),key=(PS.main||'')+'|'+beat.toFixed(5)+'|'+t0.toFixed(4)+'|'+y.length;if(BF&&BF.key===key)return BF;
+ const L=Math.round(bar*sr),n=Math.max(0,Math.floor((y.length-Math.round(t0*sr))/L)),aL=1-Math.exp(-2*Math.PI*150/sr),aH=1-Math.exp(-2*Math.PI*4000/sr),S=16;let lp=0,lp2=0;const bars=[];
+ const s00=Math.round(t0*sr);for(let i=Math.max(0,s00-2048);i<s00;i++){const x=y[i];lp+=aL*(x-lp);lp2+=aH*(x-lp2)}
+ for(let b=0;b<n;b++){const s0=s00+b*L,lo=new Float32Array(S),mi=new Float32Array(S),hi=new Float32Array(S);
+  for(let i=0;i<L;i+=2){const x=y[s0+i]||0;lp+=aL*(x-lp);lp2+=aH*(x-lp2);const k=(i*S/L)|0,m=lp2-lp,h=x-lp2;lo[k]+=lp*lp;mi[k]+=m*m;hi[k]+=h*h}
+  for(let k=0;k<S;k++){lo[k]=Math.sqrt(lo[k]/(L/S/2));mi[k]=Math.sqrt(mi[k]/(L/S/2));hi[k]=Math.sqrt(hi[k]/(L/S/2))}
+  const sum=a=>a.reduce((p,v)=>p+v,0);bars.push({lo,mi,hi,eL:sum(lo)/S,eM:sum(mi)/S,eH:sum(hi)/S})}
+ let mx=1e-9;for(const f of bars)mx=Math.max(mx,f.eL+f.eM+f.eH);for(const f of bars){f.E=(f.eL+f.eM+f.eH)/mx;const t=f.eL+f.eM+f.eH+1e-9;f.sL=f.eL/t;f.sM=f.eM/t;f.sH=f.eH/t;
+  const on=a=>{let c=0;for(let k=1;k<S;k++)if(a[k]>a[k-1]*1.6&&a[k]>.25*Math.max(...a))c++;return c/S};f.dH=on(f.hi);f.dL=on(f.lo);
+  const q=[0,4,8,12].reduce((p,k)=>p+f.lo[k],0)/4,o=f.lo.reduce((p,v,k)=>p+(k%4?v:0),0)/12;f.reg=q/(q+o+1e-9);f.one=f.lo[0]/(Math.max(...f.lo)+1e-9)}
+ BF={key,bars,beat,bar,t0,L};return BF}
+function fvec(f){const v=[];for(let k=0;k<16;k++)v.push(f.lo[k],f.mi[k],f.hi[k]);return v}
+function cos(a,b){let x=0,p=0,q=0;for(let i=0;i<a.length;i++){x+=a[i]*b[i];p+=a[i]*a[i];q+=b[i]*b[i]}return x/Math.sqrt(p*q+1e-12)}
+function sections(F){const B=F.bars,n=B.length;if(!n)return[];const V=B.map(fvec),cut=[0];
+ for(let b=1;b<n;b++){const d=1-cos(V[b-1],V[b]),dE=Math.abs(B[b].E-B[b-1].E);if((d>.22||dE>.25)&&(b%4===0||d>.4)&&b-cut[cut.length-1]>=4)cut.push(b)}
+ const secs=cut.map((a,i)=>{const e=i+1<cut.length?cut[i+1]:n;let E=0;for(let b=a;b<e;b++)E+=B[b].E;return{a,e,E:E/(e-a)}});
+ const Es=secs.map(x=>x.E).sort((p,q)=>p-q),hiE=Es[Math.floor(Es.length*.7)]||1,loE=Es[Math.floor(Es.length*.25)]||0;
+ const med=Es[Math.floor(Es.length/2)]||0;secs.forEach((x,i)=>{x.name=i===0&&x.E<=med&&secs.length>1?'INTRO':i===secs.length-1&&x.E<=loE&&secs.length>2?'OUTRO':x.E>=hiE?'HOOK':x.E<=loE?'BREAK':'VERSE'});
+ return secs}
+function genreLoops(o){o=o||{};const F=barFeats(),B=F.bars,n=B.length,w=Object.assign({lo:1,mi:1,hi:1,reg:0,perc:0},o.w||{}),secs=sections(F),secOf=b=>secs.find(x=>b>=x.a&&b<x.e)||{name:'PART',a:0};
+ const V=B.map(fvec),cand=[];
+ for(const nb of[1,2]){const want=nb===1?o.l1:o.l2;if(!want)continue;
+  for(let b=0;b+nb<=n;b++){let E=0;for(let j=0;j<nb;j++)E+=B[b+j].E;E/=nb;if(E<.18)continue;
+   let rep=0,c=0;for(let j=0;j<nb;j++){const nx=b+nb+j<n?b+nb+j:b-nb+j>=0?b-nb+j:-1;if(nx>=0){rep+=cos(V[b+j],V[nx]);c++}}rep=c?rep/c:0;
+   const f=B[b],shape=w.lo*f.sL+w.mi*f.sM+w.hi*f.sH+w.reg*f.reg+w.perc*(f.dH+f.dL)*.5;
+   const s=zx(Math.round((F.t0+b*F.bar)*sr)),e=s+Math.round(nb*F.bar*sr);if(e>y.length)continue;
+   const seam=1-clamp(Math.abs(y[e-1]-y[s])*5,0,1),tail=B[b+nb-1].hi[15]+B[b+nb-1].mi[15],head=f.hi[0]+f.mi[0],edge=1-clamp(Math.abs(tail-head)/(tail+head+1e-9),0,1);
+   cand.push({s,e,nb,b,sec:secOf(b),sc:rep*1.4+f.one*.5+seam*.25+edge*.25+shape*.9+Math.min(E,1)*.6,rep,one:f.one,E})}}
+ cand.sort((a,b)=>b.sc-a.sc);const pick=[],q={1:o.l1||0,2:o.l2||0},perSec={},cap=nb=>Math.max(o.perSec||2,Math.ceil((nb===1?o.l1:o.l2)/Math.max(1,secs.length))+1);
+ for(const c of cand){if(!q[c.nb])continue;const k=c.sec.a+'|'+c.nb;if((perSec[k]||0)>=cap(c.nb))continue;
+  if(pick.some(p=>p.nb===c.nb&&Math.min(p.e,c.e)-Math.max(p.s,c.s)>0))continue;
+  if(pick.some(p=>p.nb===c.nb&&cos(V[p.b],V[c.b])>.985))continue;
+  pick.push(c);q[c.nb]--;perSec[k]=(perSec[k]||0)+1}
+ pick.sort((a,b)=>b.nb-a.nb||a.b-b.b);
+ return pick.map(c=>Object.assign(c,{name:c.sec.name+' '+c.nb+'BAR '+(c.b+1),why:c.nb+'-bar loop from the '+c.sec.name.toLowerCase()+' (bar '+(c.b+1)+'), cut on the bar line at '+songBpm().toFixed(2)+' BPM, exactly '+c.nb*4+' beats long. Groove repeats '+Math.round(Math.max(0,c.rep)*100)+'%'+(c.one>.6?', hit on the one':'')+'.'}))}
+function zx(i){i=clamp(i,1,y.length-2);for(let d=0;d<24;d++){for(const j of[i-d,i+d]){if(j>0&&j<y.length&&(y[j-1]<=0)!==(y[j]<=0))return j}}return i}
+function loopPads(list){return list.map(c=>mkPad(PS.main,[[c.s,c.e]],c.name,'loop',{choke:4,mode:'latch',sync:true,bpm:songBpm(),lb:c.nb*4,why:c.why}))}
+function genreStats(){const F=barFeats(),B=F.bars;if(!B.length)return null;const top=B.filter(f=>f.E>.35);const m=k=>top.reduce((p,f)=>p+f[k],0)/(top.length||1);
+ return{bpm:songBpm(),reg:m('reg'),dH:m('dH'),dL:m('dL'),sL:m('sL'),sM:m('sM'),sH:m('sH'),bars:B.length}}
 function smartLoops(max){max=max||16;const beat=60/songBpm(),bar=beat*4,G=globMean(),dur=y.length/sr,cand=[];gMean=0;
  const envSeg=(a,n)=>{const o=new Float32Array(n),st=Math.floor(beat*sr/blk/n)||1;for(let i=0;i<n;i++)o[i]=envAt(a+i*st*blk);return o};
  const corr=(a,b)=>{let ma=0,mb=0;for(let i=0;i<a.length;i++){ma+=a[i];mb+=b[i]}ma/=a.length;mb/=b.length;let x=0,p=0,q=0;for(let i=0;i<a.length;i++){const u=a[i]-ma,v=b[i]-mb;x+=u*v;p+=u*u;q+=v*v}return x/Math.sqrt(p*q+1e-12)};
@@ -258,7 +304,7 @@ async function fill(kind,from){toKit();mainFresh();const S=PS.srcs[PS.cur];if(!S
  let pads=[];const L=S.sl;
  if(kind==='kit')pads=kitPads();
  else if(kind==='chains')pads=smartChains();
- else if(kind==='loops')pads=smartLoops();
+ else if(kind==='loops')pads=(()=>{try{const L=genreLoops({l1:6,l2:8,w:{lo:1,mi:1,hi:1}});if(L.length>=4)return loopPads(L)}catch(e){console.warn(e)}return smartLoops()})();
  else if(kind==='keys')pads=melodic();
  else if(kind==='groups')pads=await smartGroups();
  else if(kind==='cues')pads=hotCues();
@@ -857,7 +903,7 @@ const STYN={det:'Detroit / Flint bounce',trap:'trap',drill:'drill',boom:'boom ba
 /* --- automatic setup when a new song loads --- */
 let autoDoneFor=null;
 async function autoSetup(){ensurePS();mainFresh();try{renderAll()}catch(e){}if(!LS.get('bcrps:autoset')&&LS.get('bcrps:autoset')!==null)return;if(!PS.main||autoDoneFor===PS.main||!isEmpty())return;autoDoneFor=PS.main;
- toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();try{if(window.OS&&OS.sessionStart){OS.sessionStart();return}}catch(e){}toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
+ toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();{const gt=$('gToast');if(gt&&/^Setting up pads/.test(gt.textContent))gt.hidden=true}try{if(window.OS&&OS.sessionStart){OS.sessionStart();return}}catch(e){}toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
 /* --- UI --- */
 function edgeInit(){
  // transport: note repeat
@@ -949,12 +995,15 @@ window.DBC_OS={
  kit:b=>{ensurePS();return PS.banks[b].map(p=>p?{name:p.name,col:p.col,role:p.role,mode:p.mode,midi:p.midi}:null)},
  bank:()=>PS.bank,setBank:b=>{ensurePS();setBank(b)},
  hear:src=>{ensurePS();if(!ac)return false;resume();const p=osPad(src);if(p)audition(p);return!!p},
- put:(ci,b,j)=>{const p=osPad({k:'slice',ci});if(!p)return false;pushUndo();const q=deep(p);delete q.ci;delete q.chop;q.why='Picked by hand in Kit Forge (slice #'+(ci+1)+')';PS.banks[b][j]=q;if(PS.prog==='chop')setProg('kit',true);dirty();renderAll();return true},
+ put:(ci,b,j,o)=>{const p=osPad({k:'slice',ci});if(!p)return false;pushUndo();const q=deep(p);delete q.ci;delete q.chop;q.why=o&&o.why||'Picked by hand in Kit Forge (slice #'+(ci+1)+')';if(o&&o.name)q.name=o.name;if(o&&o.role)q.role=o.role;PS.banks[b][j]=q;if(PS.prog==='chop')setProg('kit',true);dirty();renderAll();return true},
  putPad:(fb,fj,b,j)=>{ensurePS();const p=PS.banks[fb][fj];if(!p)return false;pushUndo();PS.banks[b][j]=deep(p);dirty();renderAll();return true},
  clear:(b,j)=>{ensurePS();if(!PS.banks[b][j])return;pushUndo();PS.banks[b][j]=null;dirty();renderAll()},
  clearBank:b=>{ensurePS();pushUndo();PS.banks[b]=emptyBank();dirty();renderAll()},
  swap:(b1,j1,b2,j2)=>{ensurePS();pushUndo();const t=PS.banks[b1][j1];PS.banks[b1][j1]=PS.banks[b2][j2];PS.banks[b2][j2]=t;dirty();renderAll()},
  kits:()=>Object.keys(LS.get(KITKEY())||{}),
+ genreLoops:o=>{try{return genreLoops(o).map(c=>({s:c.s,e:c.e,nb:c.nb,bar:c.b+1,name:c.name,sec:c.sec.name,why:c.why}))}catch(e){console.warn(e);return[]}},
+ genreStats:()=>{try{return genreStats()}catch(e){return null}},
+ writeLoops:(b,o)=>{ensurePS();const L=genreLoops(o);if(!L.length)return 0;const B=emptyBank();loopPads(L).slice(0,16).forEach((p,j)=>B[j]=p);pushUndo();PS.banks[b]=B;renderAll();dirty();return L.length},
  saveKit:(name,b)=>{ensurePS();const all=LS.get(KITKEY())||{};all[name]=deep(PS.banks[b]);return LS.set(KITKEY(),all)},
  loadKit:(name,b)=>{ensurePS();const k=(LS.get(KITKEY())||{})[name];if(!k)return false;pushUndo();PS.banks[b]=deep(k);setProg('kit',true);setBank(b);dirty();renderAll();return true},
  delKit:name=>{const all=LS.get(KITKEY())||{};delete all[name];LS.set(KITKEY(),all)},

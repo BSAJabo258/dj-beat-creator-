@@ -115,6 +115,22 @@ Terminology: DAW (the whole production environment), sampler, drum machine, step
 **Architecture:** `js/slicesmart.js` wraps the engine's `grid()` and `rebuild()`; exposes `BC16_LOOP`.
 **Acceptance:** demo beat → BPM locked 149.78 with hits within ±18 ms, 0.81 s lead-in removed, 92-bar loop from bar 1; GRID mode → 97 % of cuts on grid, 482 grid cuts moved onto their hits.
 
+## 0.8b Genre kits: auto 1-bar and 2-bar loops + genre drum layout (built)
+**Design intent:** one press on KF-2 KIT FORGE turns the loaded song (or a Pack Factory track) into a ready kit for the genre: a loops bank and a drum bank.
+**Functional specification:**
+| Function | Behaviour |
+|----------|-----------|
+| Bar analysis | Every bar on the locked grid is measured in 16 steps for low (<150 Hz), mid and high (>4 kHz) energy. |
+| Sections | Bars are grouped where the sound changes (on 4-bar lines) and named INTRO / VERSE / HOOK / BREAK / OUTRO by energy and position. |
+| Loop choice | Each 1-bar and 2-bar candidate is scored on: does the groove repeat in the next bars, a hit on the one, a clean seam, and fit to the genre's weights (trap: low end + hats; sample-based: mids; club: steady kick on every beat; afro: busy percussion). No overlaps, no near-duplicates, spread across sections. |
+| Loop cut | Starts on the bar line (zero crossing within 0.5 ms), exactly 1 or 2 bars long, latched, tempo-synced, 1.5 ms fade at both ends. Named by section and bar, e.g. HOOK 2BAR 29. |
+| Genre families | Trap / drill / Detroit · Sample-based (boom bap, lo-fi, soul, R&B, gospel, jazz, funk) · Club (house, techno, EDM, dnb, dubstep, Jersey) · Afro / latin / island · Pop / band / cinematic. Each sets loop counts, loop weights and a 16-pad drum layout (trap: KICK, 808, SNARE, CLAP, HAT, HAT 2, OPEN HAT, PERC, KICK 2, 808 2, RIM, PERC 2, STAB, STAB 2, FX, CRASH). |
+| AUTO genre | Detected from tempo (with half/double time), kick regularity, hat density and band balance; the reason is shown. |
+| Pack types | DRUM BREAK → more 1-bar grooves; LOOPS / KEYS / FLIP → more 2-bar loops + chord stabs; 808 & BASS → 808 and bass slots; VOCAL → vox chops; ATMOSPHERE → FX and pads. |
+| Pack Factory PRO PACK | Loads the track and builds the genre kit for that pack's genre and type automatically; both banks saved to MY KITS. |
+| Auto kits on load | Bank C (loops) now uses the same exact-loop engine. |
+**Acceptance:** demo beat → detected trap (150 BPM); 12 loops, every one exactly 1 or 2 bars long and starting on the bar line (offset < 0.0003 bar); drum bank KICK, 808, SNARE, CLAP, HAT, HAT 2, OPEN HAT, PERC, KICK 2, 808 2, RIM, PERC 2, STAB, STAB 2, FX, CRASH.
+
 ## 0.9 Self-update from GitHub (built)
 **Design intent:** whoever opens BC-16 runs the newest version.
 **Functional specification:** version = content hash of the app's files, written to `version.json` and into the single-file build. On start and every 30 min the app reads `version.json` from the repository's `main` branch. If newer, a SYSTEM · UPDATE key lights on the meter bridge. On the live site (GitHub Pages) a network-first service worker means a reload is always the newest build; UPDATE reloads. From a downloaded file: UPDATE offers OPEN THE LIVE APP or DOWNLOAD THE FILE. The app is installable (web manifest) and works offline from the last good copy.

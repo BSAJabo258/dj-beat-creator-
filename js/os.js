@@ -138,7 +138,7 @@ function page(p,prev){curP=p;const U=UNITS[p]||UNITS.start;const g=GROUPS.find(x
  const tabs=$('subTabs');tabs.textContent='';if(g.pages.length>1)g.pages.forEach(q=>{const b=el('button',{class:'stab'+(q===p?' on':''),role:'tab'},'<i></i>'+UNITS[q].n);b.onclick=()=>go(q);tabs.append(b)});
  const sp=$('screenWrap').querySelector('.plate');sp.querySelector('.pn').textContent=U.n;sp.querySelector('.pm').textContent=U.m;
  $$('#stage .unit').forEach(u=>{u.classList.remove('focus');applyZoom(u)});$('stage').classList.remove('focusing');$('focusExit').hidden=true;
- if((p==='sequence'||p==='launch'||p==='build')&&ready()&&API().song().follow&&!API().playing())API().followCur();if(p==='kit')kitRender();if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='project')projRender();if(p==='start')resumeOffer();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
+ if((p==='sequence'||p==='launch'||p==='build')&&ready()&&API().song().follow&&!API().playing())API().followCur();if(p==='kit'){kitRender();if(window.BC16_PACK&&$('kfGen')&&BC16_PACK.g&&$('kfGen').querySelector('option[value="'+BC16_PACK.g+'"]'))$('kfGen').value=BC16_PACK.g;genWhy()}if(p==='build')buildRender();if(p==='factory')pfRender();if(p==='store')storeRender();if(p==='slicer')slicerRender();if(p==='project')projRender();if(p==='start')resumeOffer();if(p==='tower')towerRender();if(p==='launch')launchRender();if(p==='guide')guideRender();
  {const fi=FLOW.findIndex(f=>f[0]===p),nx=FLOW[fi+1],sn=$('subNext');sn.hidden=fi<0||!nx;if(nx){sn.innerHTML='<small>STEP '+(fi+1)+' OF '+FLOW.length+'</small> NEXT: '+UNITS[nx[0]].n+' ▶';sn.onclick=()=>go(nx[0])}}
  $('osBack').disabled=!hist.length;const pb=hist[hist.length-1];$('subBack').hidden=!pb;if(pb)$('subBack').querySelector('span').textContent=(UNITS[pb]||{n:'BACK'}).n;
  if(coach&&coach.mode==='tour')setTimeout(coachPlace,80);CO.last=null;CO.sig='';coachRender()}
@@ -174,6 +174,7 @@ const KF={bank:0,armed:0,page:0,per:16,filt:'all',list:null,key:''};
 function buildKit(){const u=el('section',{id:'osKit',class:'unit'});
  u.innerHTML='<div class="kfwrap"><div class="kfrack" id="kfRack">'+plate('KIT RACK','KR-16','kfRack')+
  '<div class="kfbody"><div class="kfbanks" id="kfBanks" data-help="kfBanks"></div><div class="kfslots" id="kfSlots" data-help="kfSlots"></div>'+
+ '<div class="kfgenre" data-help="kfGenre"><span class="hwl">GENRE KIT</span><div class="kfsrow"><select id="kfGen" aria-label="Genre"></select><button class="hwb np" id="kfGo"><i class="led"></i>BUILD GENRE KIT</button></div><div class="kfsrow"><label class="sbchk"><input type="checkbox" id="kfL2" checked> 2-bar loops</label><label class="sbchk"><input type="checkbox" id="kfL1" checked> 1-bar loops</label><label class="sbchk"><input type="checkbox" id="kfDr" checked> drum kit</label></div><small id="kfGenWhy"></small></div>'+
  '<div class="kfauto" data-help="kfAuto"><span class="hwl">AUTO-FILL</span><div class="kfsrow"><select id="kfHow"><option value="roles">MPC drum layout (kick, snare, hats, percs, tones)</option><option value="best">Best cuts, highest score first</option><option value="order">Cuts in order from this library page</option><option value="tonal">Best tonal stabs (for melodies)</option><option value="loops">Loops (2 beats and longer)</option></select><label class="sbchk"><input type="checkbox" id="kfRep"> replace</label><button class="hwb np" id="kfFill"><i class="led"></i>FILL</button></div><label class="sbchk"><input type="checkbox" id="kfRoles" checked> show MPC roles on empty slots</label></div><div class="kfsug" id="kfSug" data-help="kfSug"></div>'+
  '<div class="kfact"><button class="hwb np" id="kfDone" hidden><i class="led"></i>◀ DONE, BACK TO PADS</button><button class="hwb" id="kfClr" data-help="kfClr"><i class="led"></i>CLEAR SLOT</button><button class="hwb" id="kfClrB" data-help="kfClrB"><i class="led"></i>CLEAR BANK</button><button class="hwb" id="kfPads" data-help="kfPads"><i class="led"></i>PLAY ON PADS ▶</button></div>'+
  '<div class="kfsave" data-help="kfSave"><span class="hwl">MY KITS</span><div class="kfsrow"><input id="kfName" placeholder="Kit name, e.g. Flint knock" maxlength="32"><button class="hwb" id="kfSv"><i class="led"></i>SAVE KIT</button></div><div id="kfList"></div></div></div></div>'+
@@ -191,7 +192,10 @@ function kitWire(){
  $('kfBanks').onclick=e=>{const b=e.target.closest('button');if(!b)return;KF.bank=+b.dataset.b;API().setBank(KF.bank);kitArmNext(true);kitRender()};
  $('kfClr').onclick=()=>{if(!need())return;API().clear(KF.bank,KF.armed);kitRender();say('Cleared slot '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+'. UNDO brings it back.')};
  $('kfClrB').onclick=async()=>{if(!need())return;if(!await ask('Clear all 16 slots in kit bank '+BL[KF.bank]+'? UNDO brings them back.'))return;API().clearBank(KF.bank);KF.armed=0;kitRender()};
- KF.roles=true;$('kfRoles').onchange=e=>{KF.roles=e.target.checked;kitRender()};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
+ KF.roles=true;$('kfRoles').onchange=e=>{KF.roles=e.target.checked;kitRender()};
+ $('kfGen').innerHTML='<option value="auto">AUTO (detect the genre)</option>'+Object.entries(PROF).map(([k,P])=>'<optgroup label="'+P.n+'">'+GENRES.filter(x=>G2P[x[0]]===k).map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</optgroup>').join('');
+ $('kfGen').onchange=()=>genWhy();
+ $('kfGo').onclick=()=>{if(!need())return;let g=$('kfGen').value;if(g==='auto')g=genreGuess().g;genreKit(g,{l1:$('kfL1').checked,l2:$('kfL2').checked,drums:$('kfDr').checked,t:window.BC16_PACK&&window.BC16_PACK.t})};$('kfFill').onclick=()=>autoFill($('kfHow').value,$('kfRep').checked);
  holdable($('kfSug'),'.kc',(t)=>API().hear({k:'slice',ci:+t.dataset.ci}),(t)=>kitDrop(+t.dataset.ci,KF.armed),{drag:(t,slot)=>kitDrop(+t.dataset.ci,+slot.dataset.j),target:'#kfSlots .ks'});
  $('kfDone').onclick=()=>{const f=pickFrom&&pickFrom.from;pickFrom=null;if(f)go(f);else back()};
  $('kfPads').onclick=()=>{if(!need())return;API().setProg('kit');API().setBank(KF.bank);go('pads');say('The PAD MATRIX now plays kit bank '+BL[KF.bank]+' (KIT program).')};
@@ -490,11 +494,11 @@ function pfPoll(){clearTimeout(pfT);const live=PF.jobs.filter(j=>j.task&&['sent'
   pfSave();pfJobsRender();pfItemsRender();pfPoll()},8000)}
 async function pfFetch(it){if(it.blob)return it.blob;const r=await fetch(it.url);if(!r.ok)throw new Error('download failed ('+r.status+')');return await r.blob()}
 async function pfOffline(it,quiet){try{const b=await pfFetch(it);it.blob=b;await idbPut(it);if(!quiet)say('Saved “'+it.title+'” on this device.');pfItemsRender();return true}catch(e){if(!quiet)say('Could not save “'+it.title+'” here: the file host blocks it. Press ⬇ to download it, then drop it on the machine.');return false}}
-async function pfLoad(it){say('Loading “'+it.title+'”…');try{const b=await pfFetch(it);const buf=await b.arrayBuffer();if(!it.blob){it.blob=b;idbPut(it)}load(buf,it.title.replace(/[^\w\- ]+/g,'').trim()||'generated');return true}catch(e){say('Could not load it directly: the file host blocks it. Press ⬇ to download it, then drop the file on the machine.');return false}}
+async function pfLoad(it){window.BC16_PACK={g:it.g,t:it.t,title:it.title};say('Loading “'+it.title+'”…');try{const b=await pfFetch(it);const buf=await b.arrayBuffer();if(!it.blob){it.blob=b;idbPut(it)}load(buf,it.title.replace(/[^\w\- ]+/g,'').trim()||'generated');return true}catch(e){say('Could not load it directly: the file host blocks it. Press ⬇ to download it, then drop the file on the machine.');return false}}
 async function pfPack(it){if(!(await pfLoad(it)))return;say('Loading, chopping and building kits for “'+it.title+'”… this takes a moment.');let n=0;const nm=(it.title.replace(/[^\w\- ]+/g,'').trim()||'generated').replace(/[^\w\-]+/g,'_');
  while(n<600){await sleep(500);n++;try{if(fname===nm&&ready()&&API().kit(0).some(Boolean))break}catch(e){}}if(n>=600){say('The track loaded; build kits from KIT FORGE.');return}await sleep(1500);
- let saved=0;for(let b=0;b<8;b++){if(API().kit(b).filter(Boolean).length>=4){API().saveKit(gName(it.g)+' '+tName(it.t)+' · bank '+BL[b],b);saved++}}
- say('Pro pack ready: '+saved+' kit'+(saved!==1?'s':'')+' from “'+it.title+'” saved under MY KITS in KIT FORGE. The cuts are on the pads now.');go('kit')}
+ const r=await genreKit(it.g,{t:it.t,force:true,title:tName(it.t)});
+ say('Pro pack ready from “'+it.title+'”: '+(r&&r.loops?r.loops+' exact 1- and 2-bar loops':'no clean loops')+(r&&r.drums?' and a '+r.drums+'-pad '+gName(it.g)+' drum kit':'')+', saved under MY KITS in KIT FORGE.');go('kit')}
 function factoryWire(){const k=LSg('bc16:pf:key','');if(k){$('pfKey').value=k;$('pfRem').checked=true}
  $('pfRem').onchange=e=>{if(e.target.checked){if(pfKey())LSs('bc16:pf:key',pfKey())}else localStorage.removeItem('bc16:pf:key')};
  $('pfKey').onchange=()=>{if($('pfRem').checked)LSs('bc16:pf:key',pfKey())};
@@ -633,6 +637,70 @@ function autoFill(how,replace){if(!need())return;const A=API(),K=A.kit(KF.bank),
   else if(how==='loops')L=R.list.filter(o=>o.bt>=1.8&&o.dup==null).sort((a,b)=>(b.grid+b.score)-(a.grid+a.score)).map(o=>o.i);else L=R.list.filter(o=>o.dup==null).sort((a,b)=>b.score-a.score).map(o=>o.i);
   let k=0;for(const j of slots){const ci=L[k++];if(ci==null)break;A.put(ci,KF.bank,j);n++}}
  kitArmNext(true);kitRender();say(n?'Filled '+n+' slot'+(n>1?'s':'')+' in bank '+BL[KF.bank]+' ('+({roles:'MPC drum layout',order:'cuts in order from this page',tonal:'best tonal stabs',loops:'loops',best:'best cuts'})[how]+'). Change any slot by lighting it and holding another cut; UNDO takes the fill back.':'Not enough matching cuts. Try another fill, or another chop recipe on SLICE BRAIN.')}
+
+/* ================= GENRE KITS: one tap = loops bank + drum bank designed for the genre =================
+   Loops: exact 1-bar and 2-bar loops cut on the locked bar grid (studio.js genreLoops).
+   Drums: a 16-pad layout per genre family, each slot filled with the best matching cut. */
+const PROF={
+ trap:{n:'Trap / drill / Detroit',l2:6,l1:6,w:{lo:1.3,mi:.5,hi:1.1,reg:0,perc:.3},
+  drums:['KICK','808','SNARE','CLAP','HAT','HAT 2','OPEN HAT','PERC','KICK 2','808 2','RIM','PERC 2','STAB','STAB 2','FX','CRASH']},
+ sample:{n:'Sample-based / soul / boom bap',l2:8,l1:4,w:{lo:.5,mi:1.4,hi:.4,reg:0,perc:0},
+  drums:['KICK','SNARE','HAT','OPEN HAT','KICK 2','SNARE 2','RIM','PERC','CHORD','CHORD 2','CHORD 3','CHORD 4','STAB','STAB 2','BASS','FX']},
+ club:{n:'House / techno / club',l2:4,l1:8,w:{lo:1,mi:.6,hi:1,reg:1.4,perc:.3},
+  drums:['KICK','CLAP','HAT','OPEN HAT','KICK 2','CLAP 2','HAT 2','SHAKER','PERC','PERC 2','RIM','CRASH','STAB','STAB 2','BASS','FX']},
+ afro:{n:'Afro / latin / island',l2:6,l1:6,w:{lo:.9,mi:.7,hi:1.1,reg:.2,perc:1.2},
+  drums:['KICK','LOG DRUM','RIM','SHAKER','PERC','PERC 2','PERC 3','SNARE','HAT','OPEN HAT','LOG DRUM 2','PERC 4','STAB','STAB 2','CHORD','FX']},
+ band:{n:'Pop / band / cinematic',l2:8,l1:4,w:{lo:.8,mi:1.1,hi:.7,reg:0,perc:0},
+  drums:['KICK','SNARE','HAT','OPEN HAT','KICK 2','SNARE 2','CRASH','PERC','CHORD','CHORD 2','STAB','STAB 2','BASS','BASS 2','FX','FX 2']}};
+const G2P={detroit:'trap',trap:'trap',drill:'trap',phonk:'trap',jersey:'club',boombap:'sample',lofi:'sample',gfunk:'sample',rnb:'sample',neosoul:'sample',gospel:'sample',soul:'sample',funk:'sample',jazz:'sample',blues:'sample',
+ afrobeats:'afro',amapiano:'afro',reggaeton:'afro',dancehall:'afro',latin:'afro',house:'club',deephouse:'club',techno:'club',edm:'club',dnb:'club',dubstep:'club',pop:'band',rock:'band',country:'band',cinematic:'band',ambient:'band',kpop:'band',bollywood:'band',arab:'band'};
+/* pack types reshape the kit: a drum pack is mostly drums and 1-bar grooves, a loops pack is mostly 2-bar loops */
+const TSHAPE={drums:{l2:4,l1:10,drums:null},loops:{l2:10,l1:6,drums:['CHORD','CHORD 2','CHORD 3','CHORD 4','STAB','STAB 2','STAB 3','STAB 4','BASS','BASS 2','FX','FX 2','KICK','SNARE','HAT','PERC']},
+ keys:{l2:10,l1:6,drums:['CHORD','CHORD 2','CHORD 3','CHORD 4','CHORD 5','CHORD 6','STAB','STAB 2','STAB 3','STAB 4','BASS','BASS 2','FX','KICK','SNARE','HAT']},flip:{l2:10,l1:6},
+ '808':{l2:6,l1:8,drums:['808','808 2','808 3','808 4','BASS','BASS 2','BASS 3','BASS 4','KICK','KICK 2','SNARE','CLAP','HAT','OPEN HAT','PERC','FX']},
+ vocal:{l2:6,l1:8,drums:['VOX','VOX 2','VOX 3','VOX 4','VOX 5','VOX 6','VOX 7','VOX 8','STAB','STAB 2','FX','FX 2','KICK','SNARE','HAT','PERC']},
+ atmos:{l2:8,l1:4,drums:['FX','FX 2','FX 3','FX 4','CHORD','CHORD 2','CHORD 3','CHORD 4','STAB','STAB 2','BASS','CRASH','KICK','SNARE','HAT','PERC']},beat:{}};
+/* how each named slot picks its cut */
+function slotRule(name){const n=name.replace(/ \d+$/,''),k=+((name.match(/ (\d+)$/)||[])[1]||1)-1;const R={
+  'KICK':[o=>o.kind==='kick'&&o.bt<1.2,o=>o.score],'808':[o=>(o.kind==='tone'||o.kind==='kick')&&o.tonal&&o.midi!=null&&o.midi<=52&&o.bt>=.6,o=>o.score+o.bt*.2],
+  'LOG DRUM':[o=>(o.kind==='tone'||o.kind==='kick')&&o.tonal&&o.midi!=null&&o.midi<=55&&o.bt<1,o=>o.score+o.punch*.3],'BASS':[o=>o.tonal&&o.midi!=null&&o.midi<=50,o=>o.score],
+  'SNARE':[o=>o.kind==='snare'&&o.bt<1.2,o=>o.score],'CLAP':[o=>o.kind==='snare'&&o.bt<1,o=>o.score+o.clean*.2],'RIM':[o=>o.kind==='snare'&&o.bt<.3,o=>o.clean+o.punch],
+  'HAT':[o=>o.kind==='hat'&&o.bt<.35,o=>o.score],'SHAKER':[o=>o.kind==='hat'&&o.bt<.5,o=>o.clean],'OPEN HAT':[o=>o.kind==='hat',o=>o.bt*.5+o.score],'CRASH':[o=>o.kind==='hat'&&o.bt>.8,o=>o.bt*.3+o.score],
+  'PERC':[o=>(o.kind==='snare'||o.kind==='hat')&&o.bt<.5,o=>o.punch+o.clean],
+  'STAB':[o=>(o.kind==='tone'||o.tonal)&&o.bt<1.2,o=>o.score],'CHORD':[o=>(o.kind==='tone'||o.tonal)&&o.bt>=.5,o=>o.score+Math.min(o.bt,2)*.15],
+  'VOX':[o=>o.kind==='tone'&&o.midi!=null&&o.midi>=55&&o.bt>=.25,o=>o.score],'FX':[o=>o.bt>=1,o=>o.bt*.2+o.score]}[n]||[()=>true,o=>o.score];
+ return{f:R[0],s:R[1],skip:k}}
+function genreDrums(names,bank){const A=API(),Rr=sliceIntel();if(!Rr)return 0;const used=new Set(),B=[];
+ const L=Rr.list.filter(o=>o.dup==null).map(o=>{const sl=A.slice(o.i);return Object.assign({},o,{midi:sl&&sl.midi})});
+ names.forEach((nm,j)=>{const r=slotRule(nm);let c=L.filter(o=>!used.has(o.i)&&r.f(o)).sort((a,b)=>r.s(b)-r.s(a));if(!c.length)c=L.filter(o=>!used.has(o.i)&&o.kind===({KICK:'kick','808':'kick',SNARE:'snare',CLAP:'snare',RIM:'snare',HAT:'hat',SHAKER:'hat','OPEN HAT':'hat',CRASH:'hat',PERC:'hat'}[nm.replace(/ \d+$/,'')]||'tone')).sort((a,b)=>b.score-a.score);
+  const o=c[0];if(o){used.add(o.i);B[j]=o.i}});
+ let n=0;A.clearBank(bank);const RL={KICK:'kick','808':'bass',SNARE:'snare',CLAP:'snare',RIM:'snare',HAT:'hat',SHAKER:'hat','OPEN HAT':'open',CRASH:'open',PERC:'perc','LOG DRUM':'bass',BASS:'bass'};
+ B.forEach((ci,j)=>{if(ci==null)return;const nm=names[j],base=nm.replace(/ \d+$/,'');if(A.put(ci,bank,j,{name:nm,role:RL[base],why:nm+' for this genre: the best-scoring '+base.toLowerCase()+' cut (slice #'+(ci+1)+')'}))n++});
+ return n}
+function genreGuess(){const S=API().genreStats();if(!S)return{g:'trap',why:'no analysis yet'};let b=S.bpm;const fast=b>=125,dbl=b<90?b*2:b;
+ if(S.reg>.5&&b>=115&&b<=135)return{g:b>126?'techno':'house',why:'steady kick on every beat at '+Math.round(b)+' BPM'};
+ if(b>=165&&b<=180&&S.reg<.4)return{g:'dnb',why:'fast broken beat at '+Math.round(b)+' BPM'};
+ if(dbl>=125&&dbl<=175&&S.reg<.62&&(S.dH>=.15||S.sL>.3))return{g:'trap',why:'trap tempo ('+Math.round(b)+' BPM) with busy hats and a broken kick pattern'};
+ if(b>=95&&b<=125&&S.dH+S.dL>.45)return{g:'afrobeats',why:'busy percussion at '+Math.round(b)+' BPM'};
+ if(b>=70&&b<=100&&S.sM>.38)return{g:S.sH<.12?'lofi':'boombap',why:'mid-heavy, sample-style groove at '+Math.round(b)+' BPM'};
+ if(dbl>=120&&S.sL>.35)return{g:'trap',why:'heavy low end at '+Math.round(b)+' BPM'};
+ return{g:'pop',why:'no strong genre signature, balanced layout'}}
+function genreProfile(g,t){const base=PROF[G2P[g]||'band'],sh=TSHAPE[t]||{};return{g,t,n:base.n,w:base.w,l2:sh.l2!=null?sh.l2:base.l2,l1:sh.l1!=null?sh.l1:base.l1,drums:sh.drums===null?base.drums:(sh.drums||base.drums)}}
+async function genreKit(g,opt){if(!need())return null;opt=opt||{};const A=API(),P=genreProfile(g,opt.t);const do1=opt.l1!==false,do2=opt.l2!==false,doD=opt.drums!==false;
+ const empty=[...Array(8).keys()].filter(b=>!A.kit(b).some(Boolean));let need2=(do1||do2?1:0)+(doD?1:0);
+ if(empty.length<need2&&!opt.force){if(!await ask('Not enough empty kit banks. Build the genre kit into banks '+BL[KF.bank]+(need2>1?' and '+BL[(KF.bank+1)%8]:'')+' and replace what is there? UNDO brings it back.'))return null}
+ const banks=empty.length>=need2?empty:[KF.bank,(KF.bank+1)%8];let bi=0,res={};
+ if(do1||do2){const b=banks[bi++];res.loops=A.writeLoops(b,{l1:do1?P.l1:0,l2:do2?P.l2:0,w:P.w,perSec:2});res.lb=b}
+ if(doD){const b=banks[bi++];res.drums=genreDrums(P.drums,b);res.db=b}
+ const gn=(GENRES.find(x=>x[0]===g)||[0,g])[1];
+ if(opt.save!==false){if(res.loops)A.saveKit(gn+' · loops'+(opt.title?' · '+opt.title:''),res.lb);if(res.drums)A.saveKit(gn+' · drums'+(opt.title?' · '+opt.title:''),res.db)}
+ KF.bank=res.lb!=null?res.lb:res.db;A.setBank(KF.bank);kitRender();
+ say(gn+' kit built: '+(res.loops?res.loops+' loops (exact '+(do2?'2-bar':'')+(do2&&do1?' and ':'')+(do1?'1-bar':'')+', cut on the bar line) in bank '+BL[res.lb]:'no loops found')+(res.drums!=null?', '+res.drums+'-pad '+P.n.toLowerCase()+' drum layout in bank '+BL[res.db]:'')+'. Saved under MY KITS. UNDO takes it back.');
+ return res}
+
+function genWhy(){const w=$('kfGenWhy');if(!w)return;if(!ready()){w.textContent='Load a song: the kit is cut from it.';return}const sel=$('kfGen').value;let g=sel,why='';
+ if(sel==='auto'){const q=genreGuess();g=q.g;why='Detected '+(GENRES.find(x=>x[0]===g)||[0,g])[1]+': '+q.why+'. '}
+ const P=genreProfile(g,window.BC16_PACK&&window.BC16_PACK.t);w.textContent=why+P.n+' layout: '+P.l2+' two-bar and '+P.l1+' one-bar loops, plus '+P.drums.slice(0,6).join(', ').toLowerCase()+'…'}
 function kitSuggest(){const box=$('kfSug');if(!box)return;if(!ready()){box.innerHTML='';return}const c=roleCands(KF.armed,new Set()).slice(0,8),A=API();
  box.innerHTML='<span class="hwl">BEST FOR '+BL[KF.bank]+String(KF.armed+1).padStart(2,'0')+(KF.roles?' · '+ROLES[KF.armed][0]:'')+'</span><div class="kfsg">'+c.map(o=>{const s=A.slice(o.i);return'<button class="kc" data-ci="'+o.i+'" style="--pc:'+s.col+'"><canvas width="120" height="40"></canvas><b>#'+(o.i+1)+'</b><span>'+Math.round(o.score*100)+'</span></button>'}).join('')+'</div>';
  $$('#kfSug .kc').forEach(x=>wave(x.querySelector('canvas'),A.slice(+x.dataset.ci)))}
@@ -855,6 +923,7 @@ const H={
  osUndo:['UNDO','Takes back the last change: a recording, a cleared pattern, a pad you loaded. Up to 50 steps.','Transport'],
  ltOn:['LOOP-TIGHT','On: the tempo is locked to the hits, silence is cut off the front and the end, bar 1 starts on the first downbeat with sound, and every cut starts right on its hit. The readout shows how tight it is. Off: cuts exactly as detected.','Sampler'],
  osUpd:['UPDATE','A newer BC-16 is on GitHub. On the live site it reloads into the new version. From a downloaded file it opens the live app or downloads the newest file. Save projects as .bc16 files to carry them across.','System'],
+ kfGenre:['GENRE KIT','One tap builds two banks from the loaded song, designed for the genre: exact 2-bar and 1-bar loops cut on the bar line (they loop in time and click-free), and a 16-pad drum layout for that genre (trap: kick, 808, snare, clap, hats, open hat, percs, stabs; club: kick, clap, hats, shaker, percs; sample-based: drums plus chord stabs and bass). AUTO detects the genre from tempo and groove. Both banks are saved under MY KITS.','Kit Forge'],
  osHome:['STUDIO','The studio floor: every machine in its place with its live status. Tap a machine to walk up to it. Keyboard: Home, or Esc from any machine.','Navigation'],
  osBack:['◀ BACK','Returns to the unit you were on before, like a back button. Keyboard: `','Transport'],
  /* pad matrix */
@@ -1118,6 +1187,7 @@ const CH=[
   ['kit','#kfFilt','Filter','Use the filter to show only kicks, only snares, only hats, or only tonal sounds. This makes finding the right sound much faster.',{z:2.2,need:1}],
   ['kit','#kfCuts','Hear, then hold','Tap a cut to hear it. When you find the one you want, hold it down for half a second. It drops into the glowing slot. Watch.',{z:1.5,need:1,act:async(t,tok)=>{const c=$$('#kfCuts .kc').find(x=>/KICK/.test(x.textContent))||$$('#kfCuts .kc')[0];if(!c)return;await ghostTo(c,true);API().hear({k:'slice',ci:+c.dataset.ci});await cw(900,tok);c.classList.add('held');await cw(400,tok);kitDrop(+c.dataset.ci,KF.armed)}}],
   ['kit','#kfSlots','Keep going','The next empty slot lit up by itself. So you can keep tapping and holding, one sound after another, and build a full kit in a minute. You can also drag a cut onto any slot you like.',{z:1.6,need:1,act:async(t,tok)=>{const c=$$('#kfCuts .kc').find(x=>/SNARE/.test(x.textContent));if(!c)return;API().hear({k:'slice',ci:+c.dataset.ci});await cw(700,tok);kitDrop(+c.dataset.ci,KF.armed)}}],
+  ['kit','.kfgenre','Genre kit','Genre kit builds two banks in one press, designed for the style you pick. The first bank is loops: two bar and one bar loops cut exactly on the bar line, so they loop in time with no clicks, taken from the strongest parts of the song. The second bank is a drum kit laid out for that genre. For trap that means kick, eight oh eight, snare, clap, hats, open hat, percs and stabs. Leave it on auto and it hears the genre for you. Both banks are saved under my kits.',{z:2,need:1}],
   ['kit','.kfauto','Auto fill','Auto fill builds a bank in one press: an M P C drum layout with kick, snare, hats, percs and tones in their places, or the best cuts, cuts in order, tonal stabs, or loops. Then change any slot by hand. The strip below shows the best cuts for the glowing slot.',{z:1.8,need:1}],
   ['kit','.kfact','Change or remove a sound','To change a slot, tap it and hold a different cut. It is replaced. Clear slot empties it. Clear bank empties all sixteen. Undo brings anything back.',{z:2,need:1}],
   ['kit','.kfsave','Save your kit','Type a name for the kit and press Save kit. Your saved kits are listed here. Tap a name to load it into any bank. The x deletes it. That is how you keep a collection of kits for each song.',{z:2,need:1}],
