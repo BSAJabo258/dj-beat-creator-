@@ -115,6 +115,11 @@ Terminology: DAW (the whole production environment), sampler, drum machine, step
 **Architecture:** `js/slicesmart.js` wraps the engine's `grid()` and `rebuild()`; exposes `BC16_LOOP`.
 **Acceptance:** demo beat → BPM locked 149.78 with hits within ±18 ms, 0.81 s lead-in removed, 92-bar loop from bar 1; GRID mode → 97 % of cuts on grid, 482 grid cuts moved onto their hits.
 
+## 0.8a Smart start (built): the smartest MPC, not the most functional
+**Design intent:** loading a song ends in a playable machine, never in a question.
+**Functional specification:** on load the machine locks the tempo, cuts loop-tight, detects the genre (or takes it from the pack), builds the genre drum kit in bank A and exact 1- and 2-bar loops in bank C, switches the pads to the KIT program, and opens the PM-16 drum machine. A strip (beside the pads, never over them) says what it built and why, with one-tap next moves: RECORD A BEAT, WRITE A STARTER BEAT, CHOP THE SONG, BUILD A FULL SONG, CHANGE GENRE. Patterns stay empty; nothing plays until a pad or PLAY is pressed. The old SESSION START menu is retired.
+**Acceptance:** demo → drum machine, bank A = KICK, 808, SNARE, CLAP, HAT…; bank C = 12 loops; 0 sounds start without input; WRITE A STARTER BEAT fills P1 and PLAY plays it.
+
 ## 0.8b Genre kits: auto 1-bar and 2-bar loops + genre drum layout (built)
 **Design intent:** one press on KF-2 KIT FORGE turns the loaded song (or a Pack Factory track) into a ready kit for the genre: a loops bank and a drum bank.
 **Functional specification:**

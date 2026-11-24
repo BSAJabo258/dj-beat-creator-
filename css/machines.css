@@ -257,3 +257,21 @@ body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
 .kfgenre select{flex:1 1 180px;min-width:0;background:#0b0d12;color:#fff;border:1px solid #000;border-radius:6px;padding:8px;font:600 11.5px 'Archivo'}
 .kfgenre .hwb{flex:none}
 .kfgenre small{font:500 10.5px var(--mono);color:var(--silk2);line-height:1.45}
+/* SMART START strip: what the machine set up, and the next moves. Never blocks the pads. */
+#smartCard{position:fixed;left:50%;transform:translateX(-50%);bottom:104px;z-index:60;width:min(780px,calc(100vw - 24px));padding:12px 14px 12px;border-radius:14px;border:1px solid #000;
+ background:linear-gradient(180deg,#1b1d25,#121319);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent),0 0 30px color-mix(in srgb,var(--acc) 22%,transparent),0 18px 40px rgba(0,0,0,.65);animation:scIn .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes scIn{from{opacity:0;transform:translate(-50%,14px)}}
+.scTop{display:flex;align-items:baseline;gap:10px}
+.scTop b{font:900 15px 'Archivo';font-stretch:120%;letter-spacing:.1em;color:var(--acc)}
+.scTop span{font:600 11px var(--mono);color:var(--silk);flex:1}
+.scX{background:none;border:0;color:var(--silk2);font-size:15px;cursor:pointer;padding:2px 6px}
+#smartCard p{margin:6px 0 10px;font:500 12px/1.5 'Archivo';color:#c9cfdb}
+#smartCard p b{color:#fff}
+.scB{display:flex;flex-wrap:wrap;gap:7px}
+.scB button{display:flex;align-items:center;gap:7px;padding:9px 12px 8px;border-radius:7px;border:1px solid #000;cursor:pointer;background:linear-gradient(180deg,#2a2d36,#191b21);color:#eef1f6;font:800 10.5px var(--mono);letter-spacing:.08em;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000}
+.scB button i{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc)}
+.scB button:first-child{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 70%,#000),color-mix(in srgb,var(--acc) 35%,#000));color:#fff}
+.scB button:hover{filter:brightness(1.15)}
+@media (max-width:900px){#smartCard{bottom:auto;top:8px}.scB button{flex:1 1 calc(50% - 7px);justify-content:center}}
+@media (min-width:901px){#smartCard{left:118px;transform:none;width:min(470px,calc(100vw - 140px));animation-name:scIn2}}
+@keyframes scIn2{from{opacity:0;transform:translateY(14px)}}

@@ -903,7 +903,7 @@ const STYN={det:'Detroit / Flint bounce',trap:'trap',drill:'drill',boom:'boom ba
 /* --- automatic setup when a new song loads --- */
 let autoDoneFor=null;
 async function autoSetup(){ensurePS();mainFresh();try{renderAll()}catch(e){}if(!LS.get('bcrps:autoset')&&LS.get('bcrps:autoset')!==null)return;if(!PS.main||autoDoneFor===PS.main||!isEmpty())return;autoDoneFor=PS.main;
- toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();{const gt=$('gToast');if(gt&&/^Setting up pads/.test(gt.textContent))gt.hidden=true}try{if(window.OS&&OS.sessionStart){OS.sessionStart();return}}catch(e){}toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
+ toast('Setting up pads for '+PS.main+'…');try{AUTO=true;try{await magic()}finally{AUTO=false}PS.prog='chop';PS.bank=0;CHOPB=null;renderAll();{const gt=$('gToast');if(gt&&/^Setting up pads/.test(gt.textContent))gt.hidden=true}try{if(window.OS&&OS.smartStart){OS.smartStart();return}}catch(e){}toast('Pads are ready. The main pads play your chops in order (CHOP program); your smart kits, chains, loops and hot cues are in the KIT program.',[['Open Pads',()=>window.goPage?goPage('pads'):tab('S')]])}catch(e){}}
 /* --- UI --- */
 function edgeInit(){
  // transport: note repeat

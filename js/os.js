@@ -688,13 +688,13 @@ function genreGuess(){const S=API().genreStats();if(!S)return{g:'trap',why:'no a
 function genreProfile(g,t){const base=PROF[G2P[g]||'band'],sh=TSHAPE[t]||{};return{g,t,n:base.n,w:base.w,l2:sh.l2!=null?sh.l2:base.l2,l1:sh.l1!=null?sh.l1:base.l1,drums:sh.drums===null?base.drums:(sh.drums||base.drums)}}
 async function genreKit(g,opt){if(!need())return null;opt=opt||{};const A=API(),P=genreProfile(g,opt.t);const do1=opt.l1!==false,do2=opt.l2!==false,doD=opt.drums!==false;
  const empty=[...Array(8).keys()].filter(b=>!A.kit(b).some(Boolean));let need2=(do1||do2?1:0)+(doD?1:0);
- if(empty.length<need2&&!opt.force){if(!await ask('Not enough empty kit banks. Build the genre kit into banks '+BL[KF.bank]+(need2>1?' and '+BL[(KF.bank+1)%8]:'')+' and replace what is there? UNDO brings it back.'))return null}
- const banks=empty.length>=need2?empty:[KF.bank,(KF.bank+1)%8];let bi=0,res={};
+ if(!opt.banks&&empty.length<need2&&!opt.force){if(!await ask('Not enough empty kit banks. Build the genre kit into banks '+BL[KF.bank]+(need2>1?' and '+BL[(KF.bank+1)%8]:'')+' and replace what is there? UNDO brings it back.'))return null}
+ const banks=opt.banks||(empty.length>=need2?empty:[KF.bank,(KF.bank+1)%8]);let bi=0,res={};
  if(do1||do2){const b=banks[bi++];res.loops=A.writeLoops(b,{l1:do1?P.l1:0,l2:do2?P.l2:0,w:P.w,perSec:2});res.lb=b}
  if(doD){const b=banks[bi++];res.drums=genreDrums(P.drums,b);res.db=b}
  const gn=(GENRES.find(x=>x[0]===g)||[0,g])[1];
  if(opt.save!==false){if(res.loops)A.saveKit(gn+' · loops'+(opt.title?' · '+opt.title:''),res.lb);if(res.drums)A.saveKit(gn+' · drums'+(opt.title?' · '+opt.title:''),res.db)}
- KF.bank=res.lb!=null?res.lb:res.db;A.setBank(KF.bank);kitRender();
+ if(opt.quiet)return res;KF.bank=res.lb!=null?res.lb:res.db;A.setBank(KF.bank);kitRender();
  say(gn+' kit built: '+(res.loops?res.loops+' loops (exact '+(do2?'2-bar':'')+(do2&&do1?' and ':'')+(do1?'1-bar':'')+', cut on the bar line) in bank '+BL[res.lb]:'no loops found')+(res.drums!=null?', '+res.drums+'-pad '+P.n.toLowerCase()+' drum layout in bank '+BL[res.db]:'')+'. Saved under MY KITS. UNDO takes it back.');
  return res}
 
@@ -844,6 +844,31 @@ function sessionStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;if(doc
   else if(k==='look'){go('floor')}
   else if(k==='song'){go('build');setTimeout(()=>{$('sbTpl').scrollIntoView({block:'center'});$('sbTplRow').classList.add('hl');say('Pick a structure and press LAY IT OUT. Beat Brain writes each part from your sounds; then edit any part.')},300)}}
  d.onclick=e=>{const b=e.target.closest('[data-s]');if(b)done(b.dataset.s)};addEventListener('keydown',function k(e){if(e.key==='Escape'&&document.body.contains(d)){d.remove();removeEventListener('keydown',k,true)}},true)}
+
+
+/* ================= SMART START: the machine does the thinking when a song loads =================
+   Tempo locked, cuts loop-tight, genre detected, genre drum kit in bank A, exact 1- and 2-bar loops in bank C.
+   Lands on the drum machine in the KIT program, ready to play. Nothing plays until you touch a pad or PLAY.
+   One strip of next moves; no menu to answer. */
+async function smartStart(){if(!ready()||Date.now()<(PJ.quietUntil||0))return;const touring=document.body.classList.contains('coach');
+ const A=API();let fn='';try{fn=fname}catch(e){}const pk=window.BC16_PACK,fromPack=pk&&(pk.title||'').replace(/[^\w\- ]+/g,'').trim().replace(/[^\w\-]+/g,'_')===fn;
+ const q=genreGuess(),g=fromPack&&pk.g?pk.g:q.g;let r=null;
+ try{r=await genreKit(g,{banks:[2,0],save:false,quiet:true,t:fromPack?pk.t:null})}catch(e){console.warn(e)}
+ if(touring){A.setProg('chop');return}A.setProg('kit');A.setBank(0);go('pads');smartCard(g,fromPack?'from the pack you picked':q.why,r)}
+function smartCard(g,why,r){const old=$('smartCard');if(old)old.remove();let bpm='',key='';try{bpm=(+$('bpm').value).toFixed(1);key=DBC.keyText()}catch(e){}
+ const gn=(GENRES.find(x=>x[0]===g)||[0,g])[1],P=genreProfile(g);
+ const c=el('div',{id:'smartCard',role:'status'});
+ c.innerHTML='<div class="scTop"><b>'+esc(gn.toUpperCase())+'</b><span>'+bpm+' BPM'+(key?' · '+esc(key):'')+'</span><button class="scX" aria-label="Close">✕</button></div>'+
+  '<p>Ready to play. <b>Bank A</b>: '+esc(P.n.toLowerCase())+' drum kit ('+P.drums.slice(0,5).join(', ').toLowerCase()+'…). <b>Bank C</b>: '+((r&&r.loops)||0)+' loops, 1 and 2 bars, cut on the bar line. Genre: '+esc(why)+'.</p>'+
+  '<div class="scB"><button data-k="rec"><i></i>RECORD A BEAT</button><button data-k="write"><i></i>WRITE A STARTER BEAT</button><button data-k="chop"><i></i>CHOP THE SONG</button><button data-k="song"><i></i>BUILD A FULL SONG</button><button data-k="genre"><i></i>CHANGE GENRE</button></div>';
+ document.body.append(c);
+ c.onclick=e=>{if(e.target.closest('.scX')){c.remove();return}const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k,A=API();c.remove();
+  if(k==='rec'){A.setProg('kit');A.setBank(0);go('pads');const r=$('psRec'),p=$('psPlay');if(r&&!A.rec())r.click();if(p&&!A.playing())p.click();say('Recording after the count-in. Play the pads (keys A S D F, Q W E R…). Press STOP when done.')}
+  else if(k==='write'){const n=A.writePart(A.pat(),'verse',0,'0');go('pads');say(n<0?'No drum sounds in bank A to write with.':'Wrote a starter beat into P'+(A.pat()+1)+' from the bank A kit. Press PLAY. Change any hit in the STEP SEQUENCER, or UNDO.')}
+  else if(k==='chop'){A.setProg('chop');go('chop');say('The pads now play the song’s cuts in order. Pick a recipe on ANALYSE if you want different cuts.')}
+  else if(k==='song'){go('build');setTimeout(()=>{const t=$('sbTpl');if(t){t.scrollIntoView({block:'center'});$('sbTplRow').classList.add('hl')}say('Pick a structure and press LAY IT OUT. Beat Brain writes each part from your sounds.')},300)}
+  else if(k==='genre'){go('kit');say('Pick the genre and press BUILD GENRE KIT. It rebuilds the drums and loops for that style.')}};
+ const hide=()=>{const x=$('smartCard');if(x&&document.body.dataset.pg!=='pads')x.remove()};if(window.BC16)BC16.bus.on('machine.open',hide)}
 
 /* ================= SONG STRUCTURE + SMART EDIT per part ================= */
 const SECS=['intro','verse','hook','bridge','outro'],TPL={classic:['intro','verse','hook','verse','hook','bridge','hook','outro'],trap:['intro','hook','verse','hook','verse','hook','outro'],flip:['intro','verse','verse','hook','verse','hook','outro'],short:['intro','verse','hook','outro']};
@@ -1164,7 +1189,7 @@ const CH=[
   ['floor','#osExplain','Explain mode','If you ever forget what a button does, press the question mark. Explain mode turns on. Now any button you press tells you what it does, instead of doing it. Press the question mark again to go back to work.',{z:2.2}]]],
  ['Load a song',[
   ['start','#loadGrp','Load','To start, walk up to the tape deck. Press Load and choose a song from your device. W A V, M P 3, M 4 A, FLAC and OGG all work. You can also drag a file and drop it anywhere on the machine.',{z:2.2}],
-  ['start','#drop','The tape deck','When a song loads, the machine finds the tempo, the key, every hit, and the bars. Then it cuts the song and builds your first kits automatically. If no song is loaded yet, I will load the demo beat now so you can follow along.',{z:1.4,act:async(t,tok)=>{if(!ready()){const d=$('demo');if(d&&!d.hidden)d.click();let n=0;while(!ready()&&n<2400){await cw(100,tok);n++}await cw(1200,tok)}}}],
+  ['start','#drop','The tape deck','When a song loads, the machine finds the tempo, the key, every hit, and the bars. Then it cuts the song so every loop lands on the bar, hears the genre, and builds two things for you: a drum kit for that genre in bank A, and exact one and two bar loops in bank C. When you load a song on your own, it opens the drum machine ready to play, with a strip of next moves: record a beat, write a starter beat, chop the song, or build a full song. If no song is loaded yet, I will load the demo beat now so you can follow along.',{z:1.4,act:async(t,tok)=>{if(!ready()){const d=$('demo');if(d&&!d.hidden)d.click();let n=0;while(!ready()&&n<2400){await cw(100,tok);n++}await cw(1200,tok)}}}],
   ['start','#oled','What was found','Look at the display. It now shows the song name, the tempo in beats per minute, the key, the Camelot number for mixing, and how many slices were cut. Each song you load keeps its own pads and patterns, so you can switch songs and come back.',{z:2}]]],
  ['Chop the song',[
   ['chop','#rail .rb[data-grp="chop"]','Open the sampler','Press Chop on the rail, or tap the sampler on the studio floor. This is the C S one sampler. It decides where the song is cut into slices. Across the top are its mode keys: chop, analyse, library, stems and sort. Each one is a mode of this same machine.',{z:2.4,act:async(t,tok)=>railTo('chop',tok),need:1}],
@@ -1321,7 +1346,7 @@ function keys(){addEventListener('keydown',e=>{const tg=e.target;if(/INPUT|SELEC
 function init(){build();coachWire2();soundWire();projWire();courseWire();kitWire();builderWire();factoryWire();storeWire();slicerWire();projWire2();towerWire();launchWire();explainWire();coachWire();guideWire();keys();
  for(const k of Object.keys(H)){const x=document.getElementById(k);if(x&&!x.dataset.help)x.dataset.help=k}
  const sp=$('seqSlot');if(sp)sp.dataset.help='psPats';
- window.OS={go,say,need,ready,back,units:UNITS,groups:GROUPS,lastOf:m=>{const g=GROUPS.find(x=>x.pages.includes(m.pages[0][0]));return g?LSg('bc16:last:'+g.id,null):null},sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
+ window.OS={smartStart,go,say,need,ready,back,units:UNITS,groups:GROUPS,lastOf:m=>{const g=GROUPS.find(x=>x.pages.includes(m.pages[0][0]));return g?LSg('bc16:last:'+g.id,null):null},sessionStart,focus,allStop,_texts:()=>[...new Set([...STEPS.map(s=>s.x),...LESSONS.flatMap(L=>L.steps.map(z=>z.x))])],page,pick,_si:()=>sliceIntel(),_rc:j=>roleCands(j,new Set())};
  const relab=(id,t)=>{const x=$(id);if(!x)return;[...x.childNodes].forEach(n=>{if(n.nodeType===3)n.remove()});x.append(t)};relab('hwPst','START');relab('psTap','TAP');
  page(window.curPage?curPage():'start');halfSync();
  setInterval(()=>{coachRender();patSync();const p=$('scrProg');if(p)$('deckProg').textContent=p.textContent;if(curP==='kit'&&ready()&&KF.key.split('|')[0]!==String(API().nSlices()))kitRender()},120);
