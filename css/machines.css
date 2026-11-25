@@ -340,3 +340,11 @@ body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
  #machKeys{overflow-x:auto!important;flex:1 1 0!important;min-width:0!important;scrollbar-width:none}#machKeys::-webkit-scrollbar{display:none}
  #subNext{flex:0 0 auto!important}
 }
+
+/* variation cards */
+.peVars{display:flex;gap:6px;overflow-x:auto;margin:8px 0 6px;padding-bottom:4px;scrollbar-width:thin;flex-wrap:nowrap;align-items:stretch}
+.peVars .pvh{position:sticky;left:0;flex:0 0 100%;font:700 10px/1.2 var(--mono,monospace);letter-spacing:.08em;color:#c9a;opacity:.8;margin-bottom:2px;display:none}
+.peVars .pv{flex:0 0 auto;min-width:88px;padding:8px 10px;border-radius:9px;border:1px solid #5b3a73;background:linear-gradient(#2a1d38,#1b1226);color:#fff;text-align:left;cursor:pointer;touch-action:manipulation}
+.peVars .pv b{display:block;font:800 11px/1.2 var(--mono,monospace);letter-spacing:.04em}
+.peVars .pv small{display:block;font:500 9px/1.3 var(--mono,monospace);opacity:.7;margin-top:2px}
+.peVars .pv.on{border-color:#ff3df2;box-shadow:0 0 0 1px #ff3df2 inset,0 0 10px #ff3df266}

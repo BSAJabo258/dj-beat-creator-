@@ -1526,10 +1526,18 @@ body[data-mach=cs1] #c1{height:clamp(110px,19vh,200px)!important}
  #subNext{flex:0 0 auto!important}
 }
 
+/* variation cards */
+.peVars{display:flex;gap:6px;overflow-x:auto;margin:8px 0 6px;padding-bottom:4px;scrollbar-width:thin;flex-wrap:nowrap;align-items:stretch}
+.peVars .pvh{position:sticky;left:0;flex:0 0 100%;font:700 10px/1.2 var(--mono,monospace);letter-spacing:.08em;color:#c9a;opacity:.8;margin-bottom:2px;display:none}
+.peVars .pv{flex:0 0 auto;min-width:88px;padding:8px 10px;border-radius:9px;border:1px solid #5b3a73;background:linear-gradient(#2a1d38,#1b1226);color:#fff;text-align:left;cursor:pointer;touch-action:manipulation}
+.peVars .pv b{display:block;font:800 11px/1.2 var(--mono,monospace);letter-spacing:.04em}
+.peVars .pv small{display:block;font:500 9px/1.3 var(--mono,monospace);opacity:.7;margin-top:2px}
+.peVars .pv.on{border-color:#ff3df2;box-shadow:0 0 0 1px #ff3df2 inset,0 0 10px #ff3df266}
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#050508">
-<script>window.BC16_VERSION="a6b2b21700"</script>
+<script>window.BC16_VERSION="7c374729e6"</script>
 </head><body>
 <div id="device">
  <header id="hwTop">
@@ -2620,7 +2628,7 @@ function stretchCh(chs,ratio,N){N=N||2048;const H=N>>1,Ha=H/ratio,tol=Math.min(5
  for(let c=0;c<nc;c++){const d=out[c];for(let i=0;i<outL;i++)d[i]/=Math.max(nrm[i],.5)}return out.map(d=>d.subarray(0,outL))}
 const tmOf=p=>p.tm||PS.tmode||'stretch';
 const synced=p=>!!(p&&p.bpm&&p.lb&&(p.sync||p.role==='chain'||p.role==='loop'));
-function isStretch(p){return!!(synced(p)&&p.mode!=='cue'&&tmOf(p)==='stretch'&&Math.abs(PS.bpm/p.bpm-1)>.004)}
+function isStretch(p){return!!(synced(p)&&p.mode!=='cue'&&tmOf(p)==='stretch'&&(Math.abs(PS.bpm/p.bpm-1)>.004||Math.abs(p.tune||0)>.01))}
 function padBuf(p){if(!isStretch(p))return padBuf0(p);const r0=Math.pow(2,(p.tune||0)/12),ratio=(p.bpm/PS.bpm)*r0,k=pbKey(p)+'|S'+ratio.toFixed(5)+'|'+(p.role==='loop'||p.mode==='latch'?2048:1024);
  let b=PBUF.get(k);if(b)return b;const base=padBuf0(p);if(!base)return null;const chs=[];for(let c=0;c<base.numberOfChannels;c++)chs.push(base.getChannelData(c));
  const o=stretchCh(chs,ratio,p.role==='loop'||p.mode==='latch'?2048:1024);b=ac.createBuffer(o.length,o[0].length,sr);const f=Math.min(Math.floor(.0015*sr),o[0].length>>1);
@@ -3009,15 +3017,43 @@ function renderAll(){try{renderPacks()}catch(e){}renderBanks();renderPats();rend
  $$('.mb').forEach(b=>b.classList.toggle('on',b.dataset.m===PS.mode));$('psKeys').classList.toggle('on',PS.keys);$('psChd').classList.toggle('on',PS.chord);$('psKeyRow').hidden=!PS.keys;hint()}
 
 /* ---------- editor ---------- */
-function openEd(){const s=PS.sel,ed=$('psEd');if(!s){ed.hidden=true;return}const p=PS.banks[s.b][s.j];ed.hidden=false;edSnap=false;
+function openEd(){const s=PS.sel,ed=$('psEd');if(!s){ed.hidden=true;return}const p=PS.banks[s.b][s.j];ed.hidden=false;edSnap=false;if(!p)peVars(null);
  $('psEdT').textContent='Pad '+BL[s.b]+String(s.j+1).padStart(2,'0')+(p?' — '+p.name:' — empty (drop a slice on it)');$('psWhy').textContent=p&&p.why?'Why this pad: '+p.why:'';
  $$('#psEd input,#psEd select').forEach(el=>{if(el.id!=='peBk')el.disabled=!p});['peDup','peClr'].forEach(id=>$(id).disabled=!p);if(!p){wave($('psEdC'),null,'#888');return}
  const tot=p.seg.reduce((a,x)=>a+x[1]-x[0],0)/sr*1000;$('peN').value=p.name;$('peM').value=p.mode;$('peC').value=p.choke||0;
  $('peG').value=Math.round((p.gain??1)*100);$('peGv').textContent=$('peG').value+'%';$('peP').value=Math.round((p.pan||0)*100);$('pePv').textContent=$('peP').value;
  $('peT').value=p.tune||0;$('peTv').textContent=(p.tune>0?'+':'')+(p.tune||0);$('peS').max=$('peE').max=Math.max(1,Math.floor(tot-15));$('peS').value=p.ts||0;$('peE').value=p.te||0;$('peSv').textContent=p.ts||0;$('peEv').textContent=p.te||0;
  $('peR').checked=!!p.rev;$('peA').value=p.att||0;$('peAv').textContent=p.att||0;$('peRl').value=p.rel||0;$('peRv').textContent=p.rel||0;$('peF').value=p.flt||0;$('peFv').textContent=!p.flt?'off':p.flt<0?'LP '+(-p.flt):'HP '+p.flt;$('peMo').checked=!!p.mono;$('peLk').checked=!!p.lock;$('peKeyI').textContent=p.midi!==undefined?'Pitch '+nn(Math.round(p.midi+(p.tune||0)))+(inKey(Math.round(p.midi+(p.tune||0)))?' · in key':' · outside the key'):'';$('peY').checked=!!p.sync;$$('#peCol button').forEach(b=>b.classList.toggle('on',b.dataset.c===p.col));
- requestAnimationFrame(()=>wave($('psEdC'),padBuf(p),p.col))}
+ requestAnimationFrame(()=>wave($('psEdC'),padBuf(p),p.col));peVars(p)}
 function edSet(fn){const s=PS.sel;if(!s)return;const p=PS.banks[s.b][s.j];if(!p)return;if(!edSnap){pushUndo();edSnap=true}fn(p);if(p.sync&&!p.bpm)p.bpm=songBpm();renderPads();openEd();seqDraw();dirty()}
+
+/* ---------- drag-first: auto-fit on placement, tweak drawer, variation cards ---------- */
+const FIT_ROLES=['','loop','chain','tone'];
+function autoFit(p){if(!p||p.bpm)return'';const S=PS.srcs[p.src];if(!S||!S.chs||!p.seg||!p.seg.length)return'';
+ const n=p.seg.reduce((a,x)=>a+x[1]-x[0],0),d=n/sr,notes=[];
+ if(d<1.5&&!p.ts&&p.role!=='loop'){const ch=S.chs[0],a=p.seg[0][0],b=Math.min(p.seg[0][1],a+Math.floor(sr*1.5));let pk=0;for(let i=a;i<b;i++){const v=Math.abs(ch[i]);if(v>pk)pk=v}
+  const th=pk*.04;let i=a;const lim=Math.min(b,a+Math.floor(sr*.25));while(i<lim&&Math.abs(ch[i])<th)i++;
+  if(i-a>sr*.003){p.ts=Math.round((i-a)/sr*1000);notes.push('trimmed '+p.ts+' ms of dead air')}}
+ if(d>=.9&&FIT_ROLES.includes(p.role||'')){const sb=songBpm()||PS.bpm,beats=d*sb/60;
+  const c=[1,2,4,8,16].map(b=>({b,e:Math.abs(beats-b)/b})).sort((x,y)=>x.e-y.e)[0];
+  if(c.e<.08){p.bpm=c.b*60/d;p.lb=c.b;p.sync=true;if(p.mode==='one'&&c.b>=4){p.mode='latch';p.choke=4;p.role=p.role||'loop'}
+   notes.push(c.b+' beats, locked to '+PS.bpm.toFixed(1)+' BPM'+(Math.abs(p.bpm/PS.bpm-1)>.004?' (stretched, pitch kept)':''))}}
+ return notes.join(', ')}
+function tweak(b,j){ensurePS();if(PS.bank!==b)setBank(b);PS.mode='edit';PS.sel={b,j};renderAll();openEd();const e=$('psEd');if(e&&e.scrollIntoView)setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'nearest'}),60)}
+let VAR_ORIG=null,VAR_KEY='',VAR_ON='';
+function peVars(p){let host=$('peVars');if(!host){const w=$('psWhy');if(!w)return;host=document.createElement('div');host.id='peVars';host.className='peVars';w.parentNode.insertBefore(host,w.nextSibling)}
+ host.textContent='';const s=PS.sel;if(!p||!s)return;
+ const key=s.b+':'+s.j+':'+p.src+':'+(p.name||'');if(VAR_KEY!==key){VAR_KEY=key;VAR_ORIG=deep(p);VAR_ON='ORIGINAL'}
+ const o=VAR_ORIG,V=[{id:'ORIGINAL',sub:'as placed',f:q=>{Object.assign(q,deep(o))}}];
+ if(p.sync&&o.bpm&&o.lb){[[1,'FIT'],[2,'LONGER'],[.5,'SHORTER'],[4,'×4 LONGER']].forEach(([m,l])=>{
+   const lb=o.lb*m;if(lb<.5||lb>64)return;V.push({id:l+' '+(lb/4>=1?(lb/4)+' BAR':lb+' BEAT'),sub:(lb*60/PS.bpm).toFixed(2)+' s · pitch kept',f:q=>{q.bpm=o.bpm*m;q.lb=lb;q.sync=true}})})}
+ else if(p.seg&&p.seg.reduce((a,x)=>a+x[1]-x[0],0)/sr>=.9){V.push({id:'LOCK TO GRID',sub:'auto-detect beats',f:q=>{const t=deep(o);t.bpm=0;t.sync=false;const n=autoFit(t);if(t.bpm){q.bpm=t.bpm;q.lb=t.lb;q.sync=true}}})}
+ [[-12,'−1 OCT'],[-5,'−5'],[5,'+5'],[7,'+7'],[12,'+1 OCT']].forEach(([t,l])=>{V.push({id:l,sub:'pitch'+(p.sync?' · tempo kept':''),f:q=>{q.tune=(o.tune||0)+t}})});
+ if(p.midi!==undefined){let best=null;for(let t=-6;t<=6;t++){if(inKey(Math.round(p.midi+t))&&(best===null||Math.abs(t)<Math.abs(best)))best=t}if(best!==null&&best!==0)V.push({id:'IN KEY',sub:'tune '+(best>0?'+':'')+best,f:q=>{q.tune=(o.tune||0)+best}})}
+ V.push({id:p.rev?'FORWARD':'REVERSE',sub:'flip',f:q=>{q.rev=!q.rev}});
+ V.forEach(v=>{const b=document.createElement('button');b.className='pv'+(VAR_ON===v.id?' on':'');const a=document.createElement('b');a.textContent=v.id;const c=document.createElement('small');c.textContent=v.sub;b.append(a,c);
+  b.onclick=()=>{VAR_ON=v.id;edSet(v.f);const cur=PS.banks[s.b][s.j];if(cur)audition(cur)};host.appendChild(b)});
+ const h=document.createElement('div');h.className='pvh';h.textContent='VARIATIONS · tap to hear it on the pad, tap ORIGINAL to go back';host.prepend(h)}
 
 /* ---------- export ---------- */
 async function renderMix(list,rep,tail){const segs=[];let tot=0;for(let r=0;r<rep;r++)for(const i of list){segs.push({pat:i,start:tot,len:patLen(i)});tot+=patLen(i)}
@@ -3281,7 +3317,7 @@ function toInstrument(snd){const p=toPad(snd);let s;if(p.src===PS.main&&p.seg.le
 /* --- targets --- */
 let PICK=null;
 function targetAt(el){let t;if(!el||!el.closest)return null;
- if((t=el.closest('#psGrid .pp'))&&!PS.keys){const j=+t.dataset.j;if(PS.prog!=='chop'&&(!PS.banks[PS.bank][j]||PS.mode!=='play'))return{kind:'pad',b:PS.bank,j}}
+ if((t=el.closest('#psGrid .pp'))&&!PS.keys){const j=+t.dataset.j;if(PS.prog!=='chop')return{kind:'pad',b:PS.bank,j}}
  if(el.closest('#zpk'))return{kind:'piano'};
  if((t=el.closest('#lays .lh b'))){const L=LAYERS.find(x=>x.el&&x.el.contains(t));if(L)return{kind:'layer',id:L.id}}
  return null}
@@ -3292,14 +3328,14 @@ function startPick(T){if(T.kind==='pad'&&window.OS&&OS.pick){OS.pick(T.b,T.j);re
  (window.goPage?goPage(({A:'chop',P:'live',E:'parts',G:'groups'})[go]||'chop'):tab(go));try{renderPads()}catch(e){}if(oneCol())setTimeout(()=>$('screenWrap')&&$('screenWrap').scrollIntoView({behavior:'smooth',block:'start'}),60);setTimeout(()=>{const el=go==='A'?$('pads'):go==='P'?$('pg'):go==='G'?$('glist'):go==='E'?$('eparts'):go==='D'?$('zk'):null;if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},120)}
 function endPick(){PICK=null;$('gPick').hidden=true;try{renderPads()}catch(e){}}
 function deliver(snd,T){
- if(T.kind==='pad'){ensurePS();if(PS.prog==='chop')setProg('kit',true);pushUndo();PS.banks[T.b][T.j]=toPad(snd);dirty();tab('S');setBank(T.b);PS.sel=PS.mode==='edit'?{b:T.b,j:T.j}:PS.sel;renderAll();const el=padEl[T.j];if(el){el.scrollIntoView({behavior:'smooth',block:oneCol()?'center':'nearest'});el.classList.add('drop');setTimeout(()=>el.classList.remove('drop'),900)}audition(PS.banks[T.b][T.j]);
-  toast('Loaded '+snd.name+' into pad '+BL[T.b]+String(T.j+1).padStart(2,'0')+'.',[['↩ Undo',undo]])}
+ if(T.kind==='pad'){ensurePS();if(PS.prog==='chop')setProg('kit',true);pushUndo();const old=PS.banks[T.b][T.j],np=toPad(snd),fit=snd.pad?'':autoFit(np);PS.banks[T.b][T.j]=np;dirty();tab('S');setBank(T.b);PS.sel=PS.mode==='edit'?{b:T.b,j:T.j}:PS.sel;renderAll();const el=padEl[T.j];if(el){el.scrollIntoView({behavior:'smooth',block:oneCol()?'center':'nearest'});el.classList.add('drop');setTimeout(()=>el.classList.remove('drop'),900)}audition(PS.banks[T.b][T.j]);
+  toast('Placed '+snd.name+' on pad '+BL[T.b]+String(T.j+1).padStart(2,'0')+(old?' (replaced '+old.name+')':'')+(fit?' · '+fit:'')+'.',[['↩ Undo',undo],['✎ Tweak',()=>tweak(T.b,T.j)]])}
  else if(T.kind==='piano'){const s=toInstrument(snd);PNO.list.unshift(s);PNO.i=0;tab('D');pnUI();toast('The Piano now plays '+snd.name+'.')}
  else if(T.kind==='layer'){const L=LAYERS.find(l=>l.id===T.id),s=toInstrument(snd);L.list=L.list||[];L.list.unshift(s);L.i=0;tab('P');lab(L);keysFor(L);toast(L.name+' now plays '+snd.name+'.')}}
 function ensurePS(){if(!PS.init)psInit()}
 function quickSend(snd){ensurePS();const B=PS.banks[PS.bank];let j=B.findIndex(p=>!p);if(j<0){toast('Bank '+BL[PS.bank]+' is full. Hold an empty pad in another bank, or switch banks in Pad Studio.',[['Open Pad Studio',()=>tab('S')]]);return}
- pushUndo();B[j]=toPad(snd);dirty();renderAll();
- toast('Sent '+snd.name+' → pad '+BL[PS.bank]+String(j+1).padStart(2,'0'),[['Go to pad',()=>{tab('S');const el=padEl[j];if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}],['↩ Undo',()=>{undo();}]])}
+ pushUndo();const np=toPad(snd),fit=snd.pad?'':autoFit(np);B[j]=np;dirty();renderAll();
+ toast('Sent '+snd.name+' → pad '+BL[PS.bank]+String(j+1).padStart(2,'0')+(fit?' · '+fit:''),[['Go to pad',()=>{tab('S');const el=padEl[j];if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}],['✎ Tweak',()=>tweak(PS.bank,j)],['↩ Undo',()=>{undo();}]])}
 /* --- long-press engine --- */
 const LP_SEL='#pads button,#psBin .tl,#pg .pad,#lays .key,#lays .lh .ls,#lays .lh b,#zk .wk,#zk .bk,#zpl,#zpk,#glist .gc2,#gpads button,#eparts > div,#estems > div,#psGrid .pp';
 let LPS=null,lpFired=0;
@@ -3601,6 +3637,7 @@ window.DBC_OS={
  flip:(pi,o)=>{ensurePS();try{return flipBuild(pi==null?curPat():pi,o)}catch(e){console.warn(e);return{err:String(e)}}},
  setFeel:K=>{ensurePS();setFeel(K);dirty()},feel:()=>PS.feel||1,
  setTempo:v=>{ensurePS();setBpm(v);warm();return PS.bpm},tempo:()=>PS.bpm,setTmode:m=>{ensurePS();PS.tmode=m;PBUF.clear();warm();dirty()},tmode:()=>PS.tmode||'stretch',
+ drop:(snd,b,j)=>{deliver(snd,{kind:'pad',b,j});return PS.banks[b][j]},tweak:(b,j)=>tweak(b,j),vars:()=>[...document.querySelectorAll('#peVars .pv')].map(x=>x.querySelector('b').textContent),pv:(i)=>document.querySelectorAll('#peVars .pv')[i].click(),pad:(b,j)=>PS.banks[b][j],mainSrc:()=>PS.main,
  probe:(b,j)=>{const p=PS.banks[b]&&PS.banks[b][j];if(!p)return null;const t=performance.now(),x=padBuf(p),ms=performance.now()-t,o=padBuf0(p);const zc=d=>{let n=0;for(let i=1;i<d.length;i++)if((d[i-1]<0)!==(d[i]<0))n++;return n/d.length*sr};return{name:p.name,dur:x.duration,want:p.lb?p.lb*60/PS.bpm:null,ms,zc0:zc(o.getChannelData(0)),zc1:zc(x.getChannelData(0)),rate:rateOf(p,0),stretch:isStretch(p)}},
  genreStats:()=>{try{return genreStats()}catch(e){return null}},
  writeLoops:(b,o)=>{ensurePS();const L=genreLoops(o);if(!L.length)return 0;const B=emptyBank();loopPads(L).slice(0,16).forEach((p,j)=>B[j]=p);pushUndo();PS.banks[b]=B;renderAll();dirty();return L.length},
